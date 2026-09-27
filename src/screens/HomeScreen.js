@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import {
-  ActivityIndicator, KeyboardAvoidingView, Platform, Pressable, ScrollView, TextInput, View,
+  ActivityIndicator, KeyboardAvoidingView, Platform, Pressable, ScrollView, Switch, TextInput, View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Bot, Plus, User, X } from 'lucide-react-native';
@@ -17,6 +17,7 @@ import { newGame } from '../game/engine';
 import { loadLocalGame } from '../store/storage';
 import { createRoom, joinRoom, onlineEnabled } from '../net/online';
 import { feel } from '../feel/feel';
+import { Wordmark } from '../theme/brand';
 
 const DEFAULT_SEATS = [{ bot: true, name: '' }, { bot: true, name: '' }];
 
@@ -88,7 +89,7 @@ export default function HomeScreen({ profile, onProfile, onStartLocal, onResumeL
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <ScrollView contentContainerStyle={{ padding: 16, gap: 16 }} keyboardShouldPersistTaps="handled">
           <View style={{ alignItems: 'center', paddingTop: 12 }}>
-            <T v="display" style={{ fontSize: 40 }}>{'Iron & Gold'}</T>
+            <Wordmark size={44} align="center" />
             <T v="accent" color={th.inkSoft}>A frontier rail town, 1881</T>
           </View>
           <DoubleRule />
@@ -111,6 +112,20 @@ export default function HomeScreen({ profile, onProfile, onStartLocal, onResumeL
             <T v="accent" color={th.inkSoft} style={{ marginTop: 6, textAlign: 'center' }}>
               {TYCOON_TITLES[profile.avatar % TYCOON_TITLES.length]}
             </T>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 12, minHeight: 44 }}>
+              <View style={{ flex: 1 }}>
+                <T v="strong">Turn dispatches</T>
+                <T v="small" color={th.inkSoft}>A telegram after each tycoon's turn saying what they did.</T>
+              </View>
+              <Switch
+                value={profile.dispatches !== false}
+                onValueChange={(on) => onProfile({ ...profile, dispatches: on })}
+                trackColor={{ true: th.gilt, false: th.rule }}
+                thumbColor={th.paper}
+                activeThumbColor={th.paper}
+                accessibilityLabel="Turn dispatches"
+              />
+            </View>
           </Card>
 
           <Card>

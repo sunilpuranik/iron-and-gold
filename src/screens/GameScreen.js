@@ -20,10 +20,14 @@ import SettleSheet from '../components/sheets/SettleSheet';
 import InvestSheet from '../components/sheets/InvestSheet';
 import BellSheet from '../components/sheets/BellSheet';
 import TickerSheet from '../components/sheets/TickerSheet';
+import { DispatchToast } from '../components/game/Dispatch';
+import { describeTurn, latestTurn, turnsSince } from '../game/recap';
 
 const DECISIONS = ['found', 'survivor', 'dispose'];
 
-export default function GameScreen({ ctl, onExit }) {
+export default function GameScreen({
+  ctl, onExit, dispatches = true, onDispatches,
+}) {
   const th = useTheme();
   const {
     state, mySeat, dispatch, cover, onReady, error,
@@ -37,6 +41,19 @@ export default function GameScreen({ ctl, onExit }) {
   const [selected, setSelected] = useState(null);
   const [sheet, setSheet] = useState(over ? 'results' : null);
   const [dismissed, setDismissed] = useState(-1);
+  const [toast, setToast] = useState(null);
+
+  // Turn dispatches: after another tycoon finishes a turn, drop in a telegram of what they did.
+  const seenTurn = useRef(latestTurn(state) ? latestTurn(state).turn : 0);
+  useEffect(() => {
+    const last = latestTurn(state);
+    if (!last || last.turn <= seenTurn.current) return;
+    const missed = state.turns.filter((r) => r.turn > seenTurn.current && r.seat !== mySeat).length;
+    seenTurn.current = last.turn;
+    if (!dispatches || cover || last.seat === mySeat) return;
+    feel.select();
+    setToast({ dispatch: describeTurn(state, last), extra: Math.max(0, missed - 1) });
+  }, [state.turns]);
 
   // Clear a stale selection.
   useEffect(() => {
@@ -123,13 +140,18 @@ export default function GameScreen({ ctl, onExit }) {
           <T v="small" color={th.inkSoft}>{error}</T>
         </View>
       ) : null}
-      <Board
-        state={state}
-        myHand={!cover && me && !over ? me.hand : null}
-        canPick={mine && state.phase === 'place'}
-        selected={selected}
-        onTilePress={onDeed}
-      />
+      <View style={{ flex: 1 }}>
+        <Board
+          state={state}
+          myHand={!cover && me && !over ? me.hand : null}
+          canPick={mine && state.phase === 'place'}
+          selected={selected}
+          onTilePress={onDeed}
+        />
+        {toast && !cover && (
+          <DispatchToast dispatch={toast.dispatch} extra={toast.extra} onDone={() => setToast(null)} />
+        )}
+      </View>
       <Tabs tab={tab} onTab={setTab} />
       <View style={{ height: TAB_BODY_HEIGHT, backgroundColor: th.paper }}>{body}</View>
       <ActionBar
@@ -180,8 +202,18 @@ export default function GameScreen({ ctl, onExit }) {
         onHome={onExit}
         onClose={() => setSheet(null)}
       />
-      <TickerSheet visible={sheet === 'ticker'} state={state} onClose={() => setSheet(null)} />
-      <HandoffCover player={cover} onReady={onReady} />
+      <TickerSheet
+        visible={sheet === 'ticker'}
+        state={state}
+        dispatches={dispatches}
+        onDispatches={onDispatches}
+        onClose={() => setSheet(null)}
+      />
+      <HandoffCover
+        player={cover}
+        recap={cover && dispatches ? turnsSince(state, actor) : []}
+        onReady={onReady}
+      />
     </SafeAreaView>
   );
 }

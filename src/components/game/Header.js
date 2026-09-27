@@ -1,7 +1,10 @@
 import { View } from 'react-native';
 import { House, Newspaper } from 'lucide-react-native';
 import { useTheme } from '../../theme/theme';
-import { DoubleRule, IconButton, Money, T } from '../../theme/ui';
+import {
+  DoubleRule, IconButton, Ingot, T,
+} from '../../theme/ui';
+import { Wordmark } from '../../theme/brand';
 
 export default function Header({
   state, me, onHome, onTicker,
@@ -12,7 +15,7 @@ export default function Header({
       <View style={{ flexDirection: 'row', alignItems: 'center', paddingRight: 12, minHeight: 48 }}>
         <IconButton icon={House} label="Home" onPress={onHome} />
         <View style={{ flex: 1 }}>
-          <T v="title">{'Iron & Gold'}</T>
+          <Wordmark size={19} />
           <T v="small" color={th.inkSoft}>
             Turn {state.turnNo} · {state.pool.length} deeds left
           </T>
@@ -20,8 +23,8 @@ export default function Header({
         <IconButton icon={Newspaper} label="Ticker" onPress={onTicker} color={th.inkSoft} />
         {me && (
           <View style={{ alignItems: 'flex-end' }}>
-            <T v="small" color={th.inkSoft}>{me.name}</T>
-            <Money amount={me.cash} v="title" />
+            <T v="small" color={th.inkSoft} style={{ marginBottom: 2 }}>{me.name}</T>
+            <Ingot amount={me.cash} size={15} style={{ alignSelf: 'flex-end' }} />
           </View>
         )}
       </View>

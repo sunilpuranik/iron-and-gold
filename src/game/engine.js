@@ -10,6 +10,7 @@ export * from './rules.js';
 export { botAction } from './bot.js';
 
 const LOG_LIMIT = 120;
+const RECAP_LIMIT = 40;
 
 export function mulberry32(seed) {
   let a = seed >>> 0;
@@ -72,6 +73,7 @@ export function newGame(players, opts = {}) {
     last: null,
     idle: 0,
     log: [],
+    turns: [],
     fx: null,
     seq: 0,
     results: null,
@@ -120,7 +122,20 @@ function startTurn(s) {
   s.phase = 'buy';
 }
 
+// Remember what happened on the turn that just finished, for turn dispatches.
+function recordTurn(s) {
+  const lines = s.log.filter((l) => l.turn === s.turnNo && l.kind !== 'turn');
+  if (!s.turns) s.turns = [];
+  s.turns.push({
+    turn: s.turnNo,
+    seat: s.turn,
+    lines: lines.map((l) => ({ text: l.text, kind: l.kind })),
+  });
+  if (s.turns.length > RECAP_LIMIT) s.turns.splice(0, s.turns.length - RECAP_LIMIT);
+}
+
 function endTurn(s) {
+  recordTurn(s);
   const p = s.players[s.turn];
   while (p.hand.length < HAND_SIZE && s.pool.length) p.hand.push(s.pool.pop());
   s.turn = (s.turn + 1) % s.players.length;
@@ -217,6 +232,7 @@ function applyCart(s, seat, v) {
 }
 
 export function endGame(s, reason) {
+  if (s.phase === 'buy') recordTurn(s);
   const sz = sizes(s);
   log(s, `Closing bell — ${reason}`, 'bell');
   for (const co of COMPANY_IDS) if (sz[co] >= 2) payBonuses(s, co, price(co, sz[co]), '(final)');

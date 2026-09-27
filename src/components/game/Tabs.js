@@ -10,7 +10,7 @@ export const TAB_BODY_HEIGHT = 146; // two rows of deed cards
 export default function Tabs({ tab, onTab }) {
   const th = useTheme();
   return (
-    <View style={{ flexDirection: 'row', borderTopWidth: 1, borderBottomWidth: 1, borderColor: th.ink }}>
+    <View style={{ flexDirection: 'row', borderTopWidth: 2, borderBottomWidth: 1, borderTopColor: th.iron.mid, borderBottomColor: th.rule }}>
       {TAB_NAMES.map((name, i) => {
         const on = tab === name;
         return (
@@ -28,8 +28,8 @@ export default function Tabs({ tab, onTab }) {
               borderLeftWidth: i ? 1 : 0, borderColor: th.rule,
             }}
           >
-            <T v={on ? 'strong' : 'body'} color={on ? th.ink : th.inkSoft}>{name}</T>
-            {on && <View style={{ position: 'absolute', bottom: 0, left: 12, right: 12, height: 2, backgroundColor: th.ink }} />}
+            <T v="plate" color={on ? th.ink : th.inkSoft} style={{ fontSize: 14 }}>{name}</T>
+            {on && <View style={{ position: 'absolute', bottom: 0, left: 12, right: 12, height: 3, backgroundColor: th.gilt }} />}
           </Pressable>
         );
       })}

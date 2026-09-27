@@ -6,6 +6,14 @@ export const FONTS = {
   ui: 'LibreFranklin_400Regular',
   uiMedium: 'LibreFranklin_500Medium',
   uiSemi: 'LibreFranklin_600SemiBold',
+  // Engraved capitals with lining numerals — money, plates and button labels.
+  money: 'Cinzel_700Bold',
+  engraved: 'Cinzel_600SemiBold',
+};
+
+// Iron plates and gold leaf. Gold stays the same in both themes.
+const GOLD = {
+  hi: '#F4DE93', mid: '#CFA64A', lo: '#8A6421', ink: '#3A2A0E', emboss: 'rgba(255,244,214,0.55)',
 };
 
 const COMPANY_LIGHT = {
@@ -52,6 +60,9 @@ export const LIGHT = {
   giltSoft: '#D9BE7A',
   onInk: '#F2EBDD',
   scrim: 'rgba(30,27,22,0.45)',
+  iron: { hi: '#5B5F66', mid: '#383A3F', lo: '#1D1E21', rivet: '#9A9EA6', text: '#F2EBDD' },
+  goldLeaf: GOLD,
+  moneyShadow: 'rgba(255,244,214,0.9)',
   districts: withWash({
     river: { tint: '#D8C9A3', accent: '#5E8C86' },
     foundry: { tint: '#D9B59A', accent: '#A4552E' },
@@ -71,6 +82,9 @@ export const DARK = {
   giltSoft: '#8A7440',
   onInk: '#16140F',
   scrim: 'rgba(0,0,0,0.6)',
+  iron: { hi: '#72767E', mid: '#4B4E54', lo: '#2B2D31', rivet: '#B4B8C0', text: '#F2EBDD' },
+  goldLeaf: GOLD,
+  moneyShadow: 'rgba(0,0,0,0.8)',
   districts: withWash({
     river: { tint: '#2B3634', accent: '#7FAAA3' },
     foundry: { tint: '#3A2A20', accent: '#C9744A' },

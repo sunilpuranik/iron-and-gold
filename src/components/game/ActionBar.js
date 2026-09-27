@@ -41,7 +41,7 @@ export default function ActionBar({
     body = <Button title={DECIDE[phase]} onPress={onDecide} style={{ flex: 1 }} />;
   }
   return (
-    <View style={{ flexDirection: 'row', gap: 8, paddingHorizontal: 12, paddingTop: 8, paddingBottom: 8, borderTopWidth: 1, borderColor: th.ink }}>
+    <View style={{ flexDirection: 'row', gap: 8, paddingHorizontal: 12, paddingTop: 8, paddingBottom: 8, borderTopWidth: 1, borderColor: th.rule }}>
       {body}
     </View>
   );

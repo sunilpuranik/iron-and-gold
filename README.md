@@ -71,6 +71,79 @@ On Home, set up seats. You always take seat 1. Tap the person/robot icon to swit
 Between human turns, a full-screen **Hand to {name}** cover keeps each player's deeds private.
 The game saves to AsyncStorage after every move. **Resume local game** on Home picks up where you left off.
 
+### Turn dispatches
+
+With **Turn dispatches** switched on (Home, or the switch at the top of the Ticker), each time another tycoon finishes a turn a telegram card drops in over the map. It says what they did: built, chartered, bought out, sold, swapped, bought. Tap it to dismiss it; it also hides itself after a few seconds.
+In pass-and-play, the **Hand to {name}** screen also lists every turn since that player last played.
+
+Dispatches are in-app only. Notifications while the app is closed need push notifications (`expo-notifications`, a development build and a small server to send them); see *Shipping* below.
+
+---
+
+## Shipping to the App Store and Google Play
+
+Expo Go is for development. To give friends a real app icon on their phones, build with **EAS** (Expo Application Services). `app.json` and `eas.json` are already set up for it.
+
+**Accounts you need**
+
+- A free Expo account: `npx expo login`
+- **Apple Developer Program**: $99 a year. Required for TestFlight and the App Store.
+- **Google Play Console**: $25 one-off. Required for Play Store testing tracks and release.
+
+**One-time setup**
+
+```bash
+npm install -g eas-cli
+eas login
+eas init            # links this project to your Expo account and writes its projectId into app.json
+```
+
+The bundle id is `com.ironandgold.game` (iOS `bundleIdentifier` and Android `package` in `app.json`). If Apple or Google says it is taken, change both to something you own, like `com.yourname.ironandgold`, before the first build.
+
+**Friends-only testing (recommended first)**
+
+- **Android:** `eas build -p android --profile preview` builds an `.apk`. Send friends the link EAS prints and they install it directly. No Play Store needed.
+- **iOS:** `eas build -p ios --profile production`, then `eas submit -p ios`. The build lands in App Store Connect → **TestFlight**. Add friends as testers by email; they install through the TestFlight app. External testers need a one-time Beta App Review, usually about a day.
+
+**Public release**
+
+```bash
+eas build --platform all --profile production
+eas submit --platform ios       # App Store Connect
+eas submit --platform android   # Play Console (needs a Google service-account key the first time)
+```
+
+Then, in App Store Connect and Play Console, add:
+
+- screenshots
+- a description
+- an age rating
+- a privacy policy URL
+- a privacy questionnaire. Iron & Gold collects no personal data beyond a display name, and only if online play is on.
+
+Submit for review. Apple usually replies in 1–3 days. Google's first review can take up to a week, and new personal developer accounts must first run a closed test with at least 12 testers for 14 days before they can publish to production.
+
+**Before going public with online play**
+
+- Replace the prototype's permissive RLS with Supabase **anonymous sign-in** plus policies that only let room members write their room.
+- Move bot turns off the host's phone and onto a server, for example a Supabase Edge Function, so games don't stall when the host closes the app.
+- For push notifications ("It's your turn"), add `expo-notifications`, store each player's push token in the room, and send from that same Edge Function. Push needs a development or production build; it does not work in Expo Go.
+
+---
+
+## Troubleshooting
+
+**`CommandError: xcrun is not configured correctly`** when pressing `i`: the iOS Simulator needs the full **Xcode** app on a Mac (the command-line tools alone are not enough).
+
+1. Install Xcode from the Mac App Store and open it once to accept the licence and install components.
+2. Point the command-line tools at it: `sudo xcode-select -s /Applications/Xcode.app/Contents/Developer`
+3. In Xcode → Settings → Components (called Platforms in older versions), install an iOS Simulator runtime.
+4. Run `npx expo start` again and press `i`.
+
+Alternatively, skip the simulator and scan the QR code with an iPhone.
+
+**`No Android connected device found`** when pressing `a`: you need an Android Studio emulator for that key. Scan the QR code with Expo Go on a phone instead.
+
 ---
 
 ## Tests and simulation
@@ -139,7 +212,10 @@ src/net/useOnlineGame.js    online controller (host drives bots)
 src/screens/                Home, Lobby, Game
 src/components/game/        Board, Tile, Header, StatusStrip, Tabs (Deeds/Market/Tycoons), ActionBar, HandoffCover
 src/components/sheets/      Charter, Tied buyout, Settle shares, Invest, Closing bell, Ticker
-src/components/Portrait.js  six engraved tycoon portraits (SVG)
+src/components/Portrait.js  six banknote-cameo tycoon portraits (SVG)
+src/components/game/Dispatch.js  turn dispatch telegram + handoff recap
+src/game/recap.js           turn summaries for dispatches
+src/theme/brand.js          iron plates, rivets, gold leaf, ingots, rail rules, wordmark
 src/components/CompanyIcon.js  the one icon per company, used on the board, deeds and market
 src/theme/                  "Engraver's Ink" tokens, light/dark, UI primitives
 src/feel/feel.js            haptics + playSting() stub

@@ -14,7 +14,8 @@ export default function Sheet({
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose || (() => {})} statusBarTranslucent>
       <View style={{ flex: 1, justifyContent: 'flex-end' }}>
         <Pressable style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: th.scrim }} onPress={onClose} />
-        <View style={{ backgroundColor: th.paper, borderTopWidth: 1, borderColor: th.ink, maxHeight: '82%', paddingBottom: insets.bottom + 8 }}>
+        <View style={{ backgroundColor: th.paper, borderTopWidth: 4, borderColor: th.iron.mid, maxHeight: '82%', paddingBottom: insets.bottom + 8 }}>
+          <View style={{ height: 1, backgroundColor: th.gilt }} />
           <View style={{ flexDirection: 'row', alignItems: 'center', paddingLeft: 16, paddingTop: 8, minHeight: 52 }}>
             <View style={{ flex: 1 }}>
               <T v="display">{title}</T>

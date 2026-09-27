@@ -263,6 +263,22 @@ describe('trusts', () => {
   });
 });
 
+describe('turn recaps', () => {
+  test('each finished turn is recorded with its seat and what happened', () => {
+    const s = blank();
+    setBoard(s, { pw: ['A1', 'A2'] });
+    give(s, 0, ['A3']);
+    const t = run(s, { type: 'place', tile: 'A3' }, { type: 'buy', cart: { pw: 2 } });
+    const recap = t.turns[t.turns.length - 1];
+    expect(recap.seat).toBe(0);
+    const name = s.players[0].name;
+    expect(recap.lines.map((l) => l.text)).toEqual([
+      `${name} builds on A3 — P&W grows to 3`,
+      `${name} buys 2 P&W for $800`,
+    ]);
+  });
+});
+
 describe('buying', () => {
   test('buys up to 3 shares of active companies within cash', () => {
     const s = blank();

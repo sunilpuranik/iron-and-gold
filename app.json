@@ -7,11 +7,16 @@
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": false,
+      "bundleIdentifier": "com.ironandgold.game",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
+      "package": "com.ironandgold.game",
       "adaptiveIcon": {
-        "backgroundColor": "#F2EBDD",
+        "backgroundColor": "#2B2D31",
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
@@ -24,11 +29,13 @@
       "expo-audio",
       "expo-font"
     ],
-    "backgroundColor": "#F2EBDD",
+    "backgroundColor": "#26282C",
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#F2EBDD"
-    }
+      "backgroundColor": "#26282C"
+    },
+    "description": "A frontier rail-town board game for 2–6 tycoons: build deeds, charter companies, buy shares and cash in on buyouts.",
+    "scheme": "ironandgold"
   }
 }

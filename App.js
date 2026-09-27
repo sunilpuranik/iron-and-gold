@@ -8,6 +8,8 @@ import { IMFellEnglish_400Regular_Italic } from '@expo-google-fonts/im-fell-engl
 import { LibreFranklin_400Regular } from '@expo-google-fonts/libre-franklin/400Regular';
 import { LibreFranklin_500Medium } from '@expo-google-fonts/libre-franklin/500Medium';
 import { LibreFranklin_600SemiBold } from '@expo-google-fonts/libre-franklin/600SemiBold';
+import { Cinzel_600SemiBold } from '@expo-google-fonts/cinzel/600SemiBold';
+import { Cinzel_700Bold } from '@expo-google-fonts/cinzel/700Bold';
 import { ThemeProvider, useTheme } from './src/theme/theme';
 import { loadProfile, saveProfile } from './src/store/storage';
 import { useLocalGame } from './src/game/useLocalGame';
@@ -16,14 +18,16 @@ import HomeScreen from './src/screens/HomeScreen';
 import LobbyScreen from './src/screens/LobbyScreen';
 import GameScreen from './src/screens/GameScreen';
 
-function LocalGame({ initial, onExit }) {
+function LocalGame({ initial, onExit, ...rest }) {
   const ctl = useLocalGame(initial);
-  return <GameScreen ctl={ctl} onExit={onExit} />;
+  return <GameScreen ctl={ctl} onExit={onExit} {...rest} />;
 }
 
-function OnlineGame({ row, profile, onExit }) {
+function OnlineGame({
+  row, profile, onExit, ...rest
+}) {
   const ctl = useOnlineGame(row.code, profile, row);
-  return <GameScreen ctl={ctl} onExit={onExit} />;
+  return <GameScreen ctl={ctl} onExit={onExit} {...rest} />;
 }
 
 function Root() {
@@ -41,12 +45,16 @@ function Root() {
   }, []);
 
   const home = useCallback(() => setScreen({ name: 'home' }), []);
+  const dispatchProps = profile ? {
+    dispatches: profile.dispatches !== false,
+    onDispatches: (on) => updateProfile({ ...profile, dispatches: on }),
+  } : {};
 
   let body;
   if (!profile) {
     body = <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}><ActivityIndicator color={th.ink} /></View>;
   } else if (screen.name === 'local') {
-    body = <LocalGame key={screen.key} initial={screen.state} onExit={home} />;
+    body = <LocalGame key={screen.key} initial={screen.state} onExit={home} {...dispatchProps} />;
   } else if (screen.name === 'lobby') {
     body = (
       <LobbyScreen
@@ -57,7 +65,7 @@ function Root() {
       />
     );
   } else if (screen.name === 'online') {
-    body = <OnlineGame row={screen.row} profile={profile} onExit={home} />;
+    body = <OnlineGame row={screen.row} profile={profile} onExit={home} {...dispatchProps} />;
   } else {
     body = (
       <HomeScreen
@@ -85,6 +93,8 @@ export default function App() {
     LibreFranklin_400Regular,
     LibreFranklin_500Medium,
     LibreFranklin_600SemiBold,
+    Cinzel_600SemiBold,
+    Cinzel_700Bold,
   });
   if (!loaded) return null;
   return (

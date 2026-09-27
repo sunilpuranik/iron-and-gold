@@ -1,6 +1,7 @@
 import { View } from 'react-native';
 import { useTheme } from '../../theme/theme';
 import { T } from '../../theme/ui';
+import { IronFill, Rivets } from '../../theme/brand';
 import Avatar from '../Avatar';
 import { actorOf } from '../../game/engine';
 
@@ -35,13 +36,15 @@ export default function StatusStrip({ state, mySeat }) {
   return (
     <View
       style={{
-        backgroundColor: mine ? th.ink : th.ledger,
+        backgroundColor: th.ledger,
         paddingHorizontal: 12, minHeight: 44, flexDirection: 'row', alignItems: 'center', gap: 10,
-        borderBottomWidth: 1, borderColor: th.rule,
+        borderBottomWidth: 1, borderColor: mine ? th.iron.lo : th.rule, overflow: 'hidden',
       }}
     >
+      {mine && <IronFill />}
+      {mine && <Rivets size={4} inset={4} />}
       <Avatar index={actor.avatar} bot={actor.bot} size={34} />
-      <T v="strong" color={mine ? th.onInk : th.ink} numberOfLines={1} style={{ flex: 1 }}>
+      <T v={mine ? 'plate' : 'strong'} color={mine ? th.iron.text : th.ink} numberOfLines={1} style={{ flex: 1 }}>
         {mine ? MINE[state.phase] : `${actor.name} ${DOING[state.phase]}`}
       </T>
     </View>
