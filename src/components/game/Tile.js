@@ -4,33 +4,41 @@ import { Animated, Pressable, View } from 'react-native';
 import Svg, { Line } from 'react-native-svg';
 import { useTheme } from '../../theme/theme';
 import { T } from '../../theme/ui';
-import Silhouette from './Silhouette';
+import { companyGlyph } from '../CompanyIcon';
 
-function Hatch({ px, color }) {
+function Hatch({ w, h, color }) {
   const lines = [];
-  for (let i = -px; i < px; i += 6) {
-    lines.push(<Line key={i} x1={i} y1={px} x2={i + px} y2={0} stroke={color} strokeWidth={1} opacity={0.55} />);
+  for (let i = -h; i < w; i += 6) {
+    lines.push(<Line key={i} x1={i} y1={h} x2={i + h} y2={0} stroke={color} strokeWidth={1} opacity={0.55} />);
   }
   return (
-    <Svg width={px} height={px} style={{ position: 'absolute', left: 0, top: 0 }}>
+    <Svg width={w} height={h} style={{ position: 'absolute', left: 0, top: 0 }}>
       {lines}
     </Svg>
   );
 }
 
+// Company icon grows with company size.
+function iconScale(size) {
+  if (size >= 21) return 0.9;
+  if (size >= 11) return 0.8;
+  if (size >= 6) return 0.68;
+  return 0.56;
+}
+
 function Tile({
-  id, px, owner, companySize, district, mine, selected, trust, last, delay, onPress,
+  id, w, h, owner, companySize, district, mine, selected, trust, last, delay, onPress,
 }) {
   const th = useTheme();
   const d = th.districts[district];
   const co = owner && owner !== 'x' ? th.companies[owner] : null;
 
-  let fill = th.paper;
+  let fill = d.wash;
   if (selected) fill = th.ink;
   else if (co) fill = co.fill;
   else if (owner === 'x' || mine) fill = d.tint;
 
-  // Animate between the previous and new fill.
+  // Cross-fade from the previous fill to the new one.
   const prevFill = useRef(fill);
   const fromFill = useRef(fill);
   const anim = useRef(new Animated.Value(1)).current;
@@ -66,27 +74,35 @@ function Tile({
     borderWidth = 2;
   }
 
-  const showLabel = !co && px >= 24;
-  const labelColor = selected ? th.onInk : mine ? th.ink : owner === 'x' ? d.accent : th.rule;
+  const m = Math.min(w, h);
+  const Glyph = co ? companyGlyph(owner) : null;
+  const showLabel = !co && m >= 20;
+  const labelColor = selected ? th.onInk : mine ? th.ink : owner === 'x' ? d.accent : th.inkSoft;
 
   return (
     <Pressable
       onPress={onPress ? () => onPress(id) : undefined}
       disabled={!onPress}
       accessibilityLabel={`Plot ${id}`}
-      style={{ width: px, height: px }}
+      style={{ width: w, height: h }}
     >
-      <View style={{ width: px, height: px, backgroundColor: fromFill.current, overflow: 'hidden' }}>
-        <Animated.View style={{ position: 'absolute', left: 0, top: 0, width: px, height: px, backgroundColor: fill, opacity: anim }} />
-        {owner === 'x' && !selected && <Hatch px={px} color={d.accent} />}
-        {co && (
-          <Animated.View style={{ position: 'absolute', left: 0, top: 0, opacity: anim }}>
-            <Silhouette company={owner} color={co.ink} size={companySize} px={px} />
+      <View style={{ width: w, height: h, backgroundColor: fromFill.current, overflow: 'hidden' }}>
+        <Animated.View style={{ position: 'absolute', left: 0, top: 0, width: w, height: h, backgroundColor: fill, opacity: anim }} />
+        {owner === 'x' && !selected && <Hatch w={w} h={h} color={d.accent} />}
+        {Glyph && (
+          <Animated.View style={{ position: 'absolute', left: 0, top: 0, width: w, height: h, alignItems: 'center', justifyContent: 'center', opacity: anim }}>
+            <Glyph size={Math.round(m * iconScale(companySize))} color={co.ink} strokeWidth={trust ? 2 : 1.5} />
           </Animated.View>
         )}
         {showLabel && (
           <View style={{ position: 'absolute', left: 0, right: 0, top: 0, bottom: 0, alignItems: 'center', justifyContent: 'center' }}>
-            <T v="small" color={labelColor} style={{ fontSize: Math.max(8, Math.min(11, px / 3.4)) }}>{id}</T>
+            <T
+              v={mine || selected ? 'strong' : 'small'}
+              color={labelColor}
+              style={{ fontSize: Math.max(9, Math.min(13, m / 2.8)), opacity: mine || selected || owner ? 1 : 0.7 }}
+            >
+              {id}
+            </T>
           </View>
         )}
         {co && trust && (

@@ -30,7 +30,7 @@ export default function BellSheet({ visible, state, mySeat, onHome, onClose }) {
             }}
           >
             <T v="display" style={{ width: 26 }}>{r.rank}</T>
-            <Avatar index={p.avatar} bot={p.bot} size={32} />
+            <Avatar index={p.avatar} bot={p.bot} size={40} />
             <View style={{ flex: 1 }}>
               <T v="strong">{p.name}{r.seat === mySeat ? ' (you)' : ''}</T>
               {top && <T v="accent" color={th.gilt}>Tycoon of the frontier</T>}

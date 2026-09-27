@@ -2,6 +2,7 @@ import { View } from 'react-native';
 import { Bell, Hammer, Landmark } from 'lucide-react-native';
 import { useTheme } from '../../theme/theme';
 import { Button, T } from '../../theme/ui';
+import { districtOf } from '../../game/data';
 
 const DECIDE = { found: 'Charter a company', survivor: 'Choose survivor', dispose: 'Settle shares' };
 
@@ -21,7 +22,7 @@ export default function ActionBar({
   } else if (phase === 'place') {
     body = (
       <Button
-        title={selected ? `Build on ${selected}` : 'Tap a deed to build'}
+        title={selected ? `Build on ${selected} · ${districtOf(selected).name}` : 'Tap a deed to build'}
         icon={Hammer}
         disabled={!selected}
         onPress={() => onBuild(selected)}

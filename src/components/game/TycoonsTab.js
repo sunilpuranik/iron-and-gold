@@ -19,7 +19,7 @@ export default function TycoonsTab({ state, mySeat }) {
             minHeight: 48, borderBottomWidth: 1, borderColor: th.rule,
           }}
         >
-          <Avatar index={p.avatar} bot={p.bot} size={32} ring={seat === acting} />
+          <Avatar index={p.avatar} bot={p.bot} size={40} ring={seat === acting} />
           <View style={{ flex: 1 }}>
             <T v="strong" numberOfLines={1}>
               {p.name}{seat === mySeat ? ' (you)' : ''}

@@ -8,7 +8,9 @@ import { useTheme } from '../theme/theme';
 import {
   Button, Card, DoubleRule, IconButton, T,
 } from '../theme/ui';
-import { AVATARS, FONTS, MIN_TARGET } from '../theme/tokens';
+import {
+  AVATARS, FONTS, MIN_TARGET, TYCOON_TITLES,
+} from '../theme/tokens';
 import Avatar from '../components/Avatar';
 import { BOT_NAMES } from '../game/data';
 import { newGame } from '../game/engine';
@@ -94,18 +96,21 @@ export default function HomeScreen({ profile, onProfile, onStartLocal, onResumeL
           <Card>
             <SectionTitle>Your tycoon</SectionTitle>
             <Field value={profile.name} onChangeText={(name) => onProfile({ ...profile, name })} placeholder="Your name" maxLength={16} />
-            <View style={{ flexDirection: 'row', gap: 8, marginTop: 10, flexWrap: 'wrap' }}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 12 }}>
               {AVATARS.map((_, i) => (
                 <Pressable
                   key={i}
-                  accessibilityLabel={`Hard hat ${i + 1}`}
+                  accessibilityLabel={TYCOON_TITLES[i]}
                   onPress={() => { feel.select(); onProfile({ ...profile, avatar: i }); }}
-                  style={{ width: MIN_TARGET, height: MIN_TARGET, alignItems: 'center', justifyContent: 'center' }}
+                  style={{ minWidth: MIN_TARGET, minHeight: MIN_TARGET, alignItems: 'center', justifyContent: 'center' }}
                 >
-                  <Avatar index={i} size={38} ring={profile.avatar === i} />
+                  <Avatar index={i} size={46} ring={profile.avatar === i} />
                 </Pressable>
               ))}
             </View>
+            <T v="accent" color={th.inkSoft} style={{ marginTop: 6, textAlign: 'center' }}>
+              {TYCOON_TITLES[profile.avatar % TYCOON_TITLES.length]}
+            </T>
           </Card>
 
           <Card>
@@ -114,7 +119,7 @@ export default function HomeScreen({ profile, onProfile, onStartLocal, onResumeL
               Pass-and-play on this phone. 2–6 tycoons.
             </T>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, minHeight: MIN_TARGET }}>
-              <Avatar index={profile.avatar} size={30} />
+              <Avatar index={profile.avatar} size={36} />
               <T v="strong" style={{ flex: 1 }}>{profile.name || 'Tycoon'} (you)</T>
             </View>
             {seats.map((s, i) => (

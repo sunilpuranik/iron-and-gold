@@ -1,9 +1,11 @@
 import { View } from 'react-native';
-import { House } from 'lucide-react-native';
+import { House, Newspaper } from 'lucide-react-native';
 import { useTheme } from '../../theme/theme';
 import { DoubleRule, IconButton, Money, T } from '../../theme/ui';
 
-export default function Header({ state, me, onHome }) {
+export default function Header({
+  state, me, onHome, onTicker,
+}) {
   const th = useTheme();
   return (
     <View style={{ backgroundColor: th.paper }}>
@@ -15,6 +17,7 @@ export default function Header({ state, me, onHome }) {
             Turn {state.turnNo} · {state.pool.length} deeds left
           </T>
         </View>
+        <IconButton icon={Newspaper} label="Ticker" onPress={onTicker} color={th.inkSoft} />
         {me && (
           <View style={{ alignItems: 'flex-end' }}>
             <T v="small" color={th.inkSoft}>{me.name}</T>

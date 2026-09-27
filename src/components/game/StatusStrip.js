@@ -40,7 +40,7 @@ export default function StatusStrip({ state, mySeat }) {
         borderBottomWidth: 1, borderColor: th.rule,
       }}
     >
-      <Avatar index={actor.avatar} bot={actor.bot} size={28} />
+      <Avatar index={actor.avatar} bot={actor.bot} size={34} />
       <T v="strong" color={mine ? th.onInk : th.ink} numberOfLines={1} style={{ flex: 1 }}>
         {mine ? MINE[state.phase] : `${actor.name} ${DOING[state.phase]}`}
       </T>

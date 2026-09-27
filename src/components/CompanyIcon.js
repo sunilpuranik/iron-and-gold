@@ -7,11 +7,16 @@ import { company } from '../game/data';
 
 const ICONS = { RadioTower, Ship, TrainFront, Fuel, Lightbulb, Factory, Landmark };
 
+// The one icon used for a company everywhere: board plots, deeds, market, sheets.
+export function companyGlyph(id) {
+  return ICONS[company(id).icon];
+}
+
 // Company badge: company fill + ink icon, square, hairline border.
 export default function CompanyIcon({ id, size = 32 }) {
   const th = useTheme();
   const c = th.companies[id];
-  const Icon = ICONS[company(id).icon];
+  const Icon = companyGlyph(id);
   return (
     <View
       style={{

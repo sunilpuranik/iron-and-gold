@@ -4,8 +4,8 @@ import { T } from '../../theme/ui';
 import { MIN_TARGET } from '../../theme/tokens';
 import { feel } from '../../feel/feel';
 
-export const TAB_NAMES = ['Deeds', 'Market', 'Tycoons', 'Ticker'];
-export const TAB_BODY_HEIGHT = 170;
+export const TAB_NAMES = ['Deeds', 'Market', 'Tycoons'];
+export const TAB_BODY_HEIGHT = 146; // two rows of deed cards
 
 export default function Tabs({ tab, onTab }) {
   const th = useTheme();

@@ -137,8 +137,10 @@ src/game/useLocalGame.js    pass-and-play controller + AsyncStorage save
 src/net/online.js           Supabase config, rooms, optimistic writes, realtime
 src/net/useOnlineGame.js    online controller (host drives bots)
 src/screens/                Home, Lobby, Game
-src/components/game/        Board, Tile, Silhouette, Header, StatusStrip, Tabs, ActionBar, HandoffCover
-src/components/sheets/      Charter, Tied buyout, Settle shares, Invest, Closing bell
+src/components/game/        Board, Tile, Header, StatusStrip, Tabs (Deeds/Market/Tycoons), ActionBar, HandoffCover
+src/components/sheets/      Charter, Tied buyout, Settle shares, Invest, Closing bell, Ticker
+src/components/Portrait.js  six engraved tycoon portraits (SVG)
+src/components/CompanyIcon.js  the one icon per company, used on the board, deeds and market
 src/theme/                  "Engraver's Ink" tokens, light/dark, UI primitives
 src/feel/feel.js            haptics + playSting() stub
 scripts/simulate.mjs        bots-only games in Node

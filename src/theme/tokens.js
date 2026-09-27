@@ -27,6 +27,20 @@ function darkCompanies() {
   return out;
 }
 
+// Blend two #RRGGBB colours; t = 0 → a, 1 → b.
+function mix(a, b, t) {
+  const ch = (h, i) => parseInt(h.slice(1 + i * 2, 3 + i * 2), 16);
+  const out = [0, 1, 2].map((i) => Math.round(ch(a, i) + (ch(b, i) - ch(a, i)) * t));
+  return '#' + out.map((v) => v.toString(16).padStart(2, '0')).join('');
+}
+
+// Empty plots carry a pale wash of their district tint so you always know where a deed lands.
+function withWash(districts, paper, t) {
+  const out = {};
+  for (const [k, d] of Object.entries(districts)) out[k] = { ...d, wash: mix(d.tint, paper, t) };
+  return out;
+}
+
 export const LIGHT = {
   dark: false,
   paper: '#F2EBDD',
@@ -38,11 +52,11 @@ export const LIGHT = {
   giltSoft: '#D9BE7A',
   onInk: '#F2EBDD',
   scrim: 'rgba(30,27,22,0.45)',
-  districts: {
+  districts: withWash({
     river: { tint: '#D8C9A3', accent: '#5E8C86' },
     foundry: { tint: '#D9B59A', accent: '#A4552E' },
     main: { tint: '#D6AFA6', accent: '#8E3B32' },
-  },
+  }, '#F2EBDD', 0.55),
   companies: COMPANY_LIGHT,
 };
 
@@ -57,15 +71,16 @@ export const DARK = {
   giltSoft: '#8A7440',
   onInk: '#16140F',
   scrim: 'rgba(0,0,0,0.6)',
-  districts: {
+  districts: withWash({
     river: { tint: '#2B3634', accent: '#7FAAA3' },
     foundry: { tint: '#3A2A20', accent: '#C9744A' },
     main: { tint: '#3A2322', accent: '#B85A4F' },
-  },
+  }, '#16140F', 0.45),
   companies: darkCompanies(),
 };
 
-// Hard-hat avatar colours.
+// Tycoon portrait backgrounds and titles (one per portrait in components/Portrait.js).
 export const AVATARS = ['#5E8C86', '#A4552E', '#8E3B32', '#3E6470', '#2F4A3A', '#8A6A22'];
+export const TYCOON_TITLES = ['The Baron', 'The Banker', 'The Cattle Queen', 'The Rail King', 'The Oilman', 'The Heiress'];
 
 export const MIN_TARGET = 44;

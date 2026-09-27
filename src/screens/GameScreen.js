@@ -12,7 +12,6 @@ import Tabs, { TAB_BODY_HEIGHT } from '../components/game/Tabs';
 import DeedsTab from '../components/game/DeedsTab';
 import MarketTab from '../components/game/MarketTab';
 import TycoonsTab from '../components/game/TycoonsTab';
-import TickerTab from '../components/game/TickerTab';
 import ActionBar from '../components/game/ActionBar';
 import HandoffCover from '../components/game/HandoffCover';
 import CharterSheet from '../components/sheets/CharterSheet';
@@ -20,6 +19,7 @@ import SurvivorSheet from '../components/sheets/SurvivorSheet';
 import SettleSheet from '../components/sheets/SettleSheet';
 import InvestSheet from '../components/sheets/InvestSheet';
 import BellSheet from '../components/sheets/BellSheet';
+import TickerSheet from '../components/sheets/TickerSheet';
 
 const DECISIONS = ['found', 'survivor', 'dispose'];
 
@@ -112,12 +112,11 @@ export default function GameScreen({ ctl, onExit }) {
       />
     );
   } else if (tab === 'Market') body = <MarketTab state={state} me={me} />;
-  else if (tab === 'Tycoons') body = <TycoonsTab state={state} mySeat={mySeat} />;
-  else body = <TickerTab state={state} />;
+  else body = <TycoonsTab state={state} mySeat={mySeat} />;
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: th.paper }} edges={['top', 'bottom', 'left', 'right']}>
-      <Header state={state} me={cover ? null : me} onHome={onExit} />
+      <Header state={state} me={cover ? null : me} onHome={onExit} onTicker={() => setSheet('ticker')} />
       <StatusStrip state={state} mySeat={cover ? -1 : mySeat} />
       {error ? (
         <View style={{ paddingHorizontal: 12, paddingVertical: 4, backgroundColor: th.ledger }}>
@@ -181,6 +180,7 @@ export default function GameScreen({ ctl, onExit }) {
         onHome={onExit}
         onClose={() => setSheet(null)}
       />
+      <TickerSheet visible={sheet === 'ticker'} state={state} onClose={() => setSheet(null)} />
       <HandoffCover player={cover} onReady={onReady} />
     </SafeAreaView>
   );
