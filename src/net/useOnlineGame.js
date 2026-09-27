@@ -11,6 +11,7 @@ const POLL_MS = 10000;
 export function useOnlineGame(code, profile, initialRow, onRoomChange) {
   const [row, setRow] = useState(initialRow);
   const [error, setError] = useState(null);
+  const [hold, setHold] = useState(false); // host pauses bots while a big moment is on screen
   const rowRef = useRef(initialRow);
   const busy = useRef(false);
 
@@ -73,7 +74,7 @@ export function useOnlineGame(code, profile, initialRow, onRoomChange) {
 
   // Host drives bots.
   useEffect(() => {
-    if (!isHost || !state || state.phase === 'over') return undefined;
+    if (!isHost || hold || !state || state.phase === 'over') return undefined;
     const a = actorOf(state);
     if (!state.players[a].bot) return undefined;
     const seq = row.seq;
@@ -83,9 +84,9 @@ export function useOnlineGame(code, profile, initialRow, onRoomChange) {
       commit(a, botAction(cur.state));
     }, BOT_DELAY);
     return () => clearTimeout(t);
-  }, [row, isHost, state, commit]);
+  }, [row, isHost, state, commit, hold]);
 
   return {
-    state, mySeat, dispatch, cover: null, onReady: null, error, isHost,
+    state, mySeat, dispatch, cover: null, onReady: null, error, isHost, setHold,
   };
 }

@@ -98,6 +98,7 @@ describe('founding', () => {
     expect(t.bank.pw).toBe(24);
     expect(t.phase).toBe('buy');
     expect(t.fx).toMatchObject({ kind: 'found', id: 'pw', tile: 'A3' });
+    expect(t.fx.detail).toMatchObject({ seat: 0, size: 3, price: 400, founderShare: true });
   });
 
   test('an 8th company cannot be chartered', () => {
@@ -154,6 +155,10 @@ describe('buyouts', () => {
     expect(t.players[1].cash).toBe(6000 + 2000 + 2300);
     expect(t.players[2].cash).toBe(6000);
     expect(t.pending.absorbed.map((a) => a.co)).toEqual(['cw', 'pp']);
+    expect(t.fx.detail).toMatchObject({ before: 5, after: 13, trust: true, holders: 5 });
+    expect(t.fx.detail.bonuses.map((b) => [b.co, b.seat, b.amount])).toEqual([
+      ['cw', 0, 4000], ['cw', 1, 2000], ['pp', 0, 2300], ['pp', 1, 2300],
+    ]);
     expect(t.pending.queue).toEqual([
       { co: 'cw', seat: 0 }, { co: 'cw', seat: 1 }, { co: 'cw', seat: 2 },
       { co: 'pp', seat: 0 }, { co: 'pp', seat: 1 },

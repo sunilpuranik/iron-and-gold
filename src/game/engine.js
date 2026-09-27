@@ -47,8 +47,11 @@ function log(s, text, kind = 'info') {
   if (s.log.length > LOG_LIMIT) s.log.splice(0, s.log.length - LOG_LIMIT);
 }
 
-function fx(s, kind, tile, id = null) {
-  s.fx = { kind, id, tile, seq: s.seq };
+// `detail` carries what the app needs to animate and summarise the moment.
+function fx(s, kind, tile, id = null, detail = null) {
+  s.fx = {
+    kind, id, tile, seq: s.seq, detail,
+  };
 }
 
 // players: [{ id, name, avatar, bot }]; opts: { seed }
@@ -149,10 +152,12 @@ function toBuy(s) {
 }
 
 function payBonuses(s, co, sharePrice, label) {
-  for (const b of bonusesFor(s, co, sharePrice)) {
+  const paid = bonusesFor(s, co, sharePrice);
+  for (const b of paid) {
     s.players[b.seat].cash += b.amount;
     log(s, `${nameOf(s, b.seat)} takes ${money(b.amount)} ${b.kind} bonus in ${short(co)}${label ? ' ' + label : ''}`, 'money');
   }
+  return paid.map((b) => ({ ...b, co }));
 }
 
 function claim(s, tile, co, absorb = []) {
@@ -169,7 +174,9 @@ function found(s, co) {
   }
   const size = sizes(s)[co];
   log(s, `${p.name} charters ${company(co).name} at ${tile} (${size} plots)`, 'found');
-  fx(s, 'found', tile, co);
+  fx(s, 'found', tile, co, {
+    seat: s.turn, size, price: price(co, size), founderShare: p.shares[co] > 0,
+  });
   toBuy(s);
 }
 
@@ -180,8 +187,11 @@ function beginBuyout(s, survivor, tile, companies) {
     .sort((a, b) => sz[b] - sz[a] || COMPANY_IDS.indexOf(a) - COMPANY_IDS.indexOf(b))
     .map((co) => ({ co, size: sz[co], price: price(co, sz[co]) }));
   log(s, `Buyout! ${company(survivor).name} absorbs ${absorbed.map((a) => short(a.co)).join(', ')} at ${tile}`, 'buyout');
-  for (const a of absorbed) payBonuses(s, a.co, a.price);
+  const bonuses = [];
+  for (const a of absorbed) bonuses.push(...payBonuses(s, a.co, a.price));
+  const before = sz[survivor];
   claim(s, tile, survivor, absorbed.map((a) => a.co));
+  const after = sizes(s)[survivor];
   const n = s.players.length;
   const queue = [];
   for (const a of absorbed) {
@@ -190,7 +200,16 @@ function beginBuyout(s, survivor, tile, companies) {
       if (s.players[seat].shares[a.co] > 0) queue.push({ co: a.co, seat });
     }
   }
-  fx(s, 'buyout', tile, survivor);
+  fx(s, 'buyout', tile, survivor, {
+    seat: s.turn,
+    absorbed,
+    bonuses,
+    before,
+    after,
+    price: price(survivor, after),
+    trust: after >= 11 && before < 11,
+    holders: queue.length,
+  });
   if (!queue.length) {
     toBuy(s);
     return;

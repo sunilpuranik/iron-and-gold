@@ -7,6 +7,7 @@ const BOT_DELAY = { place: 750, found: 500, survivor: 500, dispose: 450, buy: 60
 
 export function useLocalGame(initial) {
   const [state, setState] = useState(initial);
+  const [hold, setHold] = useState(false); // pause bots while a big moment is on screen
   const humans = state.players.map((p, i) => (p.bot ? -1 : i)).filter((i) => i >= 0);
   const [viewer, setViewer] = useState(() => (humans.length === 1 ? humans[0] : -1));
 
@@ -19,7 +20,7 @@ export function useLocalGame(initial) {
   }, [state]);
 
   useEffect(() => {
-    if (!actorIsBot) return undefined;
+    if (!actorIsBot || hold) return undefined;
     const t = setTimeout(() => {
       setState((s) => {
         if (s.phase === 'over') return s;
@@ -29,7 +30,7 @@ export function useLocalGame(initial) {
       });
     }, BOT_DELAY[state.phase] || 600);
     return () => clearTimeout(t);
-  }, [state, actorIsBot]);
+  }, [state, actorIsBot, hold]);
 
   const dispatch = useCallback((action) => {
     if (cover || viewer < 0) return null;
@@ -41,6 +42,6 @@ export function useLocalGame(initial) {
   const onReady = useCallback(() => setViewer(actor), [actor]);
 
   return {
-    state, mySeat: viewer, dispatch, cover, onReady, error: null,
+    state, mySeat: viewer, dispatch, cover, onReady, error: null, setHold,
   };
 }

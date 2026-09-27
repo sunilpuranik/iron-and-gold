@@ -1,10 +1,11 @@
-import { View } from 'react-native';
-import { House, Newspaper } from 'lucide-react-native';
+import { Pressable, View } from 'react-native';
+import { Newspaper } from 'lucide-react-native';
 import { useTheme } from '../../theme/theme';
 import {
   DoubleRule, IconButton, Ingot, T,
 } from '../../theme/ui';
 import { Wordmark } from '../../theme/brand';
+import Emblem from '../Emblem';
 
 export default function Header({
   state, me, onHome, onTicker,
@@ -12,8 +13,16 @@ export default function Header({
   const th = useTheme();
   return (
     <View style={{ backgroundColor: th.paper }}>
-      <View style={{ flexDirection: 'row', alignItems: 'center', paddingRight: 12, minHeight: 48 }}>
-        <IconButton icon={House} label="Home" onPress={onHome} />
+      <View style={{ flexDirection: 'row', alignItems: 'center', paddingRight: 12, paddingLeft: 8, gap: 8, minHeight: 52 }}>
+        <Pressable
+          onPress={onHome}
+          accessibilityRole="button"
+          accessibilityLabel="Home"
+          hitSlop={6}
+          style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
+        >
+          <Emblem size={42} />
+        </Pressable>
         <View style={{ flex: 1 }}>
           <Wordmark size={19} />
           <T v="small" color={th.inkSoft}>

@@ -1,12 +1,12 @@
-import { ScrollView, View } from 'react-native';
-import { Diamond } from 'lucide-react-native';
+import { Pressable, ScrollView, View } from 'react-native';
+import { Diamond, ScrollText } from 'lucide-react-native';
 import { useTheme } from '../../theme/theme';
 import { Money, T } from '../../theme/ui';
 import { COMPANIES, TIER_NAMES } from '../../game/data';
 import { isTrust, price, sizes } from '../../game/engine';
 import CompanyIcon from '../CompanyIcon';
 
-export default function MarketTab({ state, me }) {
+export default function MarketTab({ state, me, onCertificate }) {
   const th = useTheme();
   const sz = sizes(state);
   return (
@@ -15,12 +15,15 @@ export default function MarketTab({ state, me }) {
         const size = sz[c.id];
         const active = size >= 2;
         return (
-          <View
+          <Pressable
             key={c.id}
-            style={{
-              flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 12, minHeight: 44,
+            accessibilityLabel={`${c.name} share certificate`}
+            onPress={() => onCertificate(c.id)}
+            style={({ pressed }) => ({
+              flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 12, minHeight: 48,
               borderBottomWidth: 1, borderColor: th.rule, opacity: active ? 1 : 0.55,
-            }}
+              backgroundColor: pressed ? th.ledger : 'transparent',
+            })}
           >
             <CompanyIcon id={c.id} size={30} />
             <View style={{ flex: 1 }}>
@@ -36,7 +39,8 @@ export default function MarketTab({ state, me }) {
               {active ? <Money amount={price(c.id, size)} /> : <T v="small" color={th.inkSoft}>—</T>}
               <T v="small" color={th.inkSoft}>{me ? `you hold ${me.shares[c.id]}` : ''}</T>
             </View>
-          </View>
+            <ScrollText size={18} color={th.inkSoft} strokeWidth={1.5} />
+          </Pressable>
         );
       })}
     </ScrollView>

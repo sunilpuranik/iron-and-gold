@@ -71,6 +71,19 @@ On Home, set up seats. You always take seat 1. Tap the person/robot icon to swit
 Between human turns, a full-screen **Hand to {name}** cover keeps each player's deeds private.
 The game saves to AsyncStorage after every move. **Resume local game** on Home picks up where you left off.
 
+### Charters and buyouts
+
+When a company is chartered or bought out, everyone sees a full-screen moment:
+
+- **Charter:** a *CHARTERED* stamp and a gold seal drop in, with the new company's size, share price and the founder's free share.
+- **Buyout:** a *BUYOUT!* stamp, then the absorbed companies slide into the survivor, its plot count ticks up and gold coins burst. Below that, every majority and minority bonus paid, and a *NOW A TRUST* stamp if the buyout creates a trust.
+
+Bots pause while it is on screen. Tap anywhere or **Continue** to dismiss it; it also closes on its own after a few seconds.
+
+### Share certificates
+
+In the **Market** tab, tap a company to see your holding as an engraved stock certificate, with a guilloché border, a vignette, a gold seal and signatures. If you hold no shares, it is stamped *SPECIMEN*. Under it, the share register shows who holds what and what each holder would take in a buyout today.
+
 ### Turn dispatches
 
 With **Turn dispatches** switched on (Home, or the switch at the top of the Ticker), each time another tycoon finishes a turn a telegram card drops in over the map. It says what they did: built, chartered, bought out, sold, swapped, bought. Tap it to dismiss it; it also hides itself after a few seconds.
@@ -214,6 +227,9 @@ src/components/game/        Board, Tile, Header, StatusStrip, Tabs (Deeds/Market
 src/components/sheets/      Charter, Tied buyout, Settle shares, Invest, Closing bell, Ticker
 src/components/Portrait.js  six banknote-cameo tycoon portraits (SVG)
 src/components/game/Dispatch.js  turn dispatch telegram + handoff recap
+src/components/game/EventOverlay.js  charter / buyout celebration
+src/components/Certificate.js  engraved share certificate + gold seal
+src/components/Emblem.js     the I&G gold medallion (app icon, in-game)
 src/game/recap.js           turn summaries for dispatches
 src/theme/brand.js          iron plates, rivets, gold leaf, ingots, rail rules, wordmark
 src/components/CompanyIcon.js  the one icon per company, used on the board, deeds and market

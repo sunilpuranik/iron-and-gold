@@ -18,6 +18,7 @@ import { loadLocalGame } from '../store/storage';
 import { createRoom, joinRoom, onlineEnabled } from '../net/online';
 import { feel } from '../feel/feel';
 import { Wordmark } from '../theme/brand';
+import Emblem from '../components/Emblem';
 
 const DEFAULT_SEATS = [{ bot: true, name: '' }, { bot: true, name: '' }];
 
@@ -89,6 +90,7 @@ export default function HomeScreen({ profile, onProfile, onStartLocal, onResumeL
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <ScrollView contentContainerStyle={{ padding: 16, gap: 16 }} keyboardShouldPersistTaps="handled">
           <View style={{ alignItems: 'center', paddingTop: 12 }}>
+            <Emblem size={128} />
             <Wordmark size={44} align="center" />
             <T v="accent" color={th.inkSoft}>A frontier rail town, 1881</T>
           </View>

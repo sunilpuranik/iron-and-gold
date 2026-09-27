@@ -21,6 +21,8 @@ import InvestSheet from '../components/sheets/InvestSheet';
 import BellSheet from '../components/sheets/BellSheet';
 import TickerSheet from '../components/sheets/TickerSheet';
 import { DispatchToast } from '../components/game/Dispatch';
+import EventOverlay from '../components/game/EventOverlay';
+import CertificateSheet from '../components/sheets/CertificateSheet';
 import { describeTurn, latestTurn, turnsSince } from '../game/recap';
 
 const DECISIONS = ['found', 'survivor', 'dispose'];
@@ -30,7 +32,7 @@ export default function GameScreen({
 }) {
   const th = useTheme();
   const {
-    state, mySeat, dispatch, cover, onReady, error,
+    state, mySeat, dispatch, cover, onReady, error, setHold,
   } = ctl;
   const me = mySeat >= 0 ? state.players[mySeat] : null;
   const over = state.phase === 'over';
@@ -42,6 +44,13 @@ export default function GameScreen({
   const [sheet, setSheet] = useState(over ? 'results' : null);
   const [dismissed, setDismissed] = useState(-1);
   const [toast, setToast] = useState(null);
+  const [certId, setCertId] = useState(null);
+  // Charters and buyouts get a full-screen moment; queued so none are missed.
+  const [events, setEvents] = useState([]);
+  const event = events[0] || null;
+  useEffect(() => {
+    if (setHold) setHold(!!event);
+  }, [!!event]);
 
   // Turn dispatches: after another tycoon finishes a turn, drop in a telegram of what they did.
   const seenTurn = useRef(latestTurn(state) ? latestTurn(state).turn : 0);
@@ -66,6 +75,9 @@ export default function GameScreen({
     const fx = state.fx;
     if (!fx || fx.seq === lastFx.current) return;
     lastFx.current = fx.seq;
+    if ((fx.kind === 'buyout' || fx.kind === 'found') && fx.detail) {
+      setEvents((q) => [...q, { fx, key: fx.seq }]);
+    }
     if (fx.kind === 'buyout') {
       feel.buyout();
       playSting();
@@ -114,7 +126,7 @@ export default function GameScreen({
     ]);
   };
 
-  const decisionVisible = mine && DECISIONS.includes(state.phase) && dismissed !== state.seq;
+  const decisionVisible = mine && !event && DECISIONS.includes(state.phase) && dismissed !== state.seq;
   const closeDecision = () => setDismissed(state.seq);
 
   let body;
@@ -128,7 +140,7 @@ export default function GameScreen({
         onDeed={onDeed}
       />
     );
-  } else if (tab === 'Market') body = <MarketTab state={state} me={me} />;
+  } else if (tab === 'Market') body = <MarketTab state={state} me={me} onCertificate={setCertId} />;
   else body = <TycoonsTab state={state} mySeat={mySeat} />;
 
   return (
@@ -148,7 +160,7 @@ export default function GameScreen({
           selected={selected}
           onTilePress={onDeed}
         />
-        {toast && !cover && (
+        {toast && !cover && !event && (
           <DispatchToast dispatch={toast.dispatch} extra={toast.extra} onDone={() => setToast(null)} />
         )}
       </View>
@@ -209,8 +221,25 @@ export default function GameScreen({
         onDispatches={onDispatches}
         onClose={() => setSheet(null)}
       />
+      <CertificateSheet
+        visible={!!certId && !event}
+        state={state}
+        id={certId}
+        me={cover ? null : me}
+        mySeat={mySeat}
+        onPick={setCertId}
+        onClose={() => setCertId(null)}
+      />
+      {event && (
+        <EventOverlay
+          key={event.key}
+          event={event}
+          state={state}
+          onDone={() => setEvents((q) => q.slice(1))}
+        />
+      )}
       <HandoffCover
-        player={cover}
+        player={event ? null : cover}
         recap={cover && dispatches ? turnsSince(state, actor) : []}
         onReady={onReady}
       />
