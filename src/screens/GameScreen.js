@@ -6,7 +6,7 @@ import { T } from '../theme/ui';
 import { actorOf, canClose } from '../game/engine';
 import { feel, playSting } from '../feel/feel';
 import Header from '../components/game/Header';
-import StatusStrip from '../components/game/StatusStrip';
+import ExchangeView from '../components/game/ExchangeView';
 import Board from '../components/game/Board';
 import Tabs, { TAB_BODY_HEIGHT } from '../components/game/Tabs';
 import DeedsTab from '../components/game/DeedsTab';
@@ -45,6 +45,11 @@ export default function GameScreen({
   const [dismissed, setDismissed] = useState(-1);
   const [toast, setToast] = useState(null);
   const [certId, setCertId] = useState(null);
+  // Map on your turn, Exchange while others play; the switch lets you flip either way.
+  const [view, setView] = useState(mine || over ? 'map' : 'exchange');
+  useEffect(() => {
+    if (!over) setView(mine ? 'map' : 'exchange');
+  }, [mine, over]);
   // Charters and buyouts get a full-screen moment; queued so none are missed.
   const [events, setEvents] = useState([]);
   const event = events[0] || null;
@@ -99,6 +104,7 @@ export default function GameScreen({
 
   const onDeed = useCallback((tile) => {
     if (!mine || state.phase !== 'place') return;
+    setView('map');
     if (selected === tile) {
       build(tile);
     } else {
@@ -145,21 +151,41 @@ export default function GameScreen({
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: th.paper }} edges={['top', 'bottom', 'left', 'right']}>
-      <Header state={state} me={cover ? null : me} onHome={onExit} onTicker={() => setSheet('ticker')} />
-      <StatusStrip state={state} mySeat={cover ? -1 : mySeat} />
+      <Header
+        state={state}
+        me={cover ? null : me}
+        onHome={onExit}
+        view={view}
+        onView={setView}
+        mine={mine}
+        over={over}
+      />
       {error ? (
         <View style={{ paddingHorizontal: 12, paddingVertical: 4, backgroundColor: th.ledger }}>
           <T v="small" color={th.inkSoft}>{error}</T>
         </View>
       ) : null}
       <View style={{ flex: 1 }}>
-        <Board
-          state={state}
-          myHand={!cover && me && !over ? me.hand : null}
-          canPick={mine && state.phase === 'place'}
-          selected={selected}
-          onTilePress={onDeed}
-        />
+        {view === 'map' ? (
+          <Board
+            state={state}
+            myHand={!cover && me && !over ? me.hand : null}
+            canPick={mine && state.phase === 'place'}
+            selected={selected}
+            onTilePress={onDeed}
+            onCompanyPress={setCertId}
+          />
+        ) : (
+          <ExchangeView
+            state={state}
+            mySeat={mySeat}
+            mine={mine}
+            showMine={!cover && !!me}
+            onMap={() => setView('map')}
+            onCertificate={setCertId}
+            onTicker={() => setSheet('ticker')}
+          />
+        )}
         {toast && !cover && !event && (
           <DispatchToast dispatch={toast.dispatch} extra={toast.extra} onDone={() => setToast(null)} />
         )}
@@ -235,6 +261,7 @@ export default function GameScreen({
           key={event.key}
           event={event}
           state={state}
+          remaining={events.length - 1}
           onDone={() => setEvents((q) => q.slice(1))}
         />
       )}

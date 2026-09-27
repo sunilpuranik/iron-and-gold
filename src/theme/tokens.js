@@ -36,7 +36,7 @@ function darkCompanies() {
 }
 
 // Blend two #RRGGBB colours; t = 0 → a, 1 → b.
-function mix(a, b, t) {
+export function mix(a, b, t) {
   const ch = (h, i) => parseInt(h.slice(1 + i * 2, 3 + i * 2), 16);
   const out = [0, 1, 2].map((i) => Math.round(ch(a, i) + (ch(b, i) - ch(a, i)) * t));
   return '#' + out.map((v) => v.toString(16).padStart(2, '0')).join('');

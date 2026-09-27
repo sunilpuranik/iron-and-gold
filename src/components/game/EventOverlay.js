@@ -2,19 +2,16 @@
 // the plot count ticks up, coins burst, and a summary of who was paid what.
 import { useEffect, useRef, useState } from 'react';
 import {
-  Animated, Easing, Pressable, View, useWindowDimensions,
+  Animated, Easing, View, useWindowDimensions,
 } from 'react-native';
 import { ChevronsRight } from 'lucide-react-native';
 import { useTheme } from '../../theme/theme';
-import {
-  Button, Keyline, Money, T,
-} from '../../theme/ui';
-import { Rivets } from '../../theme/brand';
+import { Button, Money, T } from '../../theme/ui';
 import { FONTS } from '../../theme/tokens';
 import { TIER_NAMES, company } from '../../game/data';
-import CompanyIcon from '../CompanyIcon';
 import Avatar from '../Avatar';
-import { Seal } from '../Certificate';
+import { Border, Seal } from '../Certificate';
+import RaisedTile from '../RaisedTile';
 import { feel } from '../../feel/feel';
 
 const BADGE = 52;
@@ -47,7 +44,7 @@ function Stamp({ text, color, delay = 150, onLand }) {
       style={{
         alignSelf: 'center',
         opacity: v.interpolate({ inputRange: [0, 0.3, 1], outputRange: [0, 1, 1] }),
-        transform: [{ scale: v.interpolate({ inputRange: [0, 1], outputRange: [2.6, 1] }) }, { rotate: '-5deg' }],
+        transform: [{ scale: v.interpolate({ inputRange: [0, 1], outputRange: [2.6, 1] }) }, { rotate: '-3deg' }],
       }}
     >
       <View style={{ borderWidth: 3, borderColor: color, padding: 2 }}>
@@ -118,12 +115,20 @@ function FoundBody({ fx, state }) {
   return (
     <>
       <View style={{ alignItems: 'center', marginTop: 14 }}>
-        <Animated.View style={{ transform: [{ scale: badge }] }}>
-          <CompanyIcon id={fx.id} size={84} />
+        <Animated.View
+          style={{
+            transform: [
+              { perspective: 600 },
+              { rotateX: badge.interpolate({ inputRange: [0, 1], outputRange: ['85deg', '0deg'] }) },
+              { scale: badge.interpolate({ inputRange: [0, 1], outputRange: [0.6, 1] }) },
+            ],
+          }}
+        >
+          <RaisedTile id={fx.id} size={88} />
         </Animated.View>
         <Animated.View
           style={{
-            position: 'absolute', right: 30, top: -6,
+            position: 'absolute', right: 16, top: -8,
             opacity: seal,
             transform: [
               { scale: seal.interpolate({ inputRange: [0, 1], outputRange: [2, 1] }) },
@@ -192,7 +197,7 @@ function BuyoutBody({ fx, state }) {
   const surv = company(fx.id);
   return (
     <>
-      <View style={{ width: ROW_W, height: BADGE + 22, alignSelf: 'center', marginTop: 16 }}>
+      <View style={{ width: ROW_W, height: BADGE + 34, alignSelf: 'center', marginTop: 16 }}>
         {d.absorbed.map((a, i) => (
           <Animated.View
             key={a.co}
@@ -205,7 +210,7 @@ function BuyoutBody({ fx, state }) {
               ],
             }}
           >
-            <CompanyIcon id={a.co} size={BADGE} />
+            <RaisedTile id={a.co} size={BADGE} depth={5} />
             <T v="small" color={th.inkSoft}>{a.size} plots</T>
           </Animated.View>
         ))}
@@ -218,7 +223,7 @@ function BuyoutBody({ fx, state }) {
           <ChevronsRight size={28} color={th.gilt} strokeWidth={1.75} />
         </Animated.View>
         <Animated.View style={{ position: 'absolute', left: SURV_X, top: 0, alignItems: 'center', transform: [{ scale: pulse }] }}>
-          <CompanyIcon id={fx.id} size={BADGE} />
+          <RaisedTile id={fx.id} size={BADGE} depth={5} />
           <Animated.View style={{ opacity: merge.interpolate({ inputRange: [0, 0.6], outputRange: [1, 0], extrapolate: 'clamp' }) }}>
             <T v="small" color={th.inkSoft}>{d.before} plots</T>
           </Animated.View>
@@ -272,54 +277,45 @@ function BuyoutBody({ fx, state }) {
   );
 }
 
-export default function EventOverlay({ event, state, onDone }) {
+export default function EventOverlay({
+  event, state, remaining = 0, onDone,
+}) {
   const th = useTheme();
   const { width } = useWindowDimensions();
+  const [box, setBox] = useState(null);
   const fx = event.fx;
   const buyout = fx.kind === 'buyout';
   const back = useAnim(0, { duration: 220 });
   const card = useAnim(60, { spring: true, bounciness: 7 });
   const cont = useAnim(buyout ? 2100 : 1200);
-  const ready = useRef(false);
+  const frame = buyout ? th.districts.main.accent : th.gilt;
 
-  useEffect(() => {
-    const r = setTimeout(() => { ready.current = true; }, 600);
-    const t = setTimeout(onDone, buyout ? 9000 : 5500);
-    return () => {
-      clearTimeout(r);
-      clearTimeout(t);
-    };
-  }, []);
-
-  const close = () => {
-    if (ready.current) onDone();
-  };
-
+  // Stays up until the player closes it; queued moments follow one by one.
   return (
     <View style={{ position: 'absolute', left: 0, top: 0, right: 0, bottom: 0, zIndex: 50, justifyContent: 'center', alignItems: 'center' }}>
-      <Animated.View style={{ position: 'absolute', left: 0, top: 0, right: 0, bottom: 0, backgroundColor: 'rgba(12,10,8,0.62)', opacity: back }}>
-        <Pressable style={{ flex: 1 }} onPress={close} accessibilityLabel="Dismiss" />
-      </Animated.View>
+      <Animated.View style={{ position: 'absolute', left: 0, top: 0, right: 0, bottom: 0, backgroundColor: 'rgba(12,10,8,0.66)', opacity: back }} />
       <Animated.View
         style={{
-          width: Math.min(width - 28, 380),
+          width: Math.min(width - 24, 390),
           opacity: card,
           transform: [{ translateY: card.interpolate({ inputRange: [0, 1], outputRange: [40, 0] }) }],
         }}
       >
-        <Pressable onPress={close} style={{ backgroundColor: th.paper, borderWidth: 3, borderColor: th.iron.mid, padding: 18 }}>
-          <Keyline color={th.gilt} inset={4} />
-          <Rivets size={6} inset={-4.5} />
+        <View
+          onLayout={(e) => setBox({ w: e.nativeEvent.layout.width, h: e.nativeEvent.layout.height })}
+          style={{ backgroundColor: th.paper, paddingHorizontal: 30, paddingTop: 34, paddingBottom: 30 }}
+        >
+          {box && <Border w={box.w} h={box.h} color={frame} pid={`ev-${fx.kind}`} paper={th.paper} />}
           <Stamp
             text={buyout ? 'BUYOUT!' : 'CHARTERED'}
-            color={buyout ? th.districts.main.accent : th.gilt}
+            color={frame}
             onLand={buyout ? undefined : () => feel.build()}
           />
           {buyout ? <BuyoutBody fx={fx} state={state} /> : <FoundBody fx={fx} state={state} />}
-          <Animated.View style={{ opacity: cont, marginTop: 14 }}>
-            <Button title="Continue" onPress={onDone} />
+          <Animated.View style={{ opacity: cont, marginTop: 16 }}>
+            <Button title={remaining ? `Next · ${remaining} more` : 'Continue'} onPress={onDone} />
           </Animated.View>
-        </Pressable>
+        </View>
       </Animated.View>
       <Coins delay={buyout ? 1400 : 500} count={buyout ? 18 : 10} />
     </View>

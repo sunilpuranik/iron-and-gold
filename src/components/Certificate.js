@@ -26,13 +26,13 @@ const WORDS = ['no', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eig
   'Twenty-two', 'Twenty-three', 'Twenty-four', 'Twenty-five'];
 
 // Guilloché border: a band of interlaced rings, framed by fine rules, with rosettes in the corners.
-function Border({
-  w, h, color, pid,
+export function Border({
+  w, h, color, pid, paper = PAPER,
 }) {
   const band = 13;
   const rosette = (cx, cy) => (
     <G key={`${cx}-${cy}`}>
-      <Circle cx={cx} cy={cy} r="15" fill={PAPER} stroke={color} strokeWidth="1.2" />
+      <Circle cx={cx} cy={cy} r="15" fill={paper} stroke={color} strokeWidth="1.2" />
       {Array.from({ length: 12 }, (_, i) => {
         const a = (i / 12) * Math.PI * 2;
         return (
@@ -62,7 +62,7 @@ function Border({
         </Pattern>
       </Defs>
       <Rect x="2" y="2" width={w - 4} height={h - 4} fill={`url(#cert-rings-${pid})`} stroke={color} strokeWidth="2" />
-      <Rect x={2 + band} y={2 + band} width={w - 4 - band * 2} height={h - 4 - band * 2} fill={PAPER} stroke={color} strokeWidth="1" />
+      <Rect x={2 + band} y={2 + band} width={w - 4 - band * 2} height={h - 4 - band * 2} fill={paper} stroke={color} strokeWidth="1" />
       <Rect x={6 + band} y={6 + band} width={w - 12 - band * 2} height={h - 12 - band * 2} fill="none" stroke={color} strokeWidth="0.5" />
       {[rosette(17, 17), rosette(w - 17, 17), rosette(17, h - 17), rosette(w - 17, h - 17)]}
     </Svg>

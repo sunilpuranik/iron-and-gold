@@ -1,6 +1,8 @@
 // The city map: 9 display columns (A–I) × 12 display rows (1–12) in three district blocks.
 // Tiles stretch to fill the full width; height fits what is left on screen.
-import { useMemo, useRef, useState } from 'react';
+import {
+  useCallback, useMemo, useRef, useState,
+} from 'react';
 import { View } from 'react-native';
 import { useTheme } from '../../theme/theme';
 import { T } from '../../theme/ui';
@@ -13,7 +15,7 @@ const BAND = 18;
 const SIDE = 6;
 
 export default function Board({
-  state, myHand, canPick, selected, onTilePress,
+  state, myHand, canPick, selected, onTilePress, onCompanyPress,
 }) {
   const th = useTheme();
   const [box, setBox] = useState(null);
@@ -38,6 +40,9 @@ export default function Board({
   const sz = useMemo(() => sizes(state), [state.board]);
   const hand = useMemo(() => new Set(myHand || []), [myHand]);
   const focus = selected ? districtOf(selected).key : null;
+  // Tapping a company's plot opens its share certificate.
+  const board = state.board;
+  const onCompanyTile = useCallback((tile) => onCompanyPress && onCompanyPress(board[tile]), [board, onCompanyPress]);
 
   let w = 0;
   let h = 0;
@@ -92,7 +97,10 @@ export default function Board({
                           trust={owner && owner !== 'x' ? isTrust(sz[owner]) : false}
                           last={state.last === id}
                           delay={delays.current[id]}
-                          onPress={canPick && !owner && hand.has(id) ? onTilePress : undefined}
+                          onPress={
+                            owner && owner !== 'x' ? onCompanyTile
+                              : canPick && !owner && hand.has(id) ? onTilePress : undefined
+                          }
                         />
                       );
                     })}

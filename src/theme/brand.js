@@ -101,20 +101,32 @@ export function Ingot({ amount, size = 16, style }) {
   );
 }
 
-// Rail track: two iron rails on wooden ties that stick out past them. Replaces the plain double rule.
+// Rail track: two steel rails spiked onto heavy wooden ties. Used as the section divider.
 export function RailRule({ style }) {
   const th = useTheme();
+  const wood = th.dark ? '#6A5238' : '#7A5C3A';
+  const woodLo = th.dark ? '#3E2F20' : '#4E3A24';
+  const rail = th.dark ? '#9398A0' : th.iron.mid;
   return (
-    <View style={[{ height: 10 }, style]}>
-      <Svg width="100%" height="10">
+    <View style={[{ height: 16 }, style]}>
+      <Svg width="100%" height="16">
         <Defs>
-          <Pattern id="ig-ties" width="10" height="10" patternUnits="userSpaceOnUse">
-            <Rect x="3" y="0" width="4" height="10" fill={th.dark ? '#5A4A36' : '#9C8462'} />
+          <Pattern id="ig-ties" width="13" height="16" patternUnits="userSpaceOnUse">
+            <Rect x="3" y="0.5" width="6.5" height="15" fill={wood} />
+            <Rect x="3" y="13.5" width="6.5" height="2" fill={woodLo} />
+            <Rect x="4" y="2.2" width="1.4" height="1.4" fill="#1D1E21" />
+            <Rect x="7.2" y="2.2" width="1.4" height="1.4" fill="#1D1E21" />
+            <Rect x="4" y="12.2" width="1.4" height="1.4" fill="#1D1E21" />
+            <Rect x="7.2" y="12.2" width="1.4" height="1.4" fill="#1D1E21" />
           </Pattern>
         </Defs>
-        <Rect x="0" y="0" width="100%" height="10" fill="url(#ig-ties)" />
-        <Line x1="0" y1="2.75" x2="100%" y2="2.75" stroke={th.iron.mid} strokeWidth="2" />
-        <Line x1="0" y1="7.25" x2="100%" y2="7.25" stroke={th.iron.mid} strokeWidth="2" />
+        <Rect x="0" y="0" width="100%" height="16" fill="url(#ig-ties)" />
+        <Rect x="0" y="3.5" width="100%" height="3.5" fill={rail} />
+        <Rect x="0" y="3.5" width="100%" height="1" fill={th.iron.hi} opacity="0.9" />
+        <Rect x="0" y="9" width="100%" height="3.5" fill={rail} />
+        <Rect x="0" y="9" width="100%" height="1" fill={th.iron.hi} opacity="0.9" />
+        <Line x1="0" y1="7" x2="100%" y2="7" stroke={th.iron.lo} strokeWidth="0.8" />
+        <Line x1="0" y1="12.5" x2="100%" y2="12.5" stroke={th.iron.lo} strokeWidth="0.8" />
       </Svg>
     </View>
   );

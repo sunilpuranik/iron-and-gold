@@ -83,7 +83,7 @@ function Tile({
     <Pressable
       onPress={onPress ? () => onPress(id) : undefined}
       disabled={!onPress}
-      accessibilityLabel={`Plot ${id}`}
+      accessibilityLabel={co ? `Plot ${id}, company plot. Open share certificate.` : `Plot ${id}`}
       style={{ width: w, height: h }}
     >
       <View style={{ width: w, height: h, backgroundColor: fromFill.current, overflow: 'hidden' }}>

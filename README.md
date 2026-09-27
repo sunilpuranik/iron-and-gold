@@ -71,18 +71,31 @@ On Home, set up seats. You always take seat 1. Tap the person/robot icon to swit
 Between human turns, a full-screen **Hand to {name}** cover keeps each player's deeds private.
 The game saves to AsyncStorage after every move. **Resume local game** on Home picks up where you left off.
 
+### Map and Exchange
+
+The switch in the header flips the main area between the **Map** and the **Exchange**. When your turn starts the game switches to the map, and the header reads *YOUR TURN* in gold. While other tycoons play it switches to the Exchange. You can flip between them at any time; a gold dot on the map icon means it's your move.
+
+The Exchange shows:
+
+- **Who is acting** and what they are doing, plus the turn number and deeds left.
+- **Standings:** net worth, split into cash and shares.
+- **Your position:** cash, share value, rank, and the bonus each majority or minority stake would pay.
+- **The company race:** each company's size against the 11-plot trust mark and the 41-plot bell, its share price and its majority holder.
+- **The closing bell gauge.**
+- **The latest dispatches,** with a button that opens the full ticker.
+
 ### Charters and buyouts
 
-When a company is chartered or bought out, everyone sees a full-screen moment:
+When a company is chartered or bought out, everyone sees a full-screen moment framed like a share certificate:
 
-- **Charter:** a *CHARTERED* stamp and a gold seal drop in, with the new company's size, share price and the founder's free share.
-- **Buyout:** a *BUYOUT!* stamp, then the absorbed companies slide into the survivor, its plot count ticks up and gold coins burst. Below that, every majority and minority bonus paid, and a *NOW A TRUST* stamp if the buyout creates a trust.
+- **Charter:** a *CHARTERED* stamp, a 3D company tile that flips up, and a gold seal, with the company's size, share price and the founder's share.
+- **Buyout:** a *BUYOUT!* stamp, the absorbed tiles sliding into the survivor, a plot count that ticks up, a coin burst, and every bonus paid.
 
-Bots pause while it is on screen. Tap anywhere or **Continue** to dismiss it; it also closes on its own after a few seconds.
+These stay on screen until you tap **Continue**. If several happen in a row, they queue (*Next · 1 more*). Bots wait while one is open.
 
 ### Share certificates
 
-In the **Market** tab, tap a company to see your holding as an engraved stock certificate, with a guilloché border, a vignette, a gold seal and signatures. If you hold no shares, it is stamped *SPECIMEN*. Under it, the share register shows who holds what and what each holder would take in a buyout today.
+Tap any company plot on the map, a company in the **Market** tab, or a company in the Exchange's race, to open its engraved share certificate and share register.
 
 ### Turn dispatches
 

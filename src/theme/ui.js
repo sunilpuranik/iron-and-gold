@@ -63,40 +63,89 @@ export function Card({ children, style }) {
   );
 }
 
-// kind: primary (riveted iron plate) | secondary (gold leaf) | tertiary (iron outline)
+const DEPTH = 5;
+
+// Call to action. primary = riveted iron plate, secondary = gold leaf. Both are raised 3D
+// plates standing on a darker base; the face sinks onto the base while pressed.
+// tertiary = flat iron outline.
 export function Button({
   title, onPress, kind = 'primary', disabled, icon: Icon, style, compact,
 }) {
   const th = useTheme();
   const fg = kind === 'primary' ? th.iron.text : kind === 'secondary' ? th.goldLeaf.ink : th.ink;
+  const pad = compact ? 14 : 20;
+
+  if (kind === 'tertiary') {
+    return (
+      <Pressable
+        accessibilityRole="button"
+        accessibilityState={{ disabled: !!disabled }}
+        onPress={disabled ? undefined : onPress}
+        style={({ pressed }) => [{
+          minHeight: MIN_TARGET + 4, paddingHorizontal: pad, borderWidth: 1.5, borderColor: th.iron.mid,
+          alignItems: 'center', justifyContent: 'center', flexDirection: 'row', gap: 8,
+          opacity: disabled ? 0.4 : pressed ? 0.7 : 1,
+        }, style]}
+      >
+        {Icon && <Icon size={18} color={fg} strokeWidth={1.75} />}
+        <T v="plate" color={fg} numberOfLines={1}>{title}</T>
+      </Pressable>
+    );
+  }
+
+  const iron = kind === 'primary';
+  const base = iron ? th.iron.lo : th.goldLeaf.lo;
+  const edge = iron ? '#0C0D0F' : '#5C4012';
   return (
     <Pressable
       accessibilityRole="button"
       accessibilityState={{ disabled: !!disabled }}
       onPress={disabled ? undefined : onPress}
-      style={({ pressed }) => [
-        {
-          minHeight: MIN_TARGET + 4,
-          paddingHorizontal: compact ? 14 : 20,
-          borderWidth: kind === 'tertiary' ? 1.5 : 1,
-          borderColor: kind === 'secondary' ? th.goldLeaf.lo : kind === 'primary' ? th.iron.lo : th.iron.mid,
-          alignItems: 'center',
-          justifyContent: 'center',
-          flexDirection: 'row',
-          gap: 8,
-          overflow: 'hidden',
-          opacity: disabled ? 0.4 : pressed ? 0.85 : 1,
-        },
-        style,
-      ]}
+      style={[{ paddingBottom: DEPTH, opacity: disabled ? 0.45 : 1 }, style]}
     >
-      {kind === 'primary' && <IronFill />}
-      {kind === 'secondary' && <GoldFill />}
-      {kind === 'primary' && <Keyline color={th.goldLeaf.mid} />}
-      {kind === 'secondary' && <Keyline color={th.goldLeaf.lo} />}
-      {kind === 'primary' && <Rivets size={4} inset={6} />}
-      {Icon && <Icon size={18} color={fg} strokeWidth={1.75} />}
-      <T v="plate" color={fg} numberOfLines={1}>{title}</T>
+      {({ pressed }) => {
+        const down = pressed && !disabled;
+        return (
+          <>
+            <View
+              style={{
+                position: 'absolute', left: 0, right: 0, top: DEPTH, bottom: 0,
+                backgroundColor: base, borderWidth: 1, borderColor: edge,
+              }}
+            />
+            <View
+              style={{
+                minHeight: MIN_TARGET + 2, paddingHorizontal: pad, borderWidth: 1, borderColor: edge,
+                alignItems: 'center', justifyContent: 'center', flexDirection: 'row', gap: 8, overflow: 'hidden',
+                transform: [{ translateY: down ? DEPTH - 1 : 0 }],
+              }}
+            >
+              {iron ? <IronFill /> : <GoldFill />}
+              <View style={{ position: 'absolute', left: 0, right: 0, top: 0, height: 1.5, backgroundColor: '#FFFFFF', opacity: iron ? 0.28 : 0.6 }} />
+              <View style={{ position: 'absolute', left: 0, right: 0, bottom: 0, height: 1.5, backgroundColor: '#000000', opacity: 0.35 }} />
+              <Keyline color={iron ? th.goldLeaf.mid : th.goldLeaf.lo} />
+              {iron && <Rivets size={4} inset={6} />}
+              {Icon && (
+                <View>
+                  <Icon size={18} color={fg} strokeWidth={1.75} />
+                </View>
+              )}
+              <T
+                v="plate"
+                color={fg}
+                numberOfLines={1}
+                style={{
+                  textShadowColor: iron ? 'rgba(0,0,0,0.6)' : 'rgba(255,244,214,0.7)',
+                  textShadowOffset: { width: 0, height: iron ? -1 : 1 },
+                  textShadowRadius: 0,
+                }}
+              >
+                {title}
+              </T>
+            </View>
+          </>
+        );
+      }}
     </Pressable>
   );
 }
