@@ -1,12 +1,11 @@
 import { Pressable, View } from 'react-native';
 import { useTheme } from '../../theme/theme';
-import { DoubleRule, Ingot, T } from '../../theme/ui';
+import { Money, Rule, T } from '../../theme/ui';
 import { FONTS } from '../../theme/tokens';
-import { Wordmark } from '../../theme/brand';
-import Emblem from '../Emblem';
+import { Seal, Wordmark } from '../../theme/brand';
 import ViewSwitch from './ViewSwitch';
 
-// Emblem (home) · wordmark with turn line · Map/Exchange switch · your cash.
+// Coin seal (home) · wordmark with turn line · Map/Exchange switch · your cash.
 export default function Header({
   state, me, onHome, view, onView, mine, over,
 }) {
@@ -21,7 +20,7 @@ export default function Header({
           hitSlop={6}
           style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
         >
-          <Emblem size={40} />
+          <Seal kind="coin" size={40} />
         </Pressable>
         <View style={{ flex: 1, minWidth: 0 }}>
           <Wordmark size={17} />
@@ -36,9 +35,9 @@ export default function Header({
           )}
         </View>
         <ViewSwitch view={view} onView={onView} mine={mine && !over} />
-        {me && <Ingot amount={me.cash} size={14} style={{ alignSelf: 'center' }} />}
+        {me && <Money amount={me.cash} v="ingot" size={14} style={{ alignSelf: 'center' }} />}
       </View>
-      <DoubleRule />
+      <Rule kind="rail" />
     </View>
   );
 }

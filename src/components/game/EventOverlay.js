@@ -10,7 +10,8 @@ import { Button, Money, T } from '../../theme/ui';
 import { FONTS } from '../../theme/tokens';
 import { TIER_NAMES, company } from '../../game/data';
 import Avatar from '../Avatar';
-import { Border, Seal } from '../Certificate';
+import { Border } from '../Certificate';
+import { Seal } from '../../theme/brand';
 import RaisedTile from '../RaisedTile';
 import { feel } from '../../feel/feel';
 
@@ -136,7 +137,7 @@ function FoundBody({ fx, state }) {
             ],
           }}
         >
-          <Seal size={52} label={initials} />
+          <Seal kind="notary" size={52} label={initials} />
         </Animated.View>
       </View>
       <Animated.View style={{ opacity: text, transform: [{ translateY: text.interpolate({ inputRange: [0, 1], outputRange: [12, 0] }) }] }}>

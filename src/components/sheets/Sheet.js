@@ -3,7 +3,7 @@ import { Modal, Pressable, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { X } from 'lucide-react-native';
 import { useTheme } from '../../theme/theme';
-import { DoubleRule, IconButton, T } from '../../theme/ui';
+import { Button, Rule, T } from '../../theme/ui';
 
 export default function Sheet({
   visible, title, subtitle, onClose, children, footer,
@@ -21,9 +21,9 @@ export default function Sheet({
               <T v="display">{title}</T>
               {subtitle ? <T v="accent" color={th.inkSoft}>{subtitle}</T> : null}
             </View>
-            {onClose && <IconButton icon={X} label="Close" onPress={onClose} />}
+            {onClose && <Button iconOnly icon={X} label="Close" onPress={onClose} />}
           </View>
-          <DoubleRule style={{ marginHorizontal: 16, marginTop: 6 }} />
+          <Rule kind="gilt" style={{ marginHorizontal: 16, marginTop: 6 }} />
           <ScrollView contentContainerStyle={{ padding: 16, gap: 10 }}>{children}</ScrollView>
           {footer ? <View style={{ paddingHorizontal: 16, gap: 8 }}>{footer}</View> : null}
         </View>

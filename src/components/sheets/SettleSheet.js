@@ -57,10 +57,10 @@ function Settle({ state, me, onSettle }) {
       </Row>
       <Row label={`Hold ${hold}`} hint={`Keep ${company(co).short} in case it is chartered again`} />
       <View style={{ flexDirection: 'row', gap: 8 }}>
-        <Button title="Sell all" kind="tertiary" compact onPress={() => { setSwap(0); setSell(held); }} style={{ flex: 1 }} />
+        <Button title="Sell all" kind="ghost" compact onPress={() => { setSwap(0); setSell(held); }} style={{ flex: 1 }} />
         <Button
           title="Swap max"
-          kind="tertiary"
+          kind="ghost"
           compact
           onPress={() => {
             const s = Math.min(Math.floor(held / 2) * 2, bankRoom);

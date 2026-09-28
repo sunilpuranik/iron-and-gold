@@ -10,10 +10,10 @@ export { SafeAreaProvider } from 'react-native-safe-area-context';
 
 // Primitives
 export {
-  T, Money, DoubleRule, Hairline, Keyline, Card, Button, IconButton, Stepper, Screen,
+  T, Money, DoubleRule, Hairline, Keyline, Card, Button, IconButton, Stepper, Screen, Ingot,
 } from '../../src/theme/ui';
 export {
-  IronFill, GoldFill, Rivets, Ingot, RailRule, Wordmark,
+  IronFill, GoldFill, Rivets, RailRule, Wordmark,
 } from '../../src/theme/brand';
 
 // Brand art

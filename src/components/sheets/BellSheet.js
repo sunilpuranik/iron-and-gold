@@ -2,7 +2,7 @@ import { View } from 'react-native';
 import { Crown } from 'lucide-react-native';
 import { useTheme } from '../../theme/theme';
 import {
-  Button, Ingot, Money, T,
+  Button, Money, T,
 } from '../../theme/ui';
 import Avatar from '../Avatar';
 import Sheet from './Sheet';
@@ -38,7 +38,7 @@ export default function BellSheet({ visible, state, mySeat, onHome, onClose }) {
               {top && <T v="accent" color={th.gilt}>Tycoon of the frontier</T>}
             </View>
             {top && <Crown size={18} color={th.gilt} strokeWidth={1.5} />}
-            {top ? <Ingot amount={r.cash} size={16} /> : <Money amount={r.cash} v="title" />}
+            {top ? <Money amount={r.cash} v="ingot" size={16} /> : <Money amount={r.cash} v="title" />}
           </View>
         );
       })}

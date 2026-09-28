@@ -69,7 +69,7 @@ function NowCard({ state, mySeat, mine, onMap }) {
             <T v="accent" color={th.inkSoft}>{mine ? MINE[state.phase] : DOING[state.phase]}</T>
           </>
         ) : <T v="title" color={th.gilt}>The closing bell has rung</T>}
-        {mine && <Button title="Back to the map" kind="secondary" compact onPress={onMap} style={{ marginTop: 8, alignSelf: 'flex-start' }} />}
+        {mine && <Button title="Back to the map" kind="iron" compact onPress={onMap} style={{ marginTop: 8, alignSelf: 'flex-start' }} />}
       </View>
       <View style={{ alignItems: 'flex-end' }}>
         <T style={{ fontFamily: FONTS.money, fontSize: 11, letterSpacing: 1.4, color: th.inkSoft }}>TURN</T>
@@ -111,7 +111,7 @@ function Standings({ state, mySeat }) {
             </View>
             <Bar total={top} parts={[{ value: r.cash, color: th.gilt }, { value: r.stock, color: th.iron.mid }]} />
           </View>
-          <Money amount={r.worth} v="strong" />
+          <Money amount={r.worth} v="body" />
         </View>
       ))}
       <T v="small" color={th.inkSoft}>Net worth: cash plus shares at today's prices{Object.values(sz).some((n) => n >= 2) ? '' : ' (no companies yet)'}.</T>
@@ -153,7 +153,7 @@ function CompanyRace({ state, onCertificate }) {
               </View>
             </View>
             <View style={{ alignItems: 'flex-end', minWidth: 58 }}>
-              <Money amount={price(id, sz[id])} v="strong" />
+              <Money amount={price(id, sz[id])} v="body" />
               {majP && (
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 3 }}>
                   <T v="small" color={th.inkSoft}>maj.</T>
@@ -211,9 +211,9 @@ function YourPosition({ state, mySeat }) {
   return (
     <Section title="YOUR POSITION">
       <View style={{ flexDirection: 'row', gap: 6 }}>
-        <Cell label="CASH"><Money amount={me.cash} v="strong" /></Cell>
-        <Cell label="SHARES"><Money amount={worth - me.cash} v="strong" /></Cell>
-        <Cell label="NET WORTH"><Money amount={worth} v="strong" /></Cell>
+        <Cell label="CASH"><Money amount={me.cash} v="body" /></Cell>
+        <Cell label="SHARES"><Money amount={worth - me.cash} v="body" /></Cell>
+        <Cell label="NET WORTH"><Money amount={worth} v="body" /></Cell>
         <Cell label="RANK"><T style={{ fontFamily: FONTS.money, fontSize: 14 }}>{rank} of {state.players.length}</T></Cell>
       </View>
       {stakes.map((s) => (
@@ -221,7 +221,7 @@ function YourPosition({ state, mySeat }) {
           <CompanyIcon id={s.id} size={20} />
           <T v="body" style={{ flex: 1 }}>{company(s.id).short}: {s.kind} holder ({me.shares[s.id]} shares)</T>
           <T v="small" color={th.inkSoft}>bonus </T>
-          <Money amount={s.amount} v="strong" />
+          <Money amount={s.amount} v="body" />
         </View>
       ))}
       {!stakes.length && <T v="small" color={th.inkSoft}>You hold no majority or minority stake yet.</T>}
@@ -243,7 +243,7 @@ function Latest({ state, onTicker }) {
           </View>
         </View>
       ))}
-      <Button title="Open the full ticker" kind="tertiary" icon={Newspaper} onPress={onTicker} />
+      <Button title="Open the full ticker" kind="ghost" icon={Newspaper} onPress={onTicker} />
     </Section>
   );
 }

@@ -3,9 +3,10 @@
 import { useState } from 'react';
 import { View } from 'react-native';
 import Svg, {
-  Circle, Defs, Ellipse, G, Pattern, Polygon, Rect,
+  Circle, Defs, Ellipse, G, Pattern, Rect,
 } from 'react-native-svg';
 import { T } from '../theme/text';
+import { Seal } from '../theme/brand';
 import { FONTS, LIGHT } from '../theme/tokens';
 import { TIER_NAMES, company } from '../game/data';
 import { isTrust, price, sizes } from '../game/engine';
@@ -69,28 +70,6 @@ export function Border({
   );
 }
 
-// Gold notarial seal with the company initials.
-export function Seal({ size = 58, label }) {
-  const pts = [];
-  for (let i = 0; i < 48; i++) {
-    const a = (i / 48) * Math.PI * 2;
-    const r = i % 2 ? 42 : 48;
-    pts.push(`${50 + Math.cos(a) * r},${50 + Math.sin(a) * r}`);
-  }
-  return (
-    <View style={{ width: size, height: size }}>
-      <Svg width={size} height={size} viewBox="0 0 100 100">
-        <Polygon points={pts.join(' ')} fill={GOLD.mid} stroke={GOLD.lo} strokeWidth="1.5" />
-        <Circle cx="50" cy="50" r="34" fill={GOLD.hi} stroke={GOLD.lo} strokeWidth="1.5" />
-        <Circle cx="50" cy="50" r="28" fill="none" stroke={GOLD.lo} strokeWidth="0.8" strokeDasharray="2 2" />
-      </Svg>
-      <View style={{ position: 'absolute', left: 0, right: 0, top: 0, bottom: 0, alignItems: 'center', justifyContent: 'center' }}>
-        <T style={{ fontFamily: FONTS.money, fontSize: size * 0.2, color: '#5C4012', letterSpacing: 1 }}>{label}</T>
-      </View>
-    </View>
-  );
-}
-
 function Vignette({ id, color }) {
   const Glyph = companyGlyph(id);
   return (
@@ -118,6 +97,8 @@ function Signature({ name, role }) {
     </View>
   );
 }
+
+export { Seal };
 
 export default function Certificate({
   id, state, owner, shares, number,
@@ -166,7 +147,7 @@ export default function Certificate({
 
       <View style={{ alignSelf: 'stretch', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 12 }}>
         <Signature name={PRESIDENTS[id]} role="PRESIDENT" />
-        <Seal label={initials} />
+        <Seal kind="notary" label={initials} />
         <Signature name="R. Quill" role="SECRETARY" />
       </View>
 

@@ -1,88 +1,120 @@
-// Shared primitives: text, money, rules, iron cards, iron and gold buttons, steppers.
+// Shared primitives: text, money, rules, plates, gold / iron / ghost buttons, steppers.
 import { Pressable, View } from 'react-native';
 import { Minus, Plus } from 'lucide-react-native';
+import Svg, {
+  Defs, LinearGradient, Polygon, Stop,
+} from 'react-native-svg';
 import { useTheme } from './theme';
-import { FONTS, MIN_TARGET } from './tokens';
+import { FONTS, GOLD, MIN_TARGET } from './tokens';
 import { T } from './text';
 import {
-  GoldFill, Ingot, IronFill, RailRule, Rivets,
+  GoldFill, IronFill, Keyline, Plate, Rule,
 } from './brand';
 import { feel } from '../feel/feel';
 
-export { T, Ingot, RailRule };
+export { T, Plate, Rule };
 
-const MONEY_SIZE = {
-  small: 11, body: 14, strong: 14, title: 18, display: 22,
-};
+const MONEY_SIZE = { small: 11, body: 14, title: 18 };
 
-// Gold-leaf money: engraved capitals, lining numerals, a faint emboss.
-export function Money({ amount, v = 'strong', style }) {
-  const th = useTheme();
+function dollars(amount, delta) {
+  const s = `$${Math.abs(amount).toLocaleString('en-US')}`;
+  if (amount < 0) return `−${s}`;
+  return delta && amount > 0 ? `+${s}` : s;
+}
+
+// A gold ingot with engraved numerals — for headline cash only (your wallet, winnings).
+function Ingot({ text, size, style }) {
   return (
-    <T
-      style={[{
-        fontFamily: FONTS.money, fontSize: MONEY_SIZE[v] || 14, color: th.gilt, letterSpacing: 0.3,
-        textShadowColor: th.moneyShadow, textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 0,
-      }, style]}
-    >
-      ${amount.toLocaleString('en-US')}
-    </T>
-  );
-}
-
-// Section divider. Drawn as a rail track: two iron rails on wooden ties.
-export function DoubleRule({ style }) {
-  return <RailRule style={style} />;
-}
-
-export function Hairline({ style }) {
-  const th = useTheme();
-  return <View style={[{ height: 1, backgroundColor: th.rule }, style]} />;
-}
-
-// Inset engraved keyline.
-export function Keyline({ color, inset = 3 }) {
-  return (
-    <View
-      style={{
-        position: 'absolute', top: inset, left: inset, right: inset, bottom: inset, borderWidth: 1, borderColor: color, pointerEvents: 'none',
-      }}
-    />
-  );
-}
-
-// Ledger card in a riveted iron frame with a gilt inner keyline.
-export function Card({ children, style }) {
-  const th = useTheme();
-  return (
-    <View style={[{ backgroundColor: th.ledger, borderWidth: 3, borderColor: th.iron.mid, padding: 16 }, style]}>
-      <Keyline color={th.gilt} inset={4} />
-      <Rivets size={6} inset={-4.5} />
-      {children}
+    <View style={[{ paddingHorizontal: size * 0.75, paddingVertical: size * 0.18, alignSelf: 'flex-start' }, style]}>
+      <Svg style={{ position: 'absolute', left: 0, top: 0, right: 0, bottom: 0 }} width="100%" height="100%" viewBox="0 0 100 30" preserveAspectRatio="none">
+        <Defs>
+          <LinearGradient id="ig-ingot" x1="0" y1="0" x2="0" y2="1">
+            <Stop offset="0" stopColor={GOLD.shine} />
+            <Stop offset="0.2" stopColor={GOLD.bright} />
+            <Stop offset="0.55" stopColor={GOLD.leaf} />
+            <Stop offset="1" stopColor={GOLD.deep} />
+          </LinearGradient>
+        </Defs>
+        <Polygon points="7,0 93,0 100,30 0,30" fill="url(#ig-ingot)" stroke={GOLD.deep} strokeWidth="1" />
+        <Polygon points="7,0 93,0 91,5 9,5" fill={GOLD.shine} opacity="0.8" />
+      </Svg>
+      <T
+        style={{
+          fontFamily: FONTS.money, fontSize: size, color: GOLD.ink, letterSpacing: 0.5,
+          textShadowColor: GOLD.emboss, textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 0,
+        }}
+      >
+        {text}
+      </T>
     </View>
   );
 }
 
-const DEPTH = 5;
-
-// Call to action. primary = riveted iron plate, secondary = gold leaf. Both are raised 3D
-// plates standing on a darker base; the face sinks onto the base while pressed.
-// tertiary = flat iron outline.
-export function Button({
-  title, onPress, kind = 'primary', disabled, icon: Icon, style, compact,
+// Money in engraved capitals with lining numerals. v: ingot | title | body | small.
+// `delta` signs the amount; losses are carnelian, never red.
+export function Money({
+  amount, v = 'body', delta, size, style,
 }) {
   const th = useTheme();
-  const fg = kind === 'primary' ? th.iron.text : kind === 'secondary' ? th.goldLeaf.ink : th.ink;
+  const text = dollars(amount, delta);
+  if (v === 'ingot') return <Ingot text={text} size={size || 20} style={style} />;
+  const loss = amount < 0;
+  return (
+    <T
+      style={[{
+        fontFamily: FONTS.money, fontSize: size || MONEY_SIZE[v] || 14, letterSpacing: 0.3,
+        color: loss ? th.jewel.carnelianText : th.money,
+        textShadowColor: th.dark ? '#000000' : GOLD.emboss, textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 0,
+      }, style]}
+    >
+      {text}
+    </T>
+  );
+}
+
+const DEPTH = 4;
+const LEGACY_KIND = { primary: 'gold', secondary: 'iron', tertiary: 'ghost' };
+const GHOST_EDGE = 'rgba(207,166,74,0.55)';
+
+// Actions.
+//   gold  — the one primary action per screen: gold leaf standing on a 4px base
+//   iron  — secondary: riveted iron plate on the same base
+//   ghost — tertiary: a gilt outline; with iconOnly, a bare icon in a 44pt target
+// Raised plates sink onto their base while pressed.
+export function Button({
+  title, onPress, kind = 'gold', disabled, icon: Icon, iconOnly, label, color, style, compact,
+}) {
+  const th = useTheme();
+  const k = LEGACY_KIND[kind] || kind;
   const pad = compact ? 14 : 20;
 
-  if (kind === 'tertiary') {
+  if (iconOnly) {
+    return (
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={label || title}
+        accessibilityState={{ disabled: !!disabled }}
+        onPress={disabled ? undefined : onPress}
+        hitSlop={4}
+        style={({ pressed }) => [{
+          width: MIN_TARGET, height: MIN_TARGET, alignItems: 'center', justifyContent: 'center',
+          opacity: disabled ? 0.3 : pressed ? 0.6 : 1,
+        }, style]}
+      >
+        <Icon size={22} color={color || th.money} strokeWidth={1.5} />
+      </Pressable>
+    );
+  }
+
+  if (k === 'ghost') {
+    const fg = color || th.money;
     return (
       <Pressable
         accessibilityRole="button"
         accessibilityState={{ disabled: !!disabled }}
         onPress={disabled ? undefined : onPress}
         style={({ pressed }) => [{
-          minHeight: MIN_TARGET + 4, paddingHorizontal: pad, borderWidth: 1.5, borderColor: th.iron.mid,
+          minHeight: MIN_TARGET + 4, paddingHorizontal: pad, borderWidth: 1, borderColor: th.dark ? GHOST_EDGE : th.accent,
           alignItems: 'center', justifyContent: 'center', flexDirection: 'row', gap: 8,
           opacity: disabled ? 0.4 : pressed ? 0.7 : 1,
         }, style]}
@@ -93,9 +125,9 @@ export function Button({
     );
   }
 
-  const iron = kind === 'primary';
-  const base = iron ? th.iron.lo : th.goldLeaf.lo;
-  const edge = iron ? '#0C0D0F' : '#5C4012';
+  const iron = k === 'iron';
+  const fg = iron ? th.iron.text : GOLD.ink;
+  const edge = iron ? th.iron.edge : GOLD.edge;
   return (
     <Pressable
       accessibilityRole="button"
@@ -110,32 +142,30 @@ export function Button({
             <View
               style={{
                 position: 'absolute', left: 0, right: 0, top: DEPTH, bottom: 0,
-                backgroundColor: base, borderWidth: 1, borderColor: edge,
+                backgroundColor: edge, borderWidth: 1, borderColor: edge,
               }}
             />
             <View
               style={{
-                minHeight: MIN_TARGET + 2, paddingHorizontal: pad, borderWidth: 1, borderColor: edge,
+                minHeight: MIN_TARGET + 6, paddingHorizontal: pad, borderWidth: 1, borderColor: edge,
                 alignItems: 'center', justifyContent: 'center', flexDirection: 'row', gap: 8, overflow: 'hidden',
                 transform: [{ translateY: down ? DEPTH - 1 : 0 }],
               }}
             >
               {iron ? <IronFill /> : <GoldFill />}
-              <View style={{ position: 'absolute', left: 0, right: 0, top: 0, height: 1.5, backgroundColor: '#FFFFFF', opacity: iron ? 0.28 : 0.6 }} />
-              <View style={{ position: 'absolute', left: 0, right: 0, bottom: 0, height: 1.5, backgroundColor: '#000000', opacity: 0.35 }} />
-              <Keyline color={iron ? th.goldLeaf.mid : th.goldLeaf.lo} />
-              {iron && <Rivets size={4} inset={6} />}
+              <View style={{ position: 'absolute', left: 0, right: 0, top: 0, height: 1, backgroundColor: '#FFFAE1', opacity: iron ? 0.25 : 0.85 }} />
+              <Keyline color={iron ? GHOST_EDGE : 'rgba(58,42,14,0.45)'} inset={5} />
               {Icon && (
                 <View>
                   <Icon size={18} color={fg} strokeWidth={1.75} />
                 </View>
               )}
               <T
-                v="plate"
-                color={fg}
                 numberOfLines={1}
                 style={{
-                  textShadowColor: iron ? 'rgba(0,0,0,0.6)' : 'rgba(255,244,214,0.7)',
+                  fontFamily: FONTS.money, fontSize: compact ? 13 : 14, letterSpacing: compact ? 2.3 : 2.8, color: fg,
+                  textTransform: 'uppercase',
+                  textShadowColor: iron ? 'rgba(0,0,0,0.6)' : GOLD.emboss,
                   textShadowOffset: { width: 0, height: iron ? -1 : 1 },
                   textShadowRadius: 0,
                 }}
@@ -150,24 +180,6 @@ export function Button({
   );
 }
 
-export function IconButton({ icon: Icon, onPress, label, color, disabled }) {
-  const th = useTheme();
-  return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityLabel={label}
-      onPress={disabled ? undefined : onPress}
-      hitSlop={4}
-      style={({ pressed }) => ({
-        width: MIN_TARGET, height: MIN_TARGET, alignItems: 'center', justifyContent: 'center',
-        opacity: disabled ? 0.3 : pressed ? 0.6 : 1,
-      })}
-    >
-      <Icon size={22} color={color || th.ink} strokeWidth={1.5} />
-    </Pressable>
-  );
-}
-
 export function Stepper({ value, onChange, min = 0, max, step = 1, label }) {
   const th = useTheme();
   const set = (n) => {
@@ -176,18 +188,20 @@ export function Stepper({ value, onChange, min = 0, max, step = 1, label }) {
     onChange(n);
   };
   const box = {
-    width: MIN_TARGET, height: MIN_TARGET, borderWidth: 1.5, borderColor: th.iron.mid, alignItems: 'center', justifyContent: 'center', backgroundColor: th.ledger,
+    width: MIN_TARGET, height: MIN_TARGET, borderWidth: 1, alignItems: 'center', justifyContent: 'center',
   };
+  const canLess = value - step >= min;
+  const canMore = value + step <= max;
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center' }} accessibilityLabel={label}>
-      <Pressable accessibilityLabel={`Less ${label || ''}`} onPress={() => set(value - step)} style={[box, { opacity: value - step < min ? 0.3 : 1 }]}>
-        <Minus size={18} color={th.ink} strokeWidth={1.5} />
+      <Pressable accessibilityLabel={`Less ${label || ''}`} onPress={() => set(value - step)} style={[box, { borderColor: th.field, opacity: canLess ? 1 : 0.35 }]}>
+        <Minus size={18} color={th.inkSoft} strokeWidth={1.5} />
       </Pressable>
-      <View style={{ minWidth: 40, alignItems: 'center' }}>
-        <T style={{ fontFamily: FONTS.money, fontSize: 18 }}>{value}</T>
+      <View style={{ minWidth: 32, alignItems: 'center' }}>
+        <T style={{ fontFamily: FONTS.money, fontSize: 16 }} color={value ? th.ink : th.inkFaint}>{value}</T>
       </View>
-      <Pressable accessibilityLabel={`More ${label || ''}`} onPress={() => set(value + step)} style={[box, { opacity: value + step > max ? 0.3 : 1 }]}>
-        <Plus size={18} color={th.ink} strokeWidth={1.5} />
+      <Pressable accessibilityLabel={`More ${label || ''}`} onPress={() => set(value + step)} style={[box, { borderColor: th.accent, opacity: canMore ? 1 : 0.35 }]}>
+        <Plus size={18} color={th.money} strokeWidth={1.5} />
       </Pressable>
     </View>
   );
@@ -195,5 +209,15 @@ export function Stepper({ value, onChange, min = 0, max, step = 1, label }) {
 
 export function Screen({ children, style }) {
   const th = useTheme();
-  return <View style={[{ flex: 1, backgroundColor: th.paper }, style]}>{children}</View>;
+  return <View style={[{ flex: 1, backgroundColor: th.ground }, style]}>{children}</View>;
 }
+
+// v1 names, kept until the cleanup pass.
+export const Card = ({ children, style }) => <Plate rivets style={style}>{children}</Plate>;
+export const DoubleRule = ({ style }) => <Rule kind="gilt" style={style} />;
+export const Hairline = ({ style }) => <Rule style={style} />;
+export const IconButton = (p) => <Button {...p} iconOnly />;
+export { Keyline };
+export const RailRule = ({ style }) => <Rule kind="rail" style={style} />;
+export const LegacyIngot = ({ amount, size = 16, style }) => <Money amount={amount} v="ingot" size={size} style={style} />;
+export { LegacyIngot as Ingot };

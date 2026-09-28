@@ -12,7 +12,7 @@ export default function ActionBar({
   const th = useTheme();
   let body;
   if (phase === 'over') {
-    body = <Button title="Closing bell results" kind="secondary" icon={Bell} onPress={onResults} style={{ flex: 1 }} />;
+    body = <Button title="Closing bell results" kind="gold" icon={Bell} onPress={onResults} style={{ flex: 1 }} />;
   } else if (!mine) {
     body = (
       <View style={{ flex: 1, minHeight: 44, justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: th.rule }}>
@@ -32,8 +32,8 @@ export default function ActionBar({
   } else if (phase === 'buy') {
     body = (
       <>
-        <Button title="Pass" kind="tertiary" onPress={onPass} compact />
-        {canBell && <Button title="Bell" kind="secondary" icon={Bell} onPress={onBell} compact />}
+        <Button title="Pass" kind="ghost" onPress={onPass} compact />
+        {canBell && <Button title="Bell" kind="iron" icon={Bell} onPress={onBell} compact />}
         <Button title="Invest" icon={Landmark} onPress={onInvest} style={{ flex: 1 }} />
       </>
     );

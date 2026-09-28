@@ -6,7 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Bot, Plus, User, X } from 'lucide-react-native';
 import { useTheme } from '../theme/theme';
 import {
-  Button, Card, DoubleRule, IconButton, T,
+  Button, Plate, Rule, T,
 } from '../theme/ui';
 import {
   AVATARS, FONTS, MIN_TARGET, TYCOON_TITLES,
@@ -17,8 +17,7 @@ import { newGame } from '../game/engine';
 import { loadLocalGame } from '../store/storage';
 import { createRoom, joinRoom, onlineEnabled } from '../net/online';
 import { feel } from '../feel/feel';
-import { Wordmark } from '../theme/brand';
-import Emblem from '../components/Emblem';
+import { Seal, Wordmark } from '../theme/brand';
 
 const DEFAULT_SEATS = [{ bot: true, name: '' }, { bot: true, name: '' }];
 
@@ -90,13 +89,13 @@ export default function HomeScreen({ profile, onProfile, onStartLocal, onResumeL
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <ScrollView contentContainerStyle={{ padding: 16, gap: 16 }} keyboardShouldPersistTaps="handled">
           <View style={{ alignItems: 'center', paddingTop: 12 }}>
-            <Emblem size={128} />
+            <Seal kind="coin" size={128} />
             <Wordmark size={44} align="center" />
             <T v="accent" color={th.inkSoft}>A frontier rail town, 1881</T>
           </View>
-          <DoubleRule />
+          <Rule kind="ornament" />
 
-          <Card>
+          <Plate>
             <SectionTitle>Your tycoon</SectionTitle>
             <Field value={profile.name} onChangeText={(name) => onProfile({ ...profile, name })} placeholder="Your name" maxLength={16} />
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 12 }}>
@@ -128,9 +127,9 @@ export default function HomeScreen({ profile, onProfile, onStartLocal, onResumeL
                 accessibilityLabel="Turn dispatches"
               />
             </View>
-          </Card>
+          </Plate>
 
-          <Card>
+          <Plate>
             <SectionTitle>Local table</SectionTitle>
             <T v="small" color={th.inkSoft} style={{ marginBottom: 8 }}>
               Pass-and-play on this phone. 2–6 tycoons.
@@ -141,7 +140,8 @@ export default function HomeScreen({ profile, onProfile, onStartLocal, onResumeL
             </View>
             {seats.map((s, i) => (
               <View key={i} style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 6 }}>
-                <IconButton
+                <Button
+                  iconOnly
                   icon={s.bot ? Bot : User}
                   label={s.bot ? 'Bot seat — tap for human' : 'Human seat — tap for bot'}
                   onPress={() => { feel.select(); setSeat(i, { bot: !s.bot }); }}
@@ -157,7 +157,8 @@ export default function HomeScreen({ profile, onProfile, onStartLocal, onResumeL
                     style={{ flex: 1 }}
                   />
                 )}
-                <IconButton
+                <Button
+                  iconOnly
                   icon={X}
                   label="Remove seat"
                   disabled={seats.length <= 1}
@@ -168,7 +169,7 @@ export default function HomeScreen({ profile, onProfile, onStartLocal, onResumeL
             {seats.length < 5 && (
               <Button
                 title="Add a seat"
-                kind="tertiary"
+                kind="ghost"
                 icon={Plus}
                 onPress={() => setSeats([...seats, { bot: true, name: '' }])}
                 style={{ marginTop: 8 }}
@@ -178,14 +179,14 @@ export default function HomeScreen({ profile, onProfile, onStartLocal, onResumeL
             {saved && (
               <Button
                 title={`Resume local game · turn ${saved.turnNo}`}
-                kind="tertiary"
+                kind="ghost"
                 onPress={() => onResumeLocal(saved)}
                 style={{ marginTop: 8 }}
               />
             )}
-          </Card>
+          </Plate>
 
-          <Card>
+          <Plate>
             <SectionTitle>Telegraph table (online)</SectionTitle>
             {!onlineEnabled ? (
               <T v="small" color={th.inkSoft}>
@@ -193,7 +194,7 @@ export default function HomeScreen({ profile, onProfile, onStartLocal, onResumeL
               </T>
             ) : (
               <>
-                <Button title="Host a room" onPress={() => online(() => createRoom(profile))} disabled={busy} />
+                <Button title="Host a room" kind="iron" onPress={() => online(() => createRoom(profile))} disabled={busy} />
                 <View style={{ flexDirection: 'row', gap: 8, marginTop: 10 }}>
                   <Field
                     value={code}
@@ -206,7 +207,7 @@ export default function HomeScreen({ profile, onProfile, onStartLocal, onResumeL
                   />
                   <Button
                     title="Join"
-                    kind="tertiary"
+                    kind="ghost"
                     disabled={busy || code.trim().length !== 4}
                     onPress={() => online(() => joinRoom(code, profile))}
                   />
@@ -215,7 +216,7 @@ export default function HomeScreen({ profile, onProfile, onStartLocal, onResumeL
                 {err && <T v="small" color={th.districts.main.accent} style={{ marginTop: 8 }}>{err}</T>}
               </>
             )}
-          </Card>
+          </Plate>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>

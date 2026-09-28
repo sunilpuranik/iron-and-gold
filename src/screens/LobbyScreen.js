@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { ChevronLeft, Plus, Share2, X } from 'lucide-react-native';
 import { useTheme } from '../theme/theme';
 import {
-  Button, Card, DoubleRule, IconButton, T,
+  Button, Plate, Rule, T,
 } from '../theme/ui';
 import { AVATARS } from '../theme/tokens';
 import Avatar from '../components/Avatar';
@@ -78,24 +78,24 @@ export default function LobbyScreen({ initialRow, profile, onStarted, onLeave })
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: th.paper }}>
       <View style={{ flexDirection: 'row', alignItems: 'center', minHeight: 48 }}>
-        <IconButton icon={ChevronLeft} label="Leave room" onPress={leave} />
+        <Button iconOnly icon={ChevronLeft} label="Leave room" onPress={leave} />
         <T v="title" style={{ flex: 1 }}>Telegraph table</T>
       </View>
-      <DoubleRule />
+      <Rule kind="gilt" />
       <ScrollView contentContainerStyle={{ padding: 16, gap: 16 }}>
-        <Card style={{ alignItems: 'center' }}>
+        <Plate style={{ alignItems: 'center' }}>
           <T v="accent" color={th.inkSoft}>Room code</T>
           <T v="display" style={{ fontSize: 48, letterSpacing: 8 }}>{code}</T>
           <Button
             title="Share code"
-            kind="tertiary"
+            kind="ghost"
             icon={Share2}
             onPress={() => Share.share({ message: `Join my Iron & Gold table — room code ${code}` })}
             style={{ alignSelf: 'stretch', marginTop: 8 }}
           />
-        </Card>
+        </Plate>
 
-        <Card>
+        <Plate>
           <T v="title" style={{ marginBottom: 6 }}>Tycoons ({players.length}/6)</T>
           {players.map((p) => (
             <View key={p.id} style={{ flexDirection: 'row', alignItems: 'center', gap: 10, minHeight: 44 }}>
@@ -105,13 +105,13 @@ export default function LobbyScreen({ initialRow, profile, onStarted, onLeave })
                 {p.id === row.lobby.host ? '  · host' : ''}
                 {p.id === profile.id ? '  · you' : ''}
               </T>
-              {isHost && p.id !== profile.id && <IconButton icon={X} label={`Remove ${p.name}`} onPress={() => remove(p.id)} />}
+              {isHost && p.id !== profile.id && <Button iconOnly icon={X} label={`Remove ${p.name}`} onPress={() => remove(p.id)} />}
             </View>
           ))}
           {isHost && players.length < 6 && (
-            <Button title="Add a bot" kind="tertiary" icon={Plus} onPress={addBot} style={{ marginTop: 8 }} />
+            <Button title="Add a bot" kind="ghost" icon={Plus} onPress={addBot} style={{ marginTop: 8 }} />
           )}
-        </Card>
+        </Plate>
 
         {err && <T v="small" color={th.districts.main.accent}>{err}</T>}
 
