@@ -5,6 +5,8 @@
   `.design-sync/web/index.js` (re-exports of src/) for the browser into `.design-sync/.cache/web/` (ESM + package.json +
   a symlink to `.ds-sync/node_modules` so the .d.ts extractor finds @types/react). The converter bundles that via cfg.entry.
 - Run it BEFORE package-build/resync on every sync: `node .design-sync/build-web.mjs`.
+  The resync driver does NOT run cfg.buildCmd - skip it and the cards render against a stale `.cache/web`
+  (seen in the Gilded Standard sync: a new ThemeProvider prop was silently ignored).
 - Aliases in build-web: react-native -> react-native-web (installed only in `.ds-sync/node_modules`, never in the app's
   package.json), `.web.js` resolution first, expo-haptics stubbed (no haptics in a browser).
 - `.ds-sync` deps: `npm i esbuild ts-morph @types/react@19 react@19.2.3 react-dom@19.2.3 react-native-web playwright`
@@ -15,6 +17,11 @@
 - `RN` (react-native-web namespace) and `Icons` (the lucide icons the app uses) are exported for designs; both are
   excluded from cards via componentSrcMap null, as are ThemeProvider/SafeAreaProvider (provider chain in cfg.provider).
 - Header.js is exported as `GameHeader` (a bare `Header` would be ambiguous in designs).
+
+## Theme in cards
+- cfg.provider pins `ThemeProvider scheme="dark"` (LACQUER). The capture browser reports a LIGHT colour scheme, so without the
+  pin every card renders on bond paper (BOND_THEME) - the opposite of the house style. conventions.md tells designs to pass it too.
+- Seal and Dispatch are `cardMode: column` ([GRID_OVERFLOW] wide on the Coin / toast cells).
 
 ## Previews
 - `.design-sync/previews/_kit.tsx` is a shared fixture, not a component (build logs "stale preview: _kit" — harmless).
@@ -32,12 +39,18 @@
 ## Known render warns
 - [RENDER_THIN] "rendered height is 0px" on BellSheet, CertificateSheet, CompanySheet, HandoffCover, InvestSheet,
   SettleSheet, Sheet, TickerSheet — Modal portals outside the measured root; screenshots are complete.
+- Sheet cards show a grey band above the sheet: the scrim over the capture page's white body. Harness-only.
 
 ## Gilded Standard (v2)
 - 46 → 30 public components (the Gilded Standard handoff). v1 names (Card, Avatar, CompanyIcon, RaisedTile, Emblem,
   Ingot, DoubleRule, RailRule, Hairline, IconButton, ViewSwitch, CharterSheet, SurvivorSheet, DispatchLines/Toast/Recap,
   Tile, IronFill/GoldFill/Keyline/Rivets, LIGHT/DARK) are gone; stale cards for them should be removed on the next resync.
 - The `Dispatch` data type in index.d.ts is now `TurnDispatch` (the name `Dispatch` is the component).
+
+## Remote files not produced by this build
+- `templates/gilded-standard/*` and `github.md` in the project were uploaded by hand - never delete them in a sync.
+- Font deletes are not in the diff's `deletePaths` (it tracks component files only): when a font leaves `fonts/`, review
+  `list_files` and add the stale `fonts/<file>` to the plan's deletes by hand (done for IMFellEnglishSC in the v2 sync).
 
 ## Re-sync risks
 - index.d.ts drift from src/ (hand-written contract; the most likely silent staleness).

@@ -10,6 +10,9 @@
   ],
   "provider": {
     "component": "ThemeProvider",
+    "props": {
+      "scheme": "dark"
+    },
     "inner": {
       "component": "SafeAreaProvider"
     }
@@ -97,6 +100,12 @@
       "cardMode": "column"
     },
     "Tabs": {
+      "cardMode": "column"
+    },
+    "Seal": {
+      "cardMode": "column"
+    },
+    "Dispatch": {
       "cardMode": "column"
     }
   },

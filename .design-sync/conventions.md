@@ -16,12 +16,12 @@ Every component reads its palette from `ThemeProvider`. Sheets also need `SafeAr
 
 ```jsx
 const { ThemeProvider, SafeAreaProvider, Screen } = window.IronGold;
-<ThemeProvider><SafeAreaProvider>
+<ThemeProvider scheme="dark"><SafeAreaProvider>
   <Screen>{/* your screen */}</Screen>
 </SafeAreaProvider></ThemeProvider>
 ```
 
-`ThemeProvider` gives `LACQUER` unless the system colour scheme is light (`BOND_THEME`). Fonts load from `styles.css`; nothing else to import.
+`scheme="dark"` pins `LACQUER`, the house style - always pass it; without it `ThemeProvider` follows the viewer's system colour scheme and a light system turns every screen into bond paper (`BOND_THEME`), breaking law 3. Fonts load from `styles.css`; nothing else to import.
 
 ## Styling idiom: React Native styles, no CSS classes
 

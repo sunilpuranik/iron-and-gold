@@ -104,11 +104,12 @@ export declare const MIN_TARGET: number;
 export declare function mix(a: string, b: string, t: number): string;
 
 export interface ThemeProviderProps {
+  /** Pin the theme: 'dark' = LACQUER (the house style), 'light' = BOND_THEME. Omit to follow the system colour scheme. */
+  scheme?: 'dark' | 'light';
   children?: React.ReactNode;
 }
 /**
- * Supplies the palette to every component: LACQUER by default, BOND_THEME when the system asks for light.
- * Wrap the whole app in it.
+ * Supplies the palette to every component. Wrap the whole app in it - use scheme="dark" for the Gilded Standard look.
  */
 export declare function ThemeProvider(props: ThemeProviderProps): JSX.Element;
 /** The active palette. */
