@@ -30,16 +30,22 @@ function Field({ value, onChangeText, placeholder, style, ...rest }) {
       placeholder={placeholder}
       placeholderTextColor={th.inkSoft}
       style={[{
-        minHeight: MIN_TARGET, borderWidth: 1, borderColor: th.ink, paddingHorizontal: 10,
-        color: th.ink, fontFamily: FONTS.ui, fontSize: 16, backgroundColor: th.paper,
+        minHeight: MIN_TARGET, borderWidth: 1, borderColor: th.field, paddingHorizontal: 12,
+        color: th.ink, fontFamily: FONTS.ui, fontSize: 16, backgroundColor: th.ground,
       }, style]}
       {...rest}
     />
   );
 }
 
-function SectionTitle({ children }) {
-  return <T v="title" style={{ marginBottom: 8 }}>{children}</T>;
+function SectionTitle({ children, aside }) {
+  const th = useTheme();
+  return (
+    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 12 }}>
+      <T v="title" style={{ fontSize: 16 }}>{children}</T>
+      {aside ? <T v="small" color={th.inkSoft}>{aside}</T> : null}
+    </View>
+  );
 }
 
 export default function HomeScreen({ profile, onProfile, onStartLocal, onResumeLocal, onLobby }) {
@@ -85,13 +91,15 @@ export default function HomeScreen({ profile, onProfile, onStartLocal, onResumeL
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: th.paper }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: th.ground }}>
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-        <ScrollView contentContainerStyle={{ padding: 16, gap: 16 }} keyboardShouldPersistTaps="handled">
-          <View style={{ alignItems: 'center', paddingTop: 12 }}>
-            <Seal kind="coin" size={128} />
-            <Wordmark size={44} align="center" />
-            <T v="accent" color={th.inkSoft}>A frontier rail town, 1881</T>
+        <ScrollView contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 8, paddingBottom: 24, gap: 16 }} keyboardShouldPersistTaps="handled">
+          <View style={{ alignItems: 'center', paddingTop: 16, gap: 8 }}>
+            <View style={{ borderRadius: 52, shadowColor: th.gold.leaf, shadowOpacity: 0.25, shadowRadius: 12, shadowOffset: { width: 0, height: 8 } }}>
+              <Seal kind="coin" size={104} />
+            </View>
+            <Wordmark size={34} align="center" />
+            <T v="accent" color={th.inkSoft} style={{ fontSize: 16 }}>A frontier rail town, 1881</T>
           </View>
           <Rule kind="ornament" />
 
@@ -106,14 +114,15 @@ export default function HomeScreen({ profile, onProfile, onStartLocal, onResumeL
                   onPress={() => { feel.select(); onProfile({ ...profile, avatar: i }); }}
                   style={{ minWidth: MIN_TARGET, minHeight: MIN_TARGET, alignItems: 'center', justifyContent: 'center' }}
                 >
-                  <Portrait index={i} size={46} ring={profile.avatar === i} />
+                  <Portrait index={i} size={42} ring={profile.avatar === i} />
                 </Pressable>
               ))}
             </View>
-            <T v="accent" color={th.inkSoft} style={{ marginTop: 6, textAlign: 'center' }}>
+            <T v="accent" color={th.money} style={{ marginTop: 6, textAlign: 'center', fontSize: 15 }}>
               {TYCOON_TITLES[profile.avatar % TYCOON_TITLES.length]}
             </T>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 12, minHeight: 44 }}>
+            <Rule style={{ marginTop: 12 }} />
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 8, minHeight: 44 }}>
               <View style={{ flex: 1 }}>
                 <T v="strong">Turn dispatches</T>
                 <T v="small" color={th.inkSoft}>A telegram after each tycoon's turn saying what they did.</T>
@@ -121,33 +130,35 @@ export default function HomeScreen({ profile, onProfile, onStartLocal, onResumeL
               <Switch
                 value={profile.dispatches !== false}
                 onValueChange={(on) => onProfile({ ...profile, dispatches: on })}
-                trackColor={{ true: th.gilt, false: th.rule }}
-                thumbColor={th.paper}
-                activeThumbColor={th.paper}
+                trackColor={{ true: th.accent, false: th.rule }}
+                thumbColor={th.ink}
+                activeThumbColor={th.ink}
                 accessibilityLabel="Turn dispatches"
               />
             </View>
           </Plate>
 
           <Plate>
-            <SectionTitle>Local table</SectionTitle>
-            <T v="small" color={th.inkSoft} style={{ marginBottom: 8 }}>
+            <SectionTitle aside={`${seats.length + 1} tycoons`}>Local table</SectionTitle>
+            <T v="small" color={th.inkSoft} style={{ marginBottom: 4 }}>
               Pass-and-play on this phone. 2–6 tycoons.
             </T>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, minHeight: MIN_TARGET }}>
-              <Portrait index={profile.avatar} size={36} />
-              <T v="strong" style={{ flex: 1 }}>{profile.name || 'Tycoon'} (you)</T>
+              <Portrait index={profile.avatar} size={32} />
+              <T v="body" style={{ flex: 1 }}>{profile.name || 'Tycoon'} <T v="body" color={th.inkFaint}>· you</T></T>
             </View>
             {seats.map((s, i) => (
-              <View key={i} style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 6 }}>
+              <View key={i} style={{ flexDirection: 'row', alignItems: 'center', gap: 8, borderTopWidth: 1, borderColor: th.rule }}>
                 <Button
                   iconOnly
                   icon={s.bot ? Bot : User}
+                  color={th.inkSoft}
                   label={s.bot ? 'Bot seat — tap for human' : 'Human seat — tap for bot'}
                   onPress={() => { feel.select(); setSeat(i, { bot: !s.bot }); }}
+                  style={{ marginLeft: -6 }}
                 />
                 {s.bot ? (
-                  <T v="body" style={{ flex: 1 }}>{BOT_NAMES[i]} <T v="small" color={th.inkSoft}>(bot)</T></T>
+                  <T v="body" style={{ flex: 1 }}>{BOT_NAMES[i]} <T v="body" color={th.inkFaint}>· bot</T></T>
                 ) : (
                   <Field
                     value={s.name}
@@ -175,7 +186,6 @@ export default function HomeScreen({ profile, onProfile, onStartLocal, onResumeL
                 style={{ marginTop: 8 }}
               />
             )}
-            <Button title="Deal a local game" onPress={startLocal} style={{ marginTop: 12 }} />
             {saved && (
               <Button
                 title={`Resume local game · turn ${saved.turnNo}`}
@@ -213,11 +223,14 @@ export default function HomeScreen({ profile, onProfile, onStartLocal, onResumeL
                   />
                 </View>
                 {busy && <ActivityIndicator color={th.ink} style={{ marginTop: 8 }} />}
-                {err && <T v="small" color={th.districts.main.accent} style={{ marginTop: 8 }}>{err}</T>}
+                {err && <T v="small" color={th.jewel.carnelianText} style={{ marginTop: 8 }}>{err}</T>}
               </>
             )}
           </Plate>
         </ScrollView>
+        <View style={{ paddingHorizontal: 16, paddingTop: 8, paddingBottom: 12, borderTopWidth: 1, borderColor: th.rule }}>
+          <Button title="Deal a local game" onPress={startLocal} />
+        </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );

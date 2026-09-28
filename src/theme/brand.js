@@ -1,10 +1,13 @@
 // Iron & Gold brand pieces: plates of lacquer, iron, gold leaf or bond paper; rules; seals; the wordmark.
+import { useState } from 'react';
 import { View } from 'react-native';
 import Svg, {
-  Circle, Defs, Line, LinearGradient, Pattern, Polygon, RadialGradient, Rect, Stop,
+  Circle, Defs, Line, LinearGradient, Pattern, RadialGradient, Rect, Stop,
 } from 'react-native-svg';
 import { useTheme } from './theme';
-import { FONTS, GOLD, KEYLINE } from './tokens';
+import {
+  FONTS, GOLD, KEYLINE, mix,
+} from './tokens';
 import { T } from './text';
 
 const FILL = { position: 'absolute', left: 0, top: 0, right: 0, bottom: 0 };
@@ -185,12 +188,7 @@ export function Rule({ kind = 'hair', style }) {
 }
 
 function NotarySeal({ size, label }) {
-  const pts = [];
-  for (let i = 0; i < 48; i++) {
-    const a = (i / 48) * Math.PI * 2;
-    const r = i % 2 ? 42 : 48;
-    pts.push(`${50 + Math.cos(a) * r},${50 + Math.sin(a) * r}`);
-  }
+  const emboss = { textShadowColor: GOLD.emboss, textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 0 };
   return (
     <View style={{ width: size, height: size }}>
       <Svg width={size} height={size} viewBox="0 0 100 100">
@@ -199,15 +197,16 @@ function NotarySeal({ size, label }) {
             <Stop offset="0" stopColor={GOLD.shine} />
             <Stop offset="0.35" stopColor={GOLD.bright} />
             <Stop offset="0.6" stopColor={GOLD.leaf} />
-            <Stop offset="1" stopColor={GOLD.deep} />
+            <Stop offset="0.95" stopColor={GOLD.deep} />
           </RadialGradient>
         </Defs>
-        <Polygon points={pts.join(' ')} fill={GOLD.leaf} stroke={GOLD.deep} strokeWidth="1.5" />
-        <Circle cx="50" cy="50" r="34" fill="url(#ig-notary)" stroke={GOLD.deep} strokeWidth="1.5" />
-        <Circle cx="50" cy="50" r="28" fill="none" stroke={GOLD.deep} strokeWidth="0.8" strokeDasharray="2 2" />
+        <Circle cx="50" cy="50" r="49" fill="url(#ig-notary)" stroke={GOLD.burnish} strokeWidth="1" />
+        <Circle cx="50" cy="50" r="44" fill="none" stroke={GOLD.deep} strokeWidth="4" />
+        <Circle cx="50" cy="50" r="40" fill="none" stroke={GOLD.shine} strokeWidth="3" opacity="0.9" />
+        <Circle cx="50" cy="50" r="31" fill="none" stroke={GOLD.deep} strokeWidth="0.8" strokeDasharray="2 2" />
       </Svg>
       <View style={{ ...FILL, alignItems: 'center', justifyContent: 'center' }}>
-        <T style={{ fontFamily: FONTS.money, fontSize: size * 0.2, color: GOLD.edge, letterSpacing: 1 }}>{label}</T>
+        <T style={[{ fontFamily: FONTS.money, fontSize: size * 0.22, color: GOLD.ink, letterSpacing: 1 }, emboss]}>{label}</T>
       </View>
     </View>
   );
@@ -240,27 +239,49 @@ function CoinSeal({ size, label = 'IG' }) {
   );
 }
 
-// Gold seals. notary = the scalloped stamp on certificates · coin = the Iron & Gold emblem.
+// Gold seals. notary = the company stamp on certificates · coin = the Iron & Gold emblem.
 export function Seal({ kind = 'notary', size = 58, label }) {
   return kind === 'coin' ? <CoinSeal size={size} label={label} /> : <NotarySeal size={size} label={label} />;
 }
 
-// "IRON & GOLD": iron letters, a gilt ampersand, gold-leaf GOLD.
+// Gold-leaf lettering: the same line of text struck in horizontal bands, shine at the top to deep at the foot.
+// Pure layout, so it lines up exactly with neighbouring text on every platform.
+const LEAF_BANDS = 8;
+function leafAt(t) {
+  const at = [0, 0.18, 0.5, 1];
+  let i = 0;
+  while (i < at.length - 2 && t > at[i + 1]) i++;
+  return mix(GOLD.stops[i], GOLD.stops[i + 1], (t - at[i]) / (at[i + 1] - at[i]));
+}
+
+export function GildText({ children, style, ...rest }) {
+  const [h, setH] = useState(0);
+  const band = h / LEAF_BANDS;
+  return (
+    <View onLayout={(e) => setH(e.nativeEvent.layout.height)}>
+      <T {...rest} style={[style, { color: GOLD.deep }]}>{children}</T>
+      {h > 0 && Array.from({ length: LEAF_BANDS }, (_, i) => (
+        <View key={i} style={{ position: 'absolute', left: 0, right: -4, top: i * band, height: band + 0.5, overflow: 'hidden' }}>
+          <T {...rest} style={[style, { position: 'absolute', left: 0, top: -i * band, color: leafAt((i + 0.5) / LEAF_BANDS) }]}>
+            {children}
+          </T>
+        </View>
+      ))}
+    </View>
+  );
+}
+
+// "IRON & GOLD", all Cinzel: IRON in rivet grey, a gilt italic ampersand, GOLD in gold leaf.
 export function Wordmark({ size = 20, align = 'left' }) {
   const th = useTheme();
-  const base = { fontFamily: FONTS.display, fontSize: size };
+  const base = { fontFamily: FONTS.display, fontSize: size, lineHeight: Math.round(size * 1.2), letterSpacing: size * 0.04 };
+  const justify = { left: 'flex-start', center: 'center', right: 'flex-end' }[align];
   return (
-    <T style={[base, { textAlign: align, color: th.dark ? th.iron.rivet : th.iron.mid }]}>
-      Iron
-      <T style={[base, { fontFamily: FONTS.accent, color: th.gilt }]}>{' & '}</T>
-      <T
-        style={[base, {
-          color: th.gilt, textShadowColor: th.moneyShadow, textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 0,
-        }]}
-      >
-        Gold
-      </T>
-    </T>
+    <View accessible accessibilityLabel="Iron & Gold" style={{ flexDirection: 'row', alignItems: 'flex-end', justifyContent: justify }}>
+      <T style={base} color={th.dark ? th.iron.rivet : th.iron.mid}>IRON</T>
+      <T style={[base, { fontFamily: FONTS.accent, letterSpacing: 0 }]} color={th.accent}>{' & '}</T>
+      <GildText style={base}>GOLD</GildText>
+    </View>
   );
 }
 

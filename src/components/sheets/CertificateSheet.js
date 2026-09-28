@@ -1,8 +1,8 @@
 // Share certificate for a company, plus its share register (who holds what).
-import { Pressable, View } from 'react-native';
+import { Pressable, ScrollView, View } from 'react-native';
 import { useTheme } from '../../theme/theme';
-import { Money, T } from '../../theme/ui';
-import { MIN_TARGET } from '../../theme/tokens';
+import { Money, Rule, T } from '../../theme/ui';
+import { FONTS } from '../../theme/tokens';
 import { COMPANY_IDS, company } from '../../game/data';
 import { bonusesFor, price, sizes } from '../../game/engine';
 import Certificate from '../Certificate';
@@ -10,6 +10,8 @@ import CompanyMark from '../CompanyMark';
 import Portrait from '../Portrait';
 import Sheet from './Sheet';
 import { feel } from '../../feel/feel';
+
+const MARK = 40;
 
 function Register({ state, id }) {
   const th = useTheme();
@@ -22,9 +24,10 @@ function Register({ state, id }) {
   if (sz >= 2) for (const b of bonusesFor(state, id, price(id, sz))) bonus[b.seat] = b;
   return (
     <View style={{ gap: 6 }}>
-      <T v="plate" style={{ fontSize: 13 }}>Share register</T>
+      <T v="plate" color={th.accent}>Holders</T>
+      <Rule kind="gilt" />
       {holders.map((h) => (
-        <View key={h.p.id} style={{ flexDirection: 'row', alignItems: 'center', gap: 10, minHeight: 40, borderBottomWidth: 1, borderColor: th.rule }}>
+        <View key={h.p.id} style={{ flexDirection: 'row', alignItems: 'center', gap: 10, minHeight: 44, borderBottomWidth: 1, borderColor: th.rule }}>
           <Portrait index={h.p.avatar} bot={h.p.bot} size={30} />
           <View style={{ flex: 1 }}>
             <T v="strong">{h.p.name}</T>
@@ -34,7 +37,7 @@ function Register({ state, id }) {
               </T>
             )}
           </View>
-          <T style={{ fontFamily: 'Cinzel_700Bold', fontSize: 16 }}>{h.n}</T>
+          <T style={{ fontFamily: FONTS.money, fontSize: 16 }}>{h.n}</T>
         </View>
       ))}
       {!holders.length && <T v="small" color={th.inkSoft}>No tycoon holds shares yet.</T>}
@@ -50,29 +53,41 @@ export default function CertificateSheet({
   if (!visible || !id) return null;
   const shares = me ? me.shares[id] : 0;
   return (
-    <Sheet visible title="Share certificate" subtitle={company(id).name} onClose={onClose}>
-      <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-        {COMPANY_IDS.map((c) => (
-          <Pressable
-            key={c}
-            accessibilityLabel={`${company(c).name} certificate`}
-            onPress={() => { feel.select(); onPick(c); }}
-            style={{
-              minWidth: MIN_TARGET, minHeight: MIN_TARGET, alignItems: 'center', justifyContent: 'center',
-              borderBottomWidth: 3, borderColor: c === id ? th.gilt : 'transparent',
-            }}
-          >
-            <CompanyMark id={c} size={30} />
-          </Pressable>
-        ))}
+    <Sheet visible title="Share register" subtitle={company(id).name} onClose={onClose}>
+      <View
+        style={{
+          borderWidth: 1, borderColor: th.gold.leaf,
+          shadowColor: '#000', shadowOpacity: 0.6, shadowRadius: 20, shadowOffset: { width: 0, height: 20 }, elevation: 10,
+        }}
+      >
+        <Certificate
+          id={id}
+          state={state}
+          owner={me ? me.name : ''}
+          shares={shares}
+          number={(COMPANY_IDS.indexOf(id) + 1) * 100 + Math.max(0, mySeat) + 1}
+        />
       </View>
-      <Certificate
-        id={id}
-        state={state}
-        owner={me ? me.name : ''}
-        shares={shares}
-        number={(COMPANY_IDS.indexOf(id) + 1) * 100 + Math.max(0, mySeat) + 1}
-      />
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8, paddingVertical: 6, paddingHorizontal: 2 }}>
+        {COMPANY_IDS.map((c) => {
+          const on = c === id;
+          return (
+            <Pressable
+              key={c}
+              accessibilityLabel={`${company(c).name} certificate`}
+              accessibilityState={{ selected: on }}
+              onPress={() => { if (!on) feel.select(); onPick(c); }}
+              style={{
+                width: MARK + 4, height: MARK + 4, alignItems: 'center', justifyContent: 'center',
+                borderWidth: 2, borderColor: on ? th.selection : 'transparent',
+                shadowColor: th.selection, shadowOpacity: on ? 0.45 : 0, shadowRadius: 6, shadowOffset: { width: 0, height: 0 },
+              }}
+            >
+              <CompanyMark id={c} size={MARK} />
+            </Pressable>
+          );
+        })}
+      </ScrollView>
       <Register state={state} id={id} />
     </Sheet>
   );

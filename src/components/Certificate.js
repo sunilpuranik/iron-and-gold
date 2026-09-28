@@ -1,5 +1,6 @@
 // An old-school engraved stock certificate for one company.
-// Always printed on cream paper (it's a document on the table), whatever the app theme.
+// Always printed on bond paper (it's a document you own), whatever the app theme:
+// guilloché in the company ink, a gold notary seal, two signatures.
 import { useState } from 'react';
 import { View } from 'react-native';
 import Svg, {
@@ -7,15 +8,16 @@ import Svg, {
 } from 'react-native-svg';
 import { T } from '../theme/text';
 import { Seal } from '../theme/brand';
-import { FONTS, LIGHT } from '../theme/tokens';
+import {
+  BOND, BOND_THEME, FONTS, GOLD,
+} from '../theme/tokens';
 import { TIER_NAMES, company } from '../game/data';
 import { isTrust, price, sizes } from '../game/engine';
 import { companyGlyph } from './CompanyMark';
 
-const PAPER = '#F6EEDB';
-const INK = '#2A221A';
-const GOLD = { hi: '#F4DE93', mid: '#CFA64A', lo: '#8A6421' };
-const SPECIMEN = '#8E3B32';
+const PAPER = BOND.paper;
+const INK = BOND.ink;
+const SPECIMEN = '#7A2E26';
 
 const PRESIDENTS = {
   cw: 'Elias Thorne', pp: 'Jonah Whitlock', pw: 'Thaddeus Crane', rm: 'Silas Kettle',
@@ -105,7 +107,7 @@ export default function Certificate({
 }) {
   const [box, setBox] = useState(null);
   const c = company(id);
-  const color = LIGHT.companies[id].ink;
+  const color = BOND_THEME.companies[id].ink;
   const size = sizes(state)[id];
   const active = size >= 2;
   const specimen = !shares;
@@ -130,7 +132,7 @@ export default function Certificate({
       <T style={{ fontFamily: FONTS.engraved, fontSize: 7.5, letterSpacing: 1.6, color: INK, marginTop: 8, textAlign: 'center' }}>
         INCORPORATED IN THE TERRITORY · 1881
       </T>
-      <T style={{ fontFamily: FONTS.display, fontSize: 23, color, textAlign: 'center', marginTop: 4 }}>{c.name}</T>
+      <T style={{ fontFamily: FONTS.display, fontSize: 21, lineHeight: 25, color, textAlign: 'center', marginTop: 4 }}>{c.name}</T>
       <T style={{ fontFamily: FONTS.engraved, fontSize: 8, letterSpacing: 1.4, color: INK, marginBottom: 6 }}>
         {c.industry.toUpperCase()} · {TIER_NAMES[c.tier].toUpperCase()} STOCK
       </T>
@@ -138,8 +140,9 @@ export default function Certificate({
       <Vignette id={id} color={color} />
 
       <T style={{ fontFamily: FONTS.accent, fontSize: 13, color: INK, marginTop: 8 }}>This certifies that</T>
-      <T style={{ fontFamily: FONTS.display, fontSize: 20, color: INK, marginTop: 2 }}>{specimen ? '— Specimen —' : owner}</T>
-      <View style={{ height: 1, width: '70%', backgroundColor: INK, opacity: 0.5 }} />
+      <View style={{ borderBottomWidth: 1, borderColor: 'rgba(35,28,18,0.5)', paddingHorizontal: 18, paddingBottom: 2, marginTop: 2 }}>
+        <T style={{ fontFamily: FONTS.display, fontSize: 18, color: INK }}>{specimen ? '— Specimen —' : owner}</T>
+      </View>
       <T style={{ fontFamily: FONTS.accent, fontSize: 12.5, color: INK, textAlign: 'center', marginTop: 6, lineHeight: 17 }}>
         is the registered owner of {WORDS[shares] || shares} fully paid share{shares === 1 ? '' : 's'} of the capital stock
         of {c.name}, transferable only on the books of the Company.
@@ -156,8 +159,8 @@ export default function Certificate({
           {active ? `${size} PLOTS · $${price(id, size)} A SHARE · BANK ${state.bank[id]} OF 25` : 'NOT YET CHARTERED'}
         </T>
         {active && isTrust(size) && (
-          <View style={{ backgroundColor: GOLD.mid, paddingHorizontal: 5, paddingVertical: 1 }}>
-            <T style={{ fontFamily: FONTS.money, fontSize: 9, color: '#3A2A0E', letterSpacing: 1 }}>TRUST</T>
+          <View style={{ backgroundColor: GOLD.leaf, paddingHorizontal: 5, paddingVertical: 1 }}>
+            <T style={{ fontFamily: FONTS.money, fontSize: 9, color: GOLD.ink, letterSpacing: 1 }}>TRUST</T>
           </View>
         )}
       </View>
