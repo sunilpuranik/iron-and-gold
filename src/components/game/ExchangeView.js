@@ -3,7 +3,9 @@
 import { Pressable, ScrollView, View } from 'react-native';
 import { Bell, Crown, Newspaper } from 'lucide-react-native';
 import { useTheme } from '../../theme/theme';
-import { Button, Money, T } from '../../theme/ui';
+import {
+  Button, Money, Rule, T,
+} from '../../theme/ui';
 import { END_SIZE, TRUST_SIZE, company } from '../../game/data';
 import {
   actorOf, activeCompanies, bonusesFor, canClose, isTrust, netWorth, price, sizes,
@@ -33,10 +35,12 @@ function Section({ title, right, children }) {
   const th = useTheme();
   return (
     <View style={{ gap: 8 }}>
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-        <T style={{ fontFamily: FONTS.engraved, fontSize: 12, letterSpacing: 1.6, color: th.ink }}>{title}</T>
-        <View style={{ flex: 1, height: 1, backgroundColor: th.rule }} />
-        {right}
+      <View style={{ gap: 6 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+          <T v="plate" color={th.accent}>{title}</T>
+          {right}
+        </View>
+        <Rule kind="gilt" />
       </View>
       {children}
     </View>

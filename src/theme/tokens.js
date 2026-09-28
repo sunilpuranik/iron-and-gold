@@ -79,7 +79,7 @@ export const BOND_THEME = {
   ink: BOND.ink, inkSoft: '#4A443A', inkFaint: '#7A6F5A',
   money: GOLD.deep, accent: GOLD.deep, selection: GOLD.leaf,
   scrim: 'rgba(30,27,22,0.45)',
-  gold: GOLD, iron: IRON, bond: BOND, jewel: JEWEL,
+  gold: GOLD, iron: IRON, bond: BOND, jewel: { ...JEWEL, carnelianText: JEWEL.carnelian },
   companies: Object.fromEntries(Object.entries(COMPANY).map(([k, ink]) => [k, { fill: BOND.vellum, ink, rim: GOLD.deep }])),
   districts: withWash({
     river: { tint: '#D8C9A3', accent: '#5E8C86' },
