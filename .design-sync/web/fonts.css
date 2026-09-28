@@ -1,0 +1,36 @@
+/* The app's brand fonts, registered under the exact family names src/theme/tokens.js FONTS uses. */
+@font-face {
+  font-family: 'IMFellEnglishSC_400Regular';
+  src: url('../../node_modules/@expo-google-fonts/im-fell-english-sc/400Regular/IMFellEnglishSC_400Regular.ttf') format('truetype');
+  font-display: block;
+}
+@font-face {
+  font-family: 'IMFellEnglish_400Regular_Italic';
+  src: url('../../node_modules/@expo-google-fonts/im-fell-english/400Regular_Italic/IMFellEnglish_400Regular_Italic.ttf') format('truetype');
+  font-display: block;
+}
+@font-face {
+  font-family: 'LibreFranklin_400Regular';
+  src: url('../../node_modules/@expo-google-fonts/libre-franklin/400Regular/LibreFranklin_400Regular.ttf') format('truetype');
+  font-display: block;
+}
+@font-face {
+  font-family: 'LibreFranklin_500Medium';
+  src: url('../../node_modules/@expo-google-fonts/libre-franklin/500Medium/LibreFranklin_500Medium.ttf') format('truetype');
+  font-display: block;
+}
+@font-face {
+  font-family: 'LibreFranklin_600SemiBold';
+  src: url('../../node_modules/@expo-google-fonts/libre-franklin/600SemiBold/LibreFranklin_600SemiBold.ttf') format('truetype');
+  font-display: block;
+}
+@font-face {
+  font-family: 'Cinzel_600SemiBold';
+  src: url('../../node_modules/@expo-google-fonts/cinzel/600SemiBold/Cinzel_600SemiBold.ttf') format('truetype');
+  font-display: block;
+}
+@font-face {
+  font-family: 'Cinzel_700Bold';
+  src: url('../../node_modules/@expo-google-fonts/cinzel/700Bold/Cinzel_700Bold.ttf') format('truetype');
+  font-display: block;
+}

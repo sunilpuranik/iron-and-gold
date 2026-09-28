@@ -1,0 +1,108 @@
+{
+  "projectId": "154e102d-d615-44a0-afc6-48cd5e9c1f29",
+  "shape": "package",
+  "pkg": "iron-and-gold",
+  "globalName": "IronGold",
+  "buildCmd": "node .design-sync/build-web.mjs",
+  "entry": ".design-sync/.cache/web/index.mjs",
+  "extraFonts": [
+    "../../web/fonts.css"
+  ],
+  "provider": {
+    "component": "ThemeProvider",
+    "inner": {
+      "component": "SafeAreaProvider"
+    }
+  },
+  "componentSrcMap": {
+    "Icons": null,
+    "ThemeProvider": null,
+    "SafeAreaProvider": null,
+    "RN": null
+  },
+  "overrides": {
+    "Sheet": {
+      "cardMode": "single",
+      "viewport": "400x760"
+    },
+    "BellSheet": {
+      "cardMode": "single",
+      "viewport": "400x760"
+    },
+    "CertificateSheet": {
+      "cardMode": "single",
+      "viewport": "400x760"
+    },
+    "CharterSheet": {
+      "cardMode": "single",
+      "viewport": "400x760"
+    },
+    "InvestSheet": {
+      "cardMode": "single",
+      "viewport": "400x760"
+    },
+    "SettleSheet": {
+      "cardMode": "single",
+      "viewport": "400x760"
+    },
+    "SurvivorSheet": {
+      "cardMode": "single",
+      "viewport": "400x760"
+    },
+    "TickerSheet": {
+      "cardMode": "single",
+      "viewport": "400x760"
+    },
+    "HandoffCover": {
+      "cardMode": "single",
+      "viewport": "400x760"
+    },
+    "EventOverlay": {
+      "cardMode": "column"
+    },
+    "ExchangeView": {
+      "cardMode": "single",
+      "viewport": "448x1230"
+    },
+    "ActionBar": {
+      "cardMode": "column"
+    },
+    "Avatar": {
+      "cardMode": "column"
+    },
+    "Board": {
+      "cardMode": "column"
+    },
+    "Button": {
+      "cardMode": "column"
+    },
+    "Card": {
+      "cardMode": "column"
+    },
+    "Certificate": {
+      "cardMode": "column"
+    },
+    "CompanyIcon": {
+      "cardMode": "column"
+    },
+    "DeedsTab": {
+      "cardMode": "column"
+    },
+    "GameHeader": {
+      "cardMode": "column"
+    },
+    "Money": {
+      "cardMode": "column"
+    },
+    "RaisedTile": {
+      "cardMode": "column"
+    },
+    "T": {
+      "cardMode": "column"
+    },
+    "Tabs": {
+      "cardMode": "column"
+    }
+  },
+  "readmeHeader": ".design-sync/conventions.md"
+}
