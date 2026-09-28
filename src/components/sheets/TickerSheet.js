@@ -10,7 +10,7 @@ export default function TickerSheet({
   const th = useTheme();
   if (!visible) return null;
   const color = (kind) => {
-    if (kind === 'money' || kind === 'bell') return th.gilt;
+    if (kind === 'money' || kind === 'bell') return th.money;
     if (kind === 'buyout') return th.ink;
     return th.inkSoft;
   };
@@ -25,9 +25,9 @@ export default function TickerSheet({
           <Switch
             value={dispatches}
             onValueChange={onDispatches}
-            trackColor={{ true: th.gilt, false: th.rule }}
-            thumbColor={th.paper}
-            activeThumbColor={th.paper}
+            trackColor={{ true: th.accent, false: th.rule }}
+            thumbColor={th.ink}
+            activeThumbColor={th.ink}
             accessibilityLabel="Turn dispatches"
           />
         </View>

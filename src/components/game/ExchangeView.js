@@ -46,7 +46,7 @@ function Section({ title, right, children }) {
 function Bar({ parts, total, height = 10 }) {
   const th = useTheme();
   return (
-    <View style={{ flexDirection: 'row', height, backgroundColor: th.ledger, borderWidth: 1, borderColor: th.rule, overflow: 'hidden' }}>
+    <View style={{ flexDirection: 'row', height, backgroundColor: th.raised, borderWidth: 1, borderColor: th.rule, overflow: 'hidden' }}>
       {parts.map((p, i) => (p.value > 0 ? (
         <View key={i} style={{ width: `${Math.min(100, (p.value / total) * 100)}%`, backgroundColor: p.color }} />
       ) : null))}
@@ -60,15 +60,15 @@ function NowCard({ state, mySeat, mine, onMap }) {
   const seat = over ? -1 : actorOf(state);
   const p = seat >= 0 ? state.players[seat] : null;
   return (
-    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, padding: 12, backgroundColor: th.ledger, borderWidth: 2, borderColor: th.iron.mid }}>
-      {p ? <Portrait index={p.avatar} bot={p.bot} size={56} ring={mine} /> : <Bell size={40} color={th.gilt} strokeWidth={1.5} />}
+    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, padding: 12, backgroundColor: th.plate, borderWidth: 1, borderColor: th.rule }}>
+      {p ? <Portrait index={p.avatar} bot={p.bot} size={56} ring={mine} /> : <Bell size={40} color={th.accent} strokeWidth={1.5} />}
       <View style={{ flex: 1 }}>
         {p ? (
           <>
             <T v="title" numberOfLines={1}>{mine ? 'Your turn' : p.name}</T>
             <T v="accent" color={th.inkSoft}>{mine ? MINE[state.phase] : DOING[state.phase]}</T>
           </>
-        ) : <T v="title" color={th.gilt}>The closing bell has rung</T>}
+        ) : <T v="title" color={th.money}>The closing bell has rung</T>}
         {mine && <Button title="Back to the map" kind="iron" compact onPress={onMap} style={{ marginTop: 8, alignSelf: 'flex-start' }} />}
       </View>
       <View style={{ alignItems: 'flex-end' }}>
@@ -95,7 +95,7 @@ function Standings({ state, mySeat }) {
       title="STANDINGS"
       right={(
         <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
-          <View style={{ width: 8, height: 8, backgroundColor: th.gilt }} /><T v="small" color={th.inkSoft}>cash</T>
+          <View style={{ width: 8, height: 8, backgroundColor: th.money }} /><T v="small" color={th.inkSoft}>cash</T>
           <View style={{ width: 8, height: 8, backgroundColor: th.iron.mid }} /><T v="small" color={th.inkSoft}>shares</T>
         </View>
       )}
@@ -107,9 +107,9 @@ function Standings({ state, mySeat }) {
           <View style={{ flex: 1, gap: 3 }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
               <T v="strong" numberOfLines={1} style={{ flexShrink: 1 }}>{r.p.name}{r.seat === mySeat ? ' (you)' : ''}</T>
-              {i === 0 && <Crown size={13} color={th.gilt} strokeWidth={1.75} />}
+              {i === 0 && <Crown size={13} color={th.accent} strokeWidth={1.75} />}
             </View>
-            <Bar total={top} parts={[{ value: r.cash, color: th.gilt }, { value: r.stock, color: th.iron.mid }]} />
+            <Bar total={top} parts={[{ value: r.cash, color: th.money }, { value: r.stock, color: th.iron.mid }]} />
           </View>
           <Money amount={r.worth} v="body" />
         </View>
@@ -143,13 +143,13 @@ function CompanyRace({ state, onCertificate }) {
               <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                 <T v="strong" numberOfLines={1}>
                   {company(id).short}
-                  {isTrust(sz[id]) ? <T v="small" color={th.gilt}>  ◆ trust</T> : null}
+                  {isTrust(sz[id]) ? <T v="small" color={th.accent}>  ◆ trust</T> : null}
                 </T>
                 <T v="small" color={th.inkSoft}>{sz[id]} / {END_SIZE} plots</T>
               </View>
               <View>
                 <Bar total={END_SIZE} parts={[{ value: sz[id], color: fill }]} height={9} />
-                <View style={{ position: 'absolute', left: `${(TRUST_SIZE / END_SIZE) * 100}%`, top: -2, bottom: -2, width: 2, backgroundColor: th.gilt }} />
+                <View style={{ position: 'absolute', left: `${(TRUST_SIZE / END_SIZE) * 100}%`, top: -2, bottom: -2, width: 2, backgroundColor: th.accent }} />
               </View>
             </View>
             <View style={{ alignItems: 'flex-end', minWidth: 58 }}>
@@ -180,8 +180,8 @@ function ClosingBell({ state }) {
   const trusts = active.filter((id) => isTrust(sz[id])).length;
   const ready = canClose(state);
   return (
-    <Section title="THE CLOSING BELL" right={ready ? <T style={{ fontFamily: FONTS.money, fontSize: 11, color: th.gilt, letterSpacing: 1 }}>MAY RING</T> : null}>
-      <Bar total={END_SIZE} parts={[{ value: biggest ? sz[biggest] : 0, color: th.gilt }]} height={12} />
+    <Section title="THE CLOSING BELL" right={ready ? <T style={{ fontFamily: FONTS.money, fontSize: 11, color: th.money, letterSpacing: 1 }}>MAY RING</T> : null}>
+      <Bar total={END_SIZE} parts={[{ value: biggest ? sz[biggest] : 0, color: th.accent }]} height={12} />
       <T v="small" color={th.inkSoft}>
         {biggest ? `Largest: ${company(biggest).short} at ${sz[biggest]} of ${END_SIZE} plots. ` : ''}
         {active.length ? `${trusts} of ${active.length} active companies are trusts.` : ''}
@@ -203,7 +203,7 @@ function YourPosition({ state, mySeat }) {
     return b ? { id, ...b } : null;
   }).filter(Boolean);
   const Cell = ({ label, children }) => (
-    <View style={{ flex: 1, alignItems: 'center', paddingVertical: 6, borderWidth: 1, borderColor: th.rule, backgroundColor: th.ledger }}>
+    <View style={{ flex: 1, alignItems: 'center', paddingVertical: 6, borderWidth: 1, borderColor: th.rule, backgroundColor: th.raised }}>
       {children}
       <T style={{ fontFamily: FONTS.engraved, fontSize: 9, letterSpacing: 1.2, color: th.inkSoft }}>{label}</T>
     </View>

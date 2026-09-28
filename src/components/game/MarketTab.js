@@ -22,14 +22,14 @@ export default function MarketTab({ state, me, onCertificate }) {
             style={({ pressed }) => ({
               flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 12, minHeight: 48,
               borderBottomWidth: 1, borderColor: th.rule, opacity: active ? 1 : 0.55,
-              backgroundColor: pressed ? th.ledger : 'transparent',
+              backgroundColor: pressed ? th.plate : 'transparent',
             })}
           >
             <CompanyMark id={c.id} size={30} />
             <View style={{ flex: 1 }}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
                 <T v="strong" numberOfLines={1}>{c.name}</T>
-                {isTrust(size) && <Diamond size={12} color={th.gilt} fill={th.gilt} strokeWidth={1.5} />}
+                {isTrust(size) && <Diamond size={12} color={th.accent} fill={th.accent} strokeWidth={1.5} />}
               </View>
               <T v="small" color={th.inkSoft}>
                 {c.industry} · {TIER_NAMES[c.tier]} · {active ? `${size} plots` : 'not chartered'} · bank {state.bank[c.id]}

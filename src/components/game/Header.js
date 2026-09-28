@@ -12,7 +12,7 @@ export default function Header({
 }) {
   const th = useTheme();
   return (
-    <View style={{ backgroundColor: th.paper }}>
+    <View style={{ backgroundColor: th.ground }}>
       <View style={{ flexDirection: 'row', alignItems: 'center', paddingRight: 10, paddingLeft: 8, gap: 8, minHeight: 54 }}>
         <Pressable
           onPress={onHome}
@@ -26,7 +26,7 @@ export default function Header({
         <View style={{ flex: 1, minWidth: 0 }}>
           <Wordmark size={17} />
           {mine && !over ? (
-            <T numberOfLines={1} style={{ fontFamily: FONTS.money, fontSize: 11, letterSpacing: 1, color: th.gilt }}>
+            <T numberOfLines={1} style={{ fontFamily: FONTS.money, fontSize: 11, letterSpacing: 1, color: th.accent }}>
               YOUR TURN · {state.turnNo}
             </T>
           ) : (

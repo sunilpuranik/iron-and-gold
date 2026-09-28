@@ -76,7 +76,7 @@ export default function LobbyScreen({ initialRow, profile, onStarted, onLeave })
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: th.paper }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: th.ground }}>
       <View style={{ flexDirection: 'row', alignItems: 'center', minHeight: 48 }}>
         <Button iconOnly icon={ChevronLeft} label="Leave room" onPress={leave} />
         <T v="title" style={{ flex: 1 }}>Telegraph table</T>
@@ -113,7 +113,7 @@ export default function LobbyScreen({ initialRow, profile, onStarted, onLeave })
           )}
         </Plate>
 
-        {err && <T v="small" color={th.districts.main.accent}>{err}</T>}
+        {err && <T v="small" color={th.jewel.carnelianText}>{err}</T>}
 
         {isHost ? (
           <Button title={players.length < 2 ? 'Need 2 tycoons to start' : 'Ring the opening bell'} disabled={players.length < 2} onPress={start} />

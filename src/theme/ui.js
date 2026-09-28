@@ -211,13 +211,3 @@ export function Screen({ children, style }) {
   const th = useTheme();
   return <View style={[{ flex: 1, backgroundColor: th.ground }, style]}>{children}</View>;
 }
-
-// v1 names, kept until the cleanup pass.
-export const Card = ({ children, style }) => <Plate rivets style={style}>{children}</Plate>;
-export const DoubleRule = ({ style }) => <Rule kind="gilt" style={style} />;
-export const Hairline = ({ style }) => <Rule style={style} />;
-export const IconButton = (p) => <Button {...p} iconOnly />;
-export { Keyline };
-export const RailRule = ({ style }) => <Rule kind="rail" style={style} />;
-export const LegacyIngot = ({ amount, size = 16, style }) => <Money amount={amount} v="ingot" size={size} style={style} />;
-export { LegacyIngot as Ingot };

@@ -221,7 +221,7 @@ function BuyoutBody({ fx, state }) {
             opacity: merge.interpolate({ inputRange: [0, 0.5], outputRange: [1, 0], extrapolate: 'clamp' }),
           }}
         >
-          <ChevronsRight size={28} color={th.gilt} strokeWidth={1.75} />
+          <ChevronsRight size={28} color={th.accent} strokeWidth={1.75} />
         </Animated.View>
         <Animated.View style={{ position: 'absolute', left: SURV_X, top: 0, alignItems: 'center', transform: [{ scale: pulse }] }}>
           <CompanyMark raised id={fx.id} size={BADGE} depth={5} />
@@ -242,11 +242,11 @@ function BuyoutBody({ fx, state }) {
         {d.trust && (
           <Animated.View
             style={{
-              marginTop: 6, backgroundColor: th.gilt, paddingHorizontal: 10, paddingVertical: 2,
+              marginTop: 6, backgroundColor: th.gold.leaf, paddingHorizontal: 10, paddingVertical: 2,
               opacity: trust, transform: [{ scale: trust.interpolate({ inputRange: [0, 1], outputRange: [1.8, 1] }) }],
             }}
           >
-            <T style={{ fontFamily: FONTS.money, fontSize: 13, letterSpacing: 2, color: '#3A2A0E' }}>NOW A TRUST</T>
+            <T style={{ fontFamily: FONTS.money, fontSize: 13, letterSpacing: 2, color: th.gold.ink }}>NOW A TRUST</T>
           </Animated.View>
         )}
       </View>
@@ -289,7 +289,7 @@ export default function EventOverlay({
   const back = useAnim(0, { duration: 220 });
   const card = useAnim(60, { spring: true, bounciness: 7 });
   const cont = useAnim(buyout ? 2100 : 1200);
-  const frame = buyout ? th.districts.main.accent : th.gilt;
+  const frame = buyout ? th.money : th.accent;
 
   // Stays up until the player closes it; queued moments follow one by one.
   return (
@@ -304,9 +304,9 @@ export default function EventOverlay({
       >
         <View
           onLayout={(e) => setBox({ w: e.nativeEvent.layout.width, h: e.nativeEvent.layout.height })}
-          style={{ backgroundColor: th.paper, paddingHorizontal: 30, paddingTop: 34, paddingBottom: 30 }}
+          style={{ backgroundColor: th.raised, paddingHorizontal: 30, paddingTop: 34, paddingBottom: 30 }}
         >
-          {box && <Border w={box.w} h={box.h} color={frame} pid={`ev-${fx.kind}`} paper={th.paper} />}
+          {box && <Border w={box.w} h={box.h} color={frame} pid={`ev-${fx.kind}`} paper={th.raised} />}
           <Stamp
             text={buyout ? 'BUYOUT!' : 'CHARTERED'}
             color={frame}

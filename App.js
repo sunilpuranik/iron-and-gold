@@ -3,7 +3,6 @@ import { ActivityIndicator, View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { useFonts } from 'expo-font';
-import { IMFellEnglishSC_400Regular } from '@expo-google-fonts/im-fell-english-sc/400Regular';
 import { IMFellEnglish_400Regular_Italic } from '@expo-google-fonts/im-fell-english/400Regular_Italic';
 import { LibreFranklin_400Regular } from '@expo-google-fonts/libre-franklin/400Regular';
 import { LibreFranklin_500Medium } from '@expo-google-fonts/libre-franklin/500Medium';
@@ -79,7 +78,7 @@ function Root() {
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: th.paper }}>
+    <View style={{ flex: 1, backgroundColor: th.ground }}>
       <StatusBar style={th.dark ? 'light' : 'dark'} />
       {body}
     </View>
@@ -88,7 +87,6 @@ function Root() {
 
 export default function App() {
   const [loaded] = useFonts({
-    IMFellEnglishSC_400Regular,
     IMFellEnglish_400Regular_Italic,
     LibreFranklin_400Regular,
     LibreFranklin_500Medium,

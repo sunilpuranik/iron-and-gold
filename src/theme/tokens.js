@@ -54,25 +54,11 @@ function withWash(districts, ground, t) {
   return out;
 }
 
-// v1 names kept as aliases so existing components keep working during the migration.
-function legacy(th, onInk, moneyShadow) {
-  return {
-    ...th,
-    paper: th.ground,
-    ledger: th.plate,
-    gilt: th.money,
-    giltSoft: GOLD.deep,
-    goldLeaf: { hi: GOLD.shine, mid: GOLD.leaf, lo: GOLD.deep, ink: GOLD.ink, emboss: GOLD.emboss },
-    onInk,
-    moneyShadow,
-  };
-}
-
 const COMPANY = {
   cw: '#6B5A2E', pp: '#3E6470', pw: '#2F4A3A', rm: '#5A2A1E', ae: '#A8812F', cr: '#3B4250', ft: '#1E1B16',
 };
 
-export const LACQUER = legacy({
+export const LACQUER = {
   dark: true,
   ground: '#0B0907', raised: '#15120D', plate: '#201B14', rule: '#3A3224', field: '#5A4D38',
   ink: '#EDE4D0', inkSoft: '#B7A98C', inkFaint: '#8C7F66',
@@ -85,9 +71,9 @@ export const LACQUER = legacy({
     foundry: { tint: '#3A2A20', accent: '#C9744A' },
     main: { tint: '#3A2322', accent: '#B85A4F' },
   }, '#0B0907', 0.45),
-}, '#0B0907', 'rgba(0,0,0,0.8)');
+};
 
-export const BOND_THEME = legacy({
+export const BOND_THEME = {
   dark: false,
   ground: BOND.paper, raised: BOND.vellum, plate: '#E2D4B4', rule: BOND.rule, field: '#9C8C6C',
   ink: BOND.ink, inkSoft: '#4A443A', inkFaint: '#7A6F5A',
@@ -100,11 +86,7 @@ export const BOND_THEME = legacy({
     foundry: { tint: '#D9B59A', accent: '#A4552E' },
     main: { tint: '#D6AFA6', accent: '#8E3B32' },
   }, BOND.paper, 0.55),
-}, BOND.paper, 'rgba(255,244,214,0.9)');
-
-// v1 theme names.
-export const DARK = LACQUER;
-export const LIGHT = BOND_THEME;
+};
 
 export const AVATARS = ['#5E8C86', '#A4552E', '#8E3B32', '#3E6470', '#2F4A3A', '#8A6A22'];
 export const TYCOON_TITLES = ['The Baron', 'The Banker', 'The Cattle Queen', 'The Rail King', 'The Oilman', 'The Heiress'];

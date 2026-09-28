@@ -40,7 +40,7 @@ export default function DeedsTab({ state, hand, selected, canBuild, onDeed }) {
         const c = classify(state, t);
         const legal = c.kind !== 'dead' && c.kind !== 'blocked';
         const on = selected === t;
-        const fg = on ? th.onInk : th.ink;
+        const fg = on ? th.ground : th.ink;
         return (
           <Pressable
             key={t}
@@ -50,7 +50,7 @@ export default function DeedsTab({ state, hand, selected, canBuild, onDeed }) {
             style={{
               width: '32%', flexGrow: 1, height: DEED_HEIGHT, paddingHorizontal: 6, paddingVertical: 4,
               backgroundColor: on ? th.ink : dc.tint,
-              borderWidth: 1, borderColor: on ? th.gilt : th.ink, borderLeftWidth: 4, borderLeftColor: dc.accent,
+              borderWidth: 1, borderColor: on ? th.selection : th.rule, borderLeftWidth: 4, borderLeftColor: dc.accent,
               opacity: legal ? 1 : 0.45,
             }}
           >
@@ -58,7 +58,7 @@ export default function DeedsTab({ state, hand, selected, canBuild, onDeed }) {
               <T v="title" color={fg}>{t}</T>
               <Badge c={c} />
             </View>
-            <T v="label" color={on ? th.onInk : dc.accent} numberOfLines={1} style={{ fontSize: 11 }}>
+            <T v="label" color={on ? th.ground : dc.accent} numberOfLines={1} style={{ fontSize: 11 }}>
               {d.name}
             </T>
             <T v="small" color={fg} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>

@@ -149,7 +149,7 @@ export default function GameScreen({
   else body = <TycoonsTab state={state} mySeat={mySeat} />;
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: th.paper }} edges={['top', 'bottom', 'left', 'right']}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: th.ground }} edges={['top', 'bottom', 'left', 'right']}>
       <Header
         state={state}
         me={cover ? null : me}
@@ -160,7 +160,7 @@ export default function GameScreen({
         over={over}
       />
       {error ? (
-        <View style={{ paddingHorizontal: 12, paddingVertical: 4, backgroundColor: th.ledger }}>
+        <View style={{ paddingHorizontal: 12, paddingVertical: 4, backgroundColor: th.raised }}>
           <T v="small" color={th.inkSoft}>{error}</T>
         </View>
       ) : null}
@@ -190,7 +190,7 @@ export default function GameScreen({
         )}
       </View>
       <Tabs value={tab} onChange={setTab} />
-      <View style={{ height: TAB_BODY_HEIGHT, backgroundColor: th.paper }}>{body}</View>
+      <View style={{ height: TAB_BODY_HEIGHT, backgroundColor: th.ground }}>{body}</View>
       <ActionBar
         phase={state.phase}
         mine={mine}

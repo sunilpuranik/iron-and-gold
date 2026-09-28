@@ -11,7 +11,7 @@ export default function HandoffCover({ player, recap = [], onReady }) {
     <Modal visible={!!player} animationType="fade" onRequestClose={() => {}} statusBarTranslucent>
       {player && (
         <ScrollView
-          style={{ flex: 1, backgroundColor: th.paper }}
+          style={{ flex: 1, backgroundColor: th.ground }}
           contentContainerStyle={{ flexGrow: 1, alignItems: 'center', justifyContent: 'center', padding: 28, paddingTop: 64, gap: 16 }}
         >
           <T v="accent" color={th.inkSoft}>Pass the telegraph along</T>

@@ -4,31 +4,28 @@
 // Theme
 export { ThemeProvider, useTheme } from '../../src/theme/theme';
 export {
-  FONTS, LIGHT, DARK, AVATARS, TYCOON_TITLES, MIN_TARGET, mix,
+  FONTS, TYPE, GOLD, IRON, BOND, JEWEL, SPACE, KEYLINE, RADIUS, LACQUER, BOND_THEME, AVATARS, TYCOON_TITLES, MIN_TARGET, mix,
 } from '../../src/theme/tokens';
 export { SafeAreaProvider } from 'react-native-safe-area-context';
 
 // Primitives
 export {
-  T, Money, DoubleRule, Hairline, Keyline, Card, Button, IconButton, Stepper, Screen, Ingot,
+  T, Money, Button, Stepper, Screen,
 } from '../../src/theme/ui';
 export {
-  IronFill, GoldFill, Rivets, RailRule, Wordmark,
+  Plate, Rule, Seal, Wordmark,
 } from '../../src/theme/brand';
 
 // Brand art
-export { default as Avatar } from '../../src/components/Avatar';
-export { default as Certificate, Seal } from '../../src/components/Certificate';
-export { default as CompanyIcon, companyGlyph } from '../../src/components/CompanyIcon';
-export { default as Emblem } from '../../src/components/Emblem';
+export { default as Certificate } from '../../src/components/Certificate';
+export { default as CompanyMark, companyGlyph } from '../../src/components/CompanyMark';
 export { default as Portrait, PORTRAIT_COUNT } from '../../src/components/Portrait';
-export { default as RaisedTile } from '../../src/components/RaisedTile';
 
 // Game
 export { default as ActionBar } from '../../src/components/game/ActionBar';
 export { default as Board } from '../../src/components/game/Board';
 export { default as DeedsTab, DEED_HEIGHT } from '../../src/components/game/DeedsTab';
-export { DispatchLines, DispatchToast, DispatchRecap } from '../../src/components/game/Dispatch';
+export { default as Dispatch } from '../../src/components/game/Dispatch';
 export { default as EventOverlay } from '../../src/components/game/EventOverlay';
 export { default as ExchangeView } from '../../src/components/game/ExchangeView';
 export { default as HandoffCover } from '../../src/components/game/HandoffCover';
@@ -36,16 +33,14 @@ export { default as GameHeader } from '../../src/components/game/Header';
 export { default as MarketTab } from '../../src/components/game/MarketTab';
 export { default as Tabs, TAB_NAMES, TAB_BODY_HEIGHT } from '../../src/components/game/Tabs';
 export { default as TycoonsTab } from '../../src/components/game/TycoonsTab';
-export { default as ViewSwitch } from '../../src/components/game/ViewSwitch';
 
 // Sheets
 export { default as Sheet } from '../../src/components/sheets/Sheet';
 export { default as BellSheet } from '../../src/components/sheets/BellSheet';
 export { default as CertificateSheet } from '../../src/components/sheets/CertificateSheet';
-export { default as CharterSheet } from '../../src/components/sheets/CharterSheet';
+export { default as CompanySheet } from '../../src/components/sheets/CompanySheet';
 export { default as InvestSheet } from '../../src/components/sheets/InvestSheet';
 export { default as SettleSheet } from '../../src/components/sheets/SettleSheet';
-export { default as SurvivorSheet } from '../../src/components/sheets/SurvivorSheet';
 export { default as TickerSheet } from '../../src/components/sheets/TickerSheet';
 
 // Game data + engine (build real game states to feed the game components)

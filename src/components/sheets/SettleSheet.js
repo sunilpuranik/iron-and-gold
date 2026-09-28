@@ -45,7 +45,7 @@ function Settle({ state, me, onSettle }) {
         </View>
       </View>
       <View style={{ flexDirection: 'row', height: 14, borderWidth: 1, borderColor: th.ink }}>
-        {seg(sell, th.gilt, swap + hold > 0)}
+        {seg(sell, th.money, swap + hold > 0)}
         {seg(swap, th.dark ? th.companies[surv].fill : th.companies[surv].ink, hold > 0)}
         {seg(hold, th.rule, false)}
       </View>

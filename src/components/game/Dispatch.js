@@ -20,7 +20,7 @@ function Lines({ d, max = 4 }) {
         <T
           key={i}
           v={l.kind === 'buyout' ? 'strong' : 'body'}
-          color={l.kind === 'money' || l.kind === 'bell' ? th.gilt : th.ink}
+          color={l.kind === 'money' || l.kind === 'bell' ? th.money : th.ink}
           style={{ fontSize: 13 }}
         >
           {l.text}
@@ -38,7 +38,7 @@ function Header({ d, extra }) {
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 6 }}>
       <Portrait index={d.player.avatar} bot={d.player.bot} size={36} />
       <View style={{ flex: 1 }}>
-        <T style={{ fontFamily: FONTS.engraved, fontSize: 11, letterSpacing: 1.5, color: th.gilt }}>
+        <T style={{ fontFamily: FONTS.engraved, fontSize: 11, letterSpacing: 1.5, color: th.accent }}>
           TELEGRAM · TURN {d.turn}
           {extra ? ` · +${extra} EARLIER` : ''}
         </T>
@@ -93,7 +93,7 @@ function Recap({ dispatches }) {
   if (!dispatches.length) return null;
   return (
     <View style={{ alignSelf: 'stretch', gap: 10 }}>
-      <T style={{ fontFamily: FONTS.engraved, fontSize: 12, letterSpacing: 1.5, color: th.gilt, textAlign: 'center' }}>
+      <T style={{ fontFamily: FONTS.engraved, fontSize: 12, letterSpacing: 1.5, color: th.accent, textAlign: 'center' }}>
         SINCE YOUR LAST TURN
       </T>
       {dispatches.map((d) => (
@@ -116,8 +116,3 @@ export default function Dispatch({
   if (as === 'recap') return <Recap dispatches={dispatches} />;
   return <Toast dispatch={dispatch} extra={extra} onDone={onDone} />;
 }
-
-// v1 names, kept until the cleanup pass.
-export const DispatchLines = ({ d, max }) => <Lines d={d} max={max} />;
-export const DispatchToast = Toast;
-export const DispatchRecap = Recap;

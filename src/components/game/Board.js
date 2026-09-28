@@ -66,15 +66,15 @@ function Tile({
   let borderWidth = 1;
   let borderStyle = 'solid';
   if (co && trust) {
-    borderColor = th.gilt;
+    borderColor = th.accent;
     borderWidth = 2;
   }
   if (mine && !co && !selected) {
-    borderColor = th.gilt;
+    borderColor = th.accent;
     borderStyle = 'dashed';
     borderWidth = 1.5;
   }
-  if (selected) borderColor = th.gilt;
+  if (selected) borderColor = th.selection;
   if (last && !selected) {
     borderColor = th.ink;
     borderWidth = 2;
@@ -83,7 +83,7 @@ function Tile({
   const m = Math.min(w, h);
   const Glyph = co ? companyGlyph(owner) : null;
   const showLabel = !co && m >= 20;
-  const labelColor = selected ? th.onInk : mine ? th.ink : owner === 'x' ? d.accent : th.inkSoft;
+  const labelColor = selected ? th.ground : mine ? th.ink : owner === 'x' ? d.accent : th.inkSoft;
 
   return (
     <Pressable
@@ -115,7 +115,7 @@ function Tile({
           <View
             style={{
               position: 'absolute', top: 3, right: 3, width: 6, height: 6,
-              backgroundColor: th.gilt, transform: [{ rotate: '45deg' }],
+              backgroundColor: th.accent, transform: [{ rotate: '45deg' }],
             }}
           />
         )}

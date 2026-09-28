@@ -27,17 +27,17 @@ export default function BellSheet({ visible, state, mySeat, onHome, onClose }) {
             key={p.id}
             style={{
               flexDirection: 'row', alignItems: 'center', gap: 12, padding: 10, minHeight: 52,
-              borderWidth: top ? 2 : 1, borderColor: top ? th.gilt : th.ink,
-              backgroundColor: top ? th.ledger : th.paper,
+              borderWidth: top ? 2 : 1, borderColor: top ? th.accent : th.rule,
+              backgroundColor: top ? th.plate : th.raised,
             }}
           >
             <T v="display" style={{ width: 26 }}>{r.rank}</T>
             <Portrait index={p.avatar} bot={p.bot} size={40} />
             <View style={{ flex: 1 }}>
               <T v="strong">{p.name}{r.seat === mySeat ? ' (you)' : ''}</T>
-              {top && <T v="accent" color={th.gilt}>Tycoon of the frontier</T>}
+              {top && <T v="accent" color={th.money}>Tycoon of the frontier</T>}
             </View>
-            {top && <Crown size={18} color={th.gilt} strokeWidth={1.5} />}
+            {top && <Crown size={18} color={th.accent} strokeWidth={1.5} />}
             {top ? <Money amount={r.cash} v="ingot" size={16} /> : <Money amount={r.cash} v="title" />}
           </View>
         );

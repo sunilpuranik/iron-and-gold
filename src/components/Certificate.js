@@ -100,8 +100,6 @@ function Signature({ name, role }) {
   );
 }
 
-export { Seal };
-
 export default function Certificate({
   id, state, owner, shares, number,
 }) {

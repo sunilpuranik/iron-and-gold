@@ -31,7 +31,7 @@ npx create-expo-app@latest iron-and-gold --template blank
 cd iron-and-gold
 npx expo install expo-haptics expo-audio expo-font @react-native-async-storage/async-storage \
   react-native-svg lucide-react-native react-native-safe-area-context \
-  @expo-google-fonts/im-fell-english-sc @expo-google-fonts/im-fell-english @expo-google-fonts/libre-franklin \
+  @expo-google-fonts/cinzel @expo-google-fonts/im-fell-english @expo-google-fonts/libre-franklin \
   @supabase/supabase-js react-native-url-polyfill
 npx expo install -- --save-dev jest-expo jest
 ```
@@ -237,16 +237,15 @@ src/net/online.js           Supabase config, rooms, optimistic writes, realtime
 src/net/useOnlineGame.js    online controller (host drives bots)
 src/screens/                Home, Lobby, Game
 src/components/game/        Board, Tile, Header, StatusStrip, Tabs (Deeds/Market/Tycoons), ActionBar, HandoffCover
-src/components/sheets/      Charter, Tied buyout, Settle shares, Invest, Closing bell, Ticker
-src/components/Portrait.js  six banknote-cameo tycoon portraits (SVG)
-src/components/game/Dispatch.js  turn dispatch telegram + handoff recap
+src/components/sheets/      CompanySheet (charter / tied buyout), Settle shares, Invest, Closing bell, Ticker
+src/components/Portrait.js  six banknote-cameo tycoon portraits (SVG), round gold-rimmed frame
+src/components/game/Dispatch.js  turn dispatch: toast telegram, handoff recap, lines
 src/components/game/EventOverlay.js  charter / buyout celebration
-src/components/Certificate.js  engraved share certificate + gold seal
-src/components/Emblem.js     the I&G gold medallion (app icon, in-game)
+src/components/Certificate.js  engraved share certificate on bond paper
 src/game/recap.js           turn summaries for dispatches
-src/theme/brand.js          iron plates, rivets, gold leaf, ingots, rail rules, wordmark
-src/components/CompanyIcon.js  the one icon per company, used on the board, deeds and market
-src/theme/                  "Engraver's Ink" tokens, light/dark, UI primitives
+src/theme/brand.js          Plate (lacquer/iron/gold/bond), Rule, Seal (notary/coin), wordmark
+src/components/CompanyMark.js  the one mark per company (flat or raised), used everywhere
+src/theme/                  "Gilded Standard" tokens (lacquer default, bond light), UI primitives
 src/feel/feel.js            haptics + playSting() stub
 scripts/simulate.mjs        bots-only games in Node
 __tests__/engine.test.js    engine unit tests

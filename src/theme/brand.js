@@ -284,6 +284,3 @@ export function Wordmark({ size = 20, align = 'left' }) {
     </View>
   );
 }
-
-// v1 names, kept until the cleanup pass.
-export const RailRule = ({ style }) => <Rule kind="rail" style={style} />;
