@@ -6,8 +6,8 @@ import { MIN_TARGET } from '../../theme/tokens';
 import { COMPANY_IDS, company } from '../../game/data';
 import { bonusesFor, price, sizes } from '../../game/engine';
 import Certificate from '../Certificate';
-import CompanyIcon from '../CompanyIcon';
-import Avatar from '../Avatar';
+import CompanyMark from '../CompanyMark';
+import Portrait from '../Portrait';
 import Sheet from './Sheet';
 import { feel } from '../../feel/feel';
 
@@ -25,7 +25,7 @@ function Register({ state, id }) {
       <T v="plate" style={{ fontSize: 13 }}>Share register</T>
       {holders.map((h) => (
         <View key={h.p.id} style={{ flexDirection: 'row', alignItems: 'center', gap: 10, minHeight: 40, borderBottomWidth: 1, borderColor: th.rule }}>
-          <Avatar index={h.p.avatar} bot={h.p.bot} size={30} />
+          <Portrait index={h.p.avatar} bot={h.p.bot} size={30} />
           <View style={{ flex: 1 }}>
             <T v="strong">{h.p.name}</T>
             {bonus[h.seat] && (
@@ -62,7 +62,7 @@ export default function CertificateSheet({
               borderBottomWidth: 3, borderColor: c === id ? th.gilt : 'transparent',
             }}
           >
-            <CompanyIcon id={c} size={30} />
+            <CompanyMark id={c} size={30} />
           </Pressable>
         ))}
       </View>

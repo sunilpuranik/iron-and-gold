@@ -11,7 +11,7 @@ import {
 import {
   AVATARS, FONTS, MIN_TARGET, TYCOON_TITLES,
 } from '../theme/tokens';
-import Avatar from '../components/Avatar';
+import Portrait from '../components/Portrait';
 import { BOT_NAMES } from '../game/data';
 import { newGame } from '../game/engine';
 import { loadLocalGame } from '../store/storage';
@@ -106,7 +106,7 @@ export default function HomeScreen({ profile, onProfile, onStartLocal, onResumeL
                   onPress={() => { feel.select(); onProfile({ ...profile, avatar: i }); }}
                   style={{ minWidth: MIN_TARGET, minHeight: MIN_TARGET, alignItems: 'center', justifyContent: 'center' }}
                 >
-                  <Avatar index={i} size={46} ring={profile.avatar === i} />
+                  <Portrait index={i} size={46} ring={profile.avatar === i} />
                 </Pressable>
               ))}
             </View>
@@ -135,7 +135,7 @@ export default function HomeScreen({ profile, onProfile, onStartLocal, onResumeL
               Pass-and-play on this phone. 2–6 tycoons.
             </T>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, minHeight: MIN_TARGET }}>
-              <Avatar index={profile.avatar} size={36} />
+              <Portrait index={profile.avatar} size={36} />
               <T v="strong" style={{ flex: 1 }}>{profile.name || 'Tycoon'} (you)</T>
             </View>
             {seats.map((s, i) => (

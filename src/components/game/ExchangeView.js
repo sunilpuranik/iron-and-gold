@@ -10,9 +10,9 @@ import {
 } from '../../game/engine';
 import { FONTS } from '../../theme/tokens';
 import { describeTurn } from '../../game/recap';
-import Avatar from '../Avatar';
-import CompanyIcon from '../CompanyIcon';
-import { DispatchLines } from './Dispatch';
+import Portrait from '../Portrait';
+import CompanyMark from '../CompanyMark';
+import Dispatch from './Dispatch';
 
 const DOING = {
   place: 'is building…',
@@ -61,7 +61,7 @@ function NowCard({ state, mySeat, mine, onMap }) {
   const p = seat >= 0 ? state.players[seat] : null;
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, padding: 12, backgroundColor: th.ledger, borderWidth: 2, borderColor: th.iron.mid }}>
-      {p ? <Avatar index={p.avatar} bot={p.bot} size={56} ring={mine} /> : <Bell size={40} color={th.gilt} strokeWidth={1.5} />}
+      {p ? <Portrait index={p.avatar} bot={p.bot} size={56} ring={mine} /> : <Bell size={40} color={th.gilt} strokeWidth={1.5} />}
       <View style={{ flex: 1 }}>
         {p ? (
           <>
@@ -103,7 +103,7 @@ function Standings({ state, mySeat }) {
       {rows.map((r, i) => (
         <View key={r.p.id} style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
           <T style={{ fontFamily: FONTS.money, fontSize: 15, width: 16, textAlign: 'center' }}>{i + 1}</T>
-          <Avatar index={r.p.avatar} bot={r.p.bot} size={30} ring={i === 0} />
+          <Portrait index={r.p.avatar} bot={r.p.bot} size={30} ring={i === 0} />
           <View style={{ flex: 1, gap: 3 }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
               <T v="strong" numberOfLines={1} style={{ flexShrink: 1 }}>{r.p.name}{r.seat === mySeat ? ' (you)' : ''}</T>
@@ -138,7 +138,7 @@ function CompanyRace({ state, onCertificate }) {
             accessibilityLabel={`${company(id).name}, ${sz[id]} plots. Open share certificate.`}
             style={{ flexDirection: 'row', alignItems: 'center', gap: 8, minHeight: 40 }}
           >
-            <CompanyIcon id={id} size={28} />
+            <CompanyMark id={id} size={28} />
             <View style={{ flex: 1, gap: 3 }}>
               <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                 <T v="strong" numberOfLines={1}>
@@ -157,7 +157,7 @@ function CompanyRace({ state, onCertificate }) {
               {majP && (
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 3 }}>
                   <T v="small" color={th.inkSoft}>maj.</T>
-                  <Avatar index={majP.avatar} bot={majP.bot} size={16} />
+                  <Portrait index={majP.avatar} bot={majP.bot} size={16} />
                 </View>
               )}
             </View>
@@ -218,7 +218,7 @@ function YourPosition({ state, mySeat }) {
       </View>
       {stakes.map((s) => (
         <View key={s.id} style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-          <CompanyIcon id={s.id} size={20} />
+          <CompanyMark id={s.id} size={20} />
           <T v="body" style={{ flex: 1 }}>{company(s.id).short}: {s.kind} holder ({me.shares[s.id]} shares)</T>
           <T v="small" color={th.inkSoft}>bonus </T>
           <Money amount={s.amount} v="body" />
@@ -236,10 +236,10 @@ function Latest({ state, onTicker }) {
     <Section title="LATEST DISPATCHES">
       {turns.map((d) => (
         <View key={d.turn} style={{ flexDirection: 'row', gap: 10 }}>
-          <Avatar index={d.player.avatar} bot={d.player.bot} size={28} />
+          <Portrait index={d.player.avatar} bot={d.player.bot} size={28} />
           <View style={{ flex: 1 }}>
             <T v="strong">{d.player.name} <T v="small" color={th.inkSoft}>· turn {d.turn}</T></T>
-            <DispatchLines d={d} max={3} />
+            <Dispatch as="lines" dispatch={d} max={3} />
           </View>
         </View>
       ))}

@@ -1,9 +1,10 @@
 import { Pressable, View } from 'react-native';
+import { ChartColumn, Map as MapIcon } from 'lucide-react-native';
 import { useTheme } from '../../theme/theme';
 import { Money, Rule, T } from '../../theme/ui';
 import { FONTS } from '../../theme/tokens';
 import { Seal, Wordmark } from '../../theme/brand';
-import ViewSwitch from './ViewSwitch';
+import Tabs from './Tabs';
 
 // Coin seal (home) · wordmark with turn line · Map/Exchange switch · your cash.
 export default function Header({
@@ -34,7 +35,15 @@ export default function Header({
             </T>
           )}
         </View>
-        <ViewSwitch view={view} onView={onView} mine={mine && !over} />
+        <Tabs
+          kind="switch"
+          value={view}
+          onChange={onView}
+          items={[
+            { key: 'map', label: 'Show the map', icon: MapIcon, flag: mine && !over && view !== 'map' },
+            { key: 'exchange', label: 'Show the exchange', icon: ChartColumn },
+          ]}
+        />
         {me && <Money amount={me.cash} v="ingot" size={14} style={{ alignSelf: 'center' }} />}
       </View>
       <Rule kind="rail" />

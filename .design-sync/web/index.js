@@ -35,7 +35,6 @@ export { default as HandoffCover } from '../../src/components/game/HandoffCover'
 export { default as GameHeader } from '../../src/components/game/Header';
 export { default as MarketTab } from '../../src/components/game/MarketTab';
 export { default as Tabs, TAB_NAMES, TAB_BODY_HEIGHT } from '../../src/components/game/Tabs';
-export { default as Tile } from '../../src/components/game/Tile';
 export { default as TycoonsTab } from '../../src/components/game/TycoonsTab';
 export { default as ViewSwitch } from '../../src/components/game/ViewSwitch';
 

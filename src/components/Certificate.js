@@ -10,7 +10,7 @@ import { Seal } from '../theme/brand';
 import { FONTS, LIGHT } from '../theme/tokens';
 import { TIER_NAMES, company } from '../game/data';
 import { isTrust, price, sizes } from '../game/engine';
-import { companyGlyph } from './CompanyIcon';
+import { companyGlyph } from './CompanyMark';
 
 const PAPER = '#F6EEDB';
 const INK = '#2A221A';

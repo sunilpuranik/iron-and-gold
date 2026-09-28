@@ -4,7 +4,7 @@ import { useTheme } from '../../theme/theme';
 import { Button, Money, Stepper, T } from '../../theme/ui';
 import { MAX_BUY, company } from '../../game/data';
 import { activeCompanies, price, sizes } from '../../game/engine';
-import CompanyIcon from '../CompanyIcon';
+import CompanyMark from '../CompanyMark';
 import Sheet from './Sheet';
 
 function Invest({ state, me, onBuy }) {
@@ -33,7 +33,7 @@ function Invest({ state, me, onBuy }) {
         const max = Math.min(state.bank[c], n + (MAX_BUY - count), n + Math.floor(after / p));
         return (
           <View key={c} style={{ flexDirection: 'row', alignItems: 'center', gap: 10, minHeight: 48 }}>
-            <CompanyIcon id={c} size={32} />
+            <CompanyMark id={c} size={32} />
             <View style={{ flex: 1 }}>
               <T v="strong" numberOfLines={1}>{company(c).short}</T>
               <T v="small" color={th.inkSoft}>

@@ -7,7 +7,7 @@ import {
   Button, Plate, Rule, T,
 } from '../theme/ui';
 import { AVATARS } from '../theme/tokens';
-import Avatar from '../components/Avatar';
+import Portrait from '../components/Portrait';
 import { BOT_NAMES } from '../game/data';
 import { newGame } from '../game/engine';
 import { fetchRoom, mutateRoom, subscribeRoom } from '../net/online';
@@ -99,7 +99,7 @@ export default function LobbyScreen({ initialRow, profile, onStarted, onLeave })
           <T v="title" style={{ marginBottom: 6 }}>Tycoons ({players.length}/6)</T>
           {players.map((p) => (
             <View key={p.id} style={{ flexDirection: 'row', alignItems: 'center', gap: 10, minHeight: 44 }}>
-              <Avatar index={p.avatar} bot={p.bot} size={30} />
+              <Portrait index={p.avatar} bot={p.bot} size={30} />
               <T v="strong" style={{ flex: 1 }}>
                 {p.name}
                 {p.id === row.lobby.host ? '  · host' : ''}

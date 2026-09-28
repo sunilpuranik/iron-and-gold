@@ -2,8 +2,8 @@
 import { Modal, ScrollView } from 'react-native';
 import { useTheme } from '../../theme/theme';
 import { Button, Rule, T } from '../../theme/ui';
-import Avatar from '../Avatar';
-import { DispatchRecap } from './Dispatch';
+import Portrait from '../Portrait';
+import Dispatch from './Dispatch';
 
 export default function HandoffCover({ player, recap = [], onReady }) {
   const th = useTheme();
@@ -15,14 +15,14 @@ export default function HandoffCover({ player, recap = [], onReady }) {
           contentContainerStyle={{ flexGrow: 1, alignItems: 'center', justifyContent: 'center', padding: 28, paddingTop: 64, gap: 16 }}
         >
           <T v="accent" color={th.inkSoft}>Pass the telegraph along</T>
-          <Avatar index={player.avatar} size={112} />
+          <Portrait index={player.avatar} size={112} />
           <T v="display" style={{ fontSize: 30, textAlign: 'center' }}>Hand to {player.name}</T>
           <Rule kind="ornament" style={{ alignSelf: 'stretch' }} />
           <T v="body" color={th.inkSoft} style={{ textAlign: 'center' }}>
             Everyone else, look away — your deeds are private.
           </T>
           <Button title={`I am ${player.name}`} onPress={onReady} style={{ alignSelf: 'stretch' }} />
-          <DispatchRecap dispatches={recap} />
+          <Dispatch as="recap" dispatches={recap} />
         </ScrollView>
       )}
     </Modal>

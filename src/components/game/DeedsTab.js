@@ -4,7 +4,7 @@ import { useTheme } from '../../theme/theme';
 import { T } from '../../theme/ui';
 import { districtOf, flavourOf } from '../../game/data';
 import { classify, effectOf } from '../../game/engine';
-import CompanyIcon from '../CompanyIcon';
+import CompanyMark from '../CompanyMark';
 
 export const DEED_HEIGHT = 64;
 
@@ -18,7 +18,7 @@ function targetOf(c) {
 function Badge({ c }) {
   const th = useTheme();
   const target = targetOf(c);
-  if (target) return <CompanyIcon id={target} size={22} />;
+  if (target) return <CompanyMark id={target} size={22} />;
   if (c.kind === 'found' || (c.kind === 'buyout' && c.tied.length > 1)) {
     return (
       <View style={{ width: 22, height: 22, borderWidth: 1, borderStyle: 'dashed', borderColor: th.ink, alignItems: 'center', justifyContent: 'center' }}>

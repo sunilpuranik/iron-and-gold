@@ -3,8 +3,8 @@ import { useTheme } from '../../theme/theme';
 import { Money, T } from '../../theme/ui';
 import { COMPANY_IDS } from '../../game/data';
 import { actorOf } from '../../game/engine';
-import Avatar from '../Avatar';
-import CompanyIcon from '../CompanyIcon';
+import Portrait from '../Portrait';
+import CompanyMark from '../CompanyMark';
 
 export default function TycoonsTab({ state, mySeat }) {
   const th = useTheme();
@@ -19,7 +19,7 @@ export default function TycoonsTab({ state, mySeat }) {
             minHeight: 48, borderBottomWidth: 1, borderColor: th.rule,
           }}
         >
-          <Avatar index={p.avatar} bot={p.bot} size={40} ring={seat === acting} />
+          <Portrait index={p.avatar} bot={p.bot} size={40} ring={seat === acting} />
           <View style={{ flex: 1 }}>
             <T v="strong" numberOfLines={1}>
               {p.name}{seat === mySeat ? ' (you)' : ''}
@@ -27,7 +27,7 @@ export default function TycoonsTab({ state, mySeat }) {
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 3 }}>
               {COMPANY_IDS.filter((c) => p.shares[c] > 0).map((c) => (
                 <View key={c} style={{ flexDirection: 'row', alignItems: 'center', gap: 3 }}>
-                  <CompanyIcon id={c} size={16} />
+                  <CompanyMark id={c} size={16} />
                   <T v="small">{p.shares[c]}</T>
                 </View>
               ))}

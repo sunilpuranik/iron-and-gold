@@ -9,10 +9,10 @@ import { useTheme } from '../../theme/theme';
 import { Button, Money, T } from '../../theme/ui';
 import { FONTS } from '../../theme/tokens';
 import { TIER_NAMES, company } from '../../game/data';
-import Avatar from '../Avatar';
+import Portrait from '../Portrait';
 import { Border } from '../Certificate';
 import { Seal } from '../../theme/brand';
-import RaisedTile from '../RaisedTile';
+import CompanyMark from '../CompanyMark';
 import { feel } from '../../feel/feel';
 
 const BADGE = 52;
@@ -125,7 +125,7 @@ function FoundBody({ fx, state }) {
             ],
           }}
         >
-          <RaisedTile id={fx.id} size={88} />
+          <CompanyMark raised id={fx.id} size={88} />
         </Animated.View>
         <Animated.View
           style={{
@@ -211,7 +211,7 @@ function BuyoutBody({ fx, state }) {
               ],
             }}
           >
-            <RaisedTile id={a.co} size={BADGE} depth={5} />
+            <CompanyMark raised id={a.co} size={BADGE} depth={5} />
             <T v="small" color={th.inkSoft}>{a.size} plots</T>
           </Animated.View>
         ))}
@@ -224,7 +224,7 @@ function BuyoutBody({ fx, state }) {
           <ChevronsRight size={28} color={th.gilt} strokeWidth={1.75} />
         </Animated.View>
         <Animated.View style={{ position: 'absolute', left: SURV_X, top: 0, alignItems: 'center', transform: [{ scale: pulse }] }}>
-          <RaisedTile id={fx.id} size={BADGE} depth={5} />
+          <CompanyMark raised id={fx.id} size={BADGE} depth={5} />
           <Animated.View style={{ opacity: merge.interpolate({ inputRange: [0, 0.6], outputRange: [1, 0], extrapolate: 'clamp' }) }}>
             <T v="small" color={th.inkSoft}>{d.before} plots</T>
           </Animated.View>
@@ -260,7 +260,7 @@ function BuyoutBody({ fx, state }) {
           const p = state.players[b.seat];
           return (
             <View key={`${b.co}-${b.seat}-${i}`} style={{ flexDirection: 'row', alignItems: 'center', gap: 8, borderTopWidth: 1, borderColor: th.rule, paddingTop: 6 }}>
-              <Avatar index={p.avatar} bot={p.bot} size={28} />
+              <Portrait index={p.avatar} bot={p.bot} size={28} />
               <View style={{ flex: 1 }}>
                 <T v="strong">{p.name}</T>
                 <T v="small" color={th.inkSoft}>{b.kind} bonus · {company(b.co).short}</T>

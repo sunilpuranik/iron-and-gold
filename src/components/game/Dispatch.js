@@ -1,14 +1,16 @@
-// Turn dispatches: a telegram card that drops in after another tycoon's turn,
-// and the recap list shown on the pass-and-play handoff screen.
+// Turn dispatches, one component in three forms:
+//   as="toast" — a telegram card that drops in after another tycoon's turn
+//   as="recap" — the "since your last turn" list on the pass-and-play handoff screen
+//   as="lines" — just the lines of one dispatch, for cards that frame their own
 import { useEffect, useRef } from 'react';
 import { Animated, Pressable, View } from 'react-native';
 import { useTheme } from '../../theme/theme';
 import { T } from '../../theme/ui';
 import { FONTS } from '../../theme/tokens';
-import { Rivets } from '../../theme/brand';
-import Avatar from '../Avatar';
+import { Plate } from '../../theme/brand';
+import Portrait from '../Portrait';
 
-export function DispatchLines({ d, max = 4 }) {
+function Lines({ d, max = 4 }) {
   const th = useTheme();
   const shown = d.lines.slice(0, max);
   const more = d.lines.length - shown.length;
@@ -34,7 +36,7 @@ function Header({ d, extra }) {
   const th = useTheme();
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 6 }}>
-      <Avatar index={d.player.avatar} bot={d.player.bot} size={36} />
+      <Portrait index={d.player.avatar} bot={d.player.bot} size={36} />
       <View style={{ flex: 1 }}>
         <T style={{ fontFamily: FONTS.engraved, fontSize: 11, letterSpacing: 1.5, color: th.gilt }}>
           TELEGRAM · TURN {d.turn}
@@ -47,7 +49,7 @@ function Header({ d, extra }) {
 }
 
 // Slides in from the top of the board; tap to dismiss, hides itself after a few seconds.
-export function DispatchToast({ dispatch, extra = 0, onDone }) {
+function Toast({ dispatch, extra = 0, onDone }) {
   const th = useTheme();
   const y = useRef(new Animated.Value(-160)).current;
 
@@ -73,21 +75,20 @@ export function DispatchToast({ dispatch, extra = 0, onDone }) {
         onPress={onDone}
         accessibilityLabel={`Dispatch from ${dispatch.player.name}. Tap to dismiss.`}
         style={{
-          backgroundColor: th.paper, borderWidth: 2, borderColor: th.iron.mid, padding: 12,
-          shadowColor: '#000', shadowOpacity: 0.25, shadowRadius: 8, shadowOffset: { width: 0, height: 4 }, elevation: 6,
+          shadowColor: '#000', shadowOpacity: 0.45, shadowRadius: 10, shadowOffset: { width: 0, height: 6 }, elevation: 6,
         }}
       >
-        <View style={{ position: 'absolute', left: 3, right: 3, top: 3, bottom: 3, borderWidth: 1, borderColor: th.gilt }} />
-        <Rivets size={5} inset={-3.5} />
-        <Header d={dispatch} extra={extra} />
-        <DispatchLines d={dispatch} />
+        <Plate pad={14} style={{ backgroundColor: th.raised, borderTopWidth: 2, borderTopColor: th.accent }}>
+          <Header d={dispatch} extra={extra} />
+          <Lines d={dispatch} />
+        </Plate>
       </Pressable>
     </Animated.View>
   );
 }
 
 // "While you were away" list for the handoff screen.
-export function DispatchRecap({ dispatches }) {
+function Recap({ dispatches }) {
   const th = useTheme();
   if (!dispatches.length) return null;
   return (
@@ -97,13 +98,26 @@ export function DispatchRecap({ dispatches }) {
       </T>
       {dispatches.map((d) => (
         <View key={d.turn} style={{ flexDirection: 'row', gap: 10, borderTopWidth: 1, borderColor: th.rule, paddingTop: 8 }}>
-          <Avatar index={d.player.avatar} bot={d.player.bot} size={30} />
+          <Portrait index={d.player.avatar} bot={d.player.bot} size={30} />
           <View style={{ flex: 1 }}>
             <T v="strong">{d.player.name}</T>
-            <DispatchLines d={d} max={3} />
+            <Lines d={d} max={3} />
           </View>
         </View>
       ))}
     </View>
   );
 }
+
+export default function Dispatch({
+  as = 'toast', dispatch, dispatches, extra, max, onDone,
+}) {
+  if (as === 'lines') return <Lines d={dispatch} max={max} />;
+  if (as === 'recap') return <Recap dispatches={dispatches} />;
+  return <Toast dispatch={dispatch} extra={extra} onDone={onDone} />;
+}
+
+// v1 names, kept until the cleanup pass.
+export const DispatchLines = ({ d, max }) => <Lines d={d} max={max} />;
+export const DispatchToast = Toast;
+export const DispatchRecap = Recap;

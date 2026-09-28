@@ -4,7 +4,7 @@ import { useTheme } from '../../theme/theme';
 import { Money, T } from '../../theme/ui';
 import { COMPANIES, TIER_NAMES } from '../../game/data';
 import { isTrust, price, sizes } from '../../game/engine';
-import CompanyIcon from '../CompanyIcon';
+import CompanyMark from '../CompanyMark';
 
 export default function MarketTab({ state, me, onCertificate }) {
   const th = useTheme();
@@ -25,7 +25,7 @@ export default function MarketTab({ state, me, onCertificate }) {
               backgroundColor: pressed ? th.ledger : 'transparent',
             })}
           >
-            <CompanyIcon id={c.id} size={30} />
+            <CompanyMark id={c.id} size={30} />
             <View style={{ flex: 1 }}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
                 <T v="strong" numberOfLines={1}>{c.name}</T>

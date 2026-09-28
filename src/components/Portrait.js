@@ -1,9 +1,13 @@
 // Tycoon portraits drawn as banknote cameos: a sepia profile bust on an engraved,
 // line-hatched ground inside a beaded gold oval. Colours are fixed so a tycoon looks
-// the same in light and dark mode.
+// the same in light and dark mode. One cameo at every size, from roster rows to the handoff.
+import { View } from 'react-native';
+import { Bot } from 'lucide-react-native';
 import Svg, {
   Circle, ClipPath, Defs, Ellipse, G, LinearGradient, Path, Pattern, Rect, Stop,
 } from 'react-native-svg';
+import { useTheme } from '../theme/theme';
+import { AVATARS, GOLD as GILT } from '../theme/tokens';
 
 const SEPIA = '#2A1F14';
 const CREAM = '#F3E7CC';
@@ -145,7 +149,7 @@ const TYCOONS = [
 
 export const PORTRAIT_COUNT = TYCOONS.length;
 
-export default function Portrait({ index = 0, size = 40 }) {
+function Cameo({ index, size }) {
   const Figure = TYCOONS[((index % TYCOONS.length) + TYCOONS.length) % TYCOONS.length];
   return (
     <Svg width={size} height={size} viewBox="0 0 100 100">
@@ -173,5 +177,44 @@ export default function Portrait({ index = 0, size = 40 }) {
       </G>
       <Ellipse cx="50" cy="51" rx="39.5" ry="42.5" fill="none" stroke={GOLD.lo} strokeWidth="1" />
     </Svg>
+  );
+}
+
+// A tycoon in a round gold-rimmed frame. `ring` marks the one acting or chosen; bots wear a clockwork badge.
+export default function Portrait({
+  index = 0, size = 40, bot, ring,
+}) {
+  const th = useTheme();
+  const rim = size >= 32 ? 2 : 1;
+  const badge = Math.max(12, Math.round(size * 0.36));
+  return (
+    <View
+      style={{
+        width: size, height: size, borderRadius: size / 2, borderWidth: rim,
+        borderColor: ring ? GILT.shine : GILT.deep, backgroundColor: AVATARS[index % AVATARS.length],
+        alignItems: 'center', justifyContent: 'center',
+      }}
+    >
+      {ring && (
+        <View
+          style={{
+            position: 'absolute', left: -rim - 2, top: -rim - 2, right: -rim - 2, bottom: -rim - 2,
+            borderRadius: size, borderWidth: 2, borderColor: GILT.leaf,
+            shadowColor: GILT.bright, shadowOpacity: 0.5, shadowRadius: 7, shadowOffset: { width: 0, height: 0 },
+          }}
+        />
+      )}
+      <Cameo index={index} size={size - rim * 2} />
+      {bot && (
+        <View
+          style={{
+            position: 'absolute', right: -1, bottom: -1, width: badge, height: badge, borderRadius: badge / 2,
+            backgroundColor: th.iron.lo, borderWidth: 1, borderColor: GILT.deep, alignItems: 'center', justifyContent: 'center',
+          }}
+        >
+          <Bot size={badge * 0.66} color={th.iron.text} strokeWidth={1.5} />
+        </View>
+      )}
+    </View>
   );
 }

@@ -3,7 +3,7 @@ import { View } from 'react-native';
 import { useTheme } from '../../theme/theme';
 import { Button, Money, Stepper, T } from '../../theme/ui';
 import { company } from '../../game/data';
-import CompanyIcon from '../CompanyIcon';
+import CompanyMark from '../CompanyMark';
 import Sheet from './Sheet';
 
 function Row({ label, hint, children }) {
@@ -38,7 +38,7 @@ function Settle({ state, me, onSettle }) {
   return (
     <>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-        <CompanyIcon id={co} size={36} />
+        <CompanyMark id={co} size={36} />
         <View style={{ flex: 1 }}>
           <T v="strong">{company(co).name}</T>
           <T v="small" color={th.inkSoft}>You hold {held} · absorbed at <Money amount={info.price} v="small" /> a share</T>

@@ -4,7 +4,7 @@ import { useTheme } from '../../theme/theme';
 import {
   Button, Money, T,
 } from '../../theme/ui';
-import Avatar from '../Avatar';
+import Portrait from '../Portrait';
 import Sheet from './Sheet';
 
 export default function BellSheet({ visible, state, mySeat, onHome, onClose }) {
@@ -32,7 +32,7 @@ export default function BellSheet({ visible, state, mySeat, onHome, onClose }) {
             }}
           >
             <T v="display" style={{ width: 26 }}>{r.rank}</T>
-            <Avatar index={p.avatar} bot={p.bot} size={40} />
+            <Portrait index={p.avatar} bot={p.bot} size={40} />
             <View style={{ flex: 1 }}>
               <T v="strong">{p.name}{r.seat === mySeat ? ' (you)' : ''}</T>
               {top && <T v="accent" color={th.gilt}>Tycoon of the frontier</T>}

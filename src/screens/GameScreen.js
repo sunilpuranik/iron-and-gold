@@ -14,13 +14,12 @@ import MarketTab from '../components/game/MarketTab';
 import TycoonsTab from '../components/game/TycoonsTab';
 import ActionBar from '../components/game/ActionBar';
 import HandoffCover from '../components/game/HandoffCover';
-import CharterSheet from '../components/sheets/CharterSheet';
-import SurvivorSheet from '../components/sheets/SurvivorSheet';
+import CompanySheet from '../components/sheets/CompanySheet';
 import SettleSheet from '../components/sheets/SettleSheet';
 import InvestSheet from '../components/sheets/InvestSheet';
 import BellSheet from '../components/sheets/BellSheet';
 import TickerSheet from '../components/sheets/TickerSheet';
-import { DispatchToast } from '../components/game/Dispatch';
+import Dispatch from '../components/game/Dispatch';
 import EventOverlay from '../components/game/EventOverlay';
 import CertificateSheet from '../components/sheets/CertificateSheet';
 import { describeTurn, latestTurn, turnsSince } from '../game/recap';
@@ -187,10 +186,10 @@ export default function GameScreen({
           />
         )}
         {toast && !cover && !event && (
-          <DispatchToast dispatch={toast.dispatch} extra={toast.extra} onDone={() => setToast(null)} />
+          <Dispatch as="toast" dispatch={toast.dispatch} extra={toast.extra} onDone={() => setToast(null)} />
         )}
       </View>
-      <Tabs tab={tab} onTab={setTab} />
+      <Tabs value={tab} onChange={setTab} />
       <View style={{ height: TAB_BODY_HEIGHT, backgroundColor: th.paper }}>{body}</View>
       <ActionBar
         phase={state.phase}
@@ -206,13 +205,15 @@ export default function GameScreen({
         onResults={() => setSheet('results')}
       />
 
-      <CharterSheet
+      <CompanySheet
+        mode="charter"
         visible={decisionVisible && state.phase === 'found'}
         state={state}
         onPick={(company) => { if (dispatch({ type: 'found', company })) feel.build(); }}
         onClose={closeDecision}
       />
-      <SurvivorSheet
+      <CompanySheet
+        mode="survivor"
         visible={decisionVisible && state.phase === 'survivor'}
         state={state}
         me={me}
