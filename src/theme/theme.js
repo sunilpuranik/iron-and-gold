@@ -1,12 +1,13 @@
 import { createContext, createElement, useContext } from 'react';
 import { useColorScheme } from 'react-native';
-import { DARK, LIGHT } from './tokens';
+import { BOND_THEME, LACQUER } from './tokens';
 
-const ThemeContext = createContext(LIGHT);
+const ThemeContext = createContext(LACQUER);
 
+// Black lacquer is the house style; bond paper only when the system asks for light.
 export function ThemeProvider({ children }) {
   const scheme = useColorScheme();
-  return createElement(ThemeContext.Provider, { value: scheme === 'dark' ? DARK : LIGHT }, children);
+  return createElement(ThemeContext.Provider, { value: scheme === 'light' ? BOND_THEME : LACQUER }, children);
 }
 
 export function useTheme() {
