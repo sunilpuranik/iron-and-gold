@@ -6,7 +6,7 @@ const { View } = RN;
 
 function Frame({ children }: any) {
   const th = useTheme();
-  return <View style={{ width: 390, height: 520, backgroundColor: th.paper }}>{children}</View>;
+  return <View style={{ width: 390, height: 520, backgroundColor: th.ground }}>{children}</View>;
 }
 
 export const MidGame = () => {

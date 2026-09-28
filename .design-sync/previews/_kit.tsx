@@ -1,5 +1,5 @@
 // Shared preview fixtures (not a component preview): real game states dealt by the app's own
-// engine, and a paper backdrop so components sit on the ground they were designed for.
+// engine, and a lacquer backdrop so components sit on the ground they were designed for.
 import * as React from 'react';
 import {
   RN, actorOf, applyAction, botAction, newGame, useTheme,
@@ -43,7 +43,7 @@ export function finished(seed = 7) {
 
 export function Paper({ children, pad = 16, width, style }: any) {
   const th = useTheme();
-  return <View style={[{ backgroundColor: th.paper, padding: pad, gap: 12, width }, style]}>{children}</View>;
+  return <View style={[{ backgroundColor: th.ground, padding: pad, gap: 12, width }, style]}>{children}</View>;
 }
 
 // Animated (react-native-web) measures elapsed time with Date.now(). The capture harness freezes

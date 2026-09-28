@@ -10,49 +10,91 @@ export type RNStyle = Record<string, unknown> | Array<Record<string, unknown>>;
 export type IconComponent = React.ComponentType<{ size?: number; color?: string; strokeWidth?: number; fill?: string }>;
 
 // ---------------------------------------------------------------------------------------------
-// Theme
+// Theme — "The Gilded Standard": black lacquer, riveted iron, one gold, bond paper for documents.
 
 export type CompanyId = 'cw' | 'pp' | 'pw' | 'rm' | 'ae' | 'cr' | 'ft';
 export type DistrictKey = 'river' | 'foundry' | 'main';
 
-export interface ThemePalette {
-  dark: boolean;
-  /** Page background. */
-  paper: string;
-  /** Raised surface (cards, selected tabs). */
-  ledger: string;
-  /** Primary text / borders. */
-  ink: string;
-  /** Secondary text. */
-  inkSoft: string;
-  /** Hairline dividers. */
-  rule: string;
-  /** Gilt accent (money, highlights, focus). */
-  gilt: string;
-  giltSoft: string;
-  /** Text on an ink background. */
-  onInk: string;
-  /** Modal backdrop. */
-  scrim: string;
-  iron: { hi: string; mid: string; lo: string; rivet: string; text: string };
-  goldLeaf: { hi: string; mid: string; lo: string; ink: string; emboss: string };
-  moneyShadow: string;
-  districts: Record<DistrictKey, { tint: string; accent: string; wash: string }>;
-  companies: Record<CompanyId, { ink: string; fill: string }>;
+export interface GoldLeaf {
+  shine: string; bright: string; leaf: string; deep: string; burnish: string; ink: string;
+  /** Border of gold plates and buttons, and their 4px base. */
+  edge: string;
+  /** Light text-shadow for lettering struck on gold. */
+  emboss: string;
+  /** Gradient stops top to bottom (offsets 0, .18, .5, 1). */
+  stops: [string, string, string, string];
+}
+export interface IronPalette { hi: string; mid: string; lo: string; edge: string; rivet: string; text: string }
+export interface BondPalette { paper: string; vellum: string; ink: string; rule: string }
+export interface JewelPalette {
+  /** You, your turn, selection. */
+  lapis: string;
+  /** Loss, errors, bell warning (fills). */
+  carnelian: string;
+  /** Carnelian that reads as text on lacquer. */
+  carnelianText: string;
 }
 
-/** Font family names. Use these in `fontFamily`, never a generic stack. */
+export interface ThemePalette {
+  dark: boolean;
+  /** Page background (black lacquer, or bond paper in the light theme). */
+  ground: string;
+  /** Raised surface: sheets, selected tabs, rows. */
+  raised: string;
+  /** Plate surface: panels (see Plate). */
+  plate: string;
+  /** Hairline dividers and panel borders. */
+  rule: string;
+  /** Input and control borders. */
+  field: string;
+  ink: string;
+  inkSoft: string;
+  inkFaint: string;
+  /** Money text. */
+  money: string;
+  /** Gilt decoration: rules, keylines, section labels. */
+  accent: string;
+  /** Selected / current item highlight. */
+  selection: string;
+  /** Modal backdrop. */
+  scrim: string;
+  gold: GoldLeaf;
+  iron: IronPalette;
+  bond: BondPalette;
+  jewel: JewelPalette;
+  districts: Record<DistrictKey, { tint: string; accent: string; wash: string }>;
+  companies: Record<CompanyId, { fill: string; ink: string; rim: string }>;
+}
+
+/** Font family names. Use these in `fontFamily`, never a generic stack. Cinzel carries every engraved capital. */
 export declare const FONTS: {
-  display: 'IMFellEnglishSC_400Regular';
+  display: 'Cinzel_700Bold';
+  engraved: 'Cinzel_600SemiBold';
+  money: 'Cinzel_700Bold';
   accent: 'IMFellEnglish_400Regular_Italic';
   ui: 'LibreFranklin_400Regular';
   uiMedium: 'LibreFranklin_500Medium';
   uiSemi: 'LibreFranklin_600SemiBold';
-  money: 'Cinzel_700Bold';
-  engraved: 'Cinzel_600SemiBold';
 };
-export declare const LIGHT: ThemePalette;
-export declare const DARK: ThemePalette;
+export type TextVariant = 'hero' | 'display' | 'title' | 'plate' | 'accent' | 'body' | 'strong' | 'label' | 'small';
+/** The type scale behind `T` (fontFamily, fontSize, letterSpacing per variant). */
+export declare const TYPE: Record<TextVariant, { fontFamily: string; fontSize: number; letterSpacing?: number }>;
+/** One gold, identical in both themes. */
+export declare const GOLD: GoldLeaf;
+export declare const IRON: IronPalette;
+/** Bond paper — documents only (certificates, deeds, the final ledger). */
+export declare const BOND: BondPalette;
+export declare const JEWEL: JewelPalette;
+/** Spacing scale: 0, 4, 8, 12, 16, 24, 32, 48. */
+export declare const SPACE: number[];
+/** The gilt keyline every plate carries. */
+export declare const KEYLINE: { color: string; inset: number };
+/** Corner radius: 0. Square, engraved corners everywhere. */
+export declare const RADIUS: 0;
+/** The default theme: black lacquer and gold leaf. */
+export declare const LACQUER: ThemePalette;
+/** The light theme: bond paper. */
+export declare const BOND_THEME: ThemePalette;
 /** Portrait background colours, indexed by avatar. */
 export declare const AVATARS: string[];
 export declare const TYCOON_TITLES: string[];
@@ -65,7 +107,7 @@ export interface ThemeProviderProps {
   children?: React.ReactNode;
 }
 /**
- * Supplies the palette (LIGHT or DARK, following the system colour scheme) to every component.
+ * Supplies the palette to every component: LACQUER by default, BOND_THEME when the system asks for light.
  * Wrap the whole app in it.
  */
 export declare function ThemeProvider(props: ThemeProviderProps): JSX.Element;
@@ -81,15 +123,13 @@ export declare function SafeAreaProvider(props: SafeAreaProviderProps): JSX.Elem
 // ---------------------------------------------------------------------------------------------
 // Primitives
 
-export type TextVariant = 'display' | 'title' | 'accent' | 'body' | 'label' | 'small' | 'strong' | 'plate';
-
 export interface TProps {
   /**
-   * Type style. display 22 / title 18 = IM Fell English SC; accent 15 = IM Fell italic;
-   * body 14 / small 11 / label 12 / strong 14 = Libre Franklin; plate 15 = Cinzel engraved caps.
+   * Type style. hero 34 (gilt) / display 24 / title 18 = Cinzel 700; plate 13 = Cinzel 600, always
+   * uppercase, wide tracking; accent 17 = IM Fell italic; body 15 / strong 15 / label 12 / small 11 = Libre Franklin.
    */
   v?: TextVariant;
-  /** Text colour; defaults to theme ink. */
+  /** Text colour; defaults to theme ink (hero: theme money). */
   color?: string;
   style?: RNStyle;
   numberOfLines?: number;
@@ -100,80 +140,65 @@ export declare function T(props: TProps): JSX.Element;
 
 export interface MoneyProps {
   amount: number;
-  /** Size, matching the text variants. */
-  v?: 'small' | 'body' | 'strong' | 'title' | 'display';
-  style?: RNStyle;
-}
-/** Gold-leaf money: `$1,234` in Cinzel with a faint emboss. */
-export declare function Money(props: MoneyProps): JSX.Element;
-
-export interface IngotProps {
-  amount: number;
-  /** Font size of the numerals. */
+  /**
+   * ingot = headline cash only (your wallet, winnings): engraved numerals on a gold ingot.
+   * title 18 / body 14 / small 11 = gold Cinzel numerals.
+   */
+  v?: 'ingot' | 'title' | 'body' | 'small';
+  /** Show a sign: +$300 in gold, −$300 in carnelian. Negative amounts are carnelian regardless. */
+  delta?: boolean;
+  /** Font size override (ingot defaults to 20). */
   size?: number;
   style?: RNStyle;
 }
-/** A gold ingot with engraved numerals, for headline money (player cash, winnings). */
-export declare function Ingot(props: IngotProps): JSX.Element;
+/** Money in engraved capitals with lining numerals. Never format dollars with plain text. */
+export declare function Money(props: MoneyProps): JSX.Element;
 
-export interface DoubleRuleProps {
+export interface RuleProps {
+  /** hair = 1px between rows; gilt = double gold rule under section titles; ornament = fading gold lines around a diamond; rail = rail track, the map only. */
+  kind?: 'hair' | 'gilt' | 'ornament' | 'rail';
   style?: RNStyle;
 }
-/** Section divider drawn as a rail track (two iron rails on wooden ties), 16px tall. */
-export declare function DoubleRule(props: DoubleRuleProps): JSX.Element;
+/** Divider. */
+export declare function Rule(props: RuleProps): JSX.Element;
 
-export interface RailRuleProps {
+export interface PlateProps {
+  /** lacquer (default) = raised black panel; iron = brushed iron; gold = gold leaf, wealth moments only; bond = cream paper, documents only. */
+  material?: 'lacquer' | 'iron' | 'gold' | 'bond';
+  /** Four rivets in the corners. */
+  rivets?: boolean;
+  /** Padding (default 16). */
+  pad?: number;
   style?: RNStyle;
-}
-/** The rail-track divider itself (DoubleRule renders this). */
-export declare function RailRule(props: RailRuleProps): JSX.Element;
-
-export interface HairlineProps {
-  style?: RNStyle;
-}
-/** 1px rule in the theme's rule colour. */
-export declare function Hairline(props: HairlineProps): JSX.Element;
-
-export interface KeylineProps {
-  color: string;
-  /** Distance from the parent's edges. */
-  inset?: number;
-}
-/** Inset engraved border, absolutely positioned inside its parent. */
-export declare function Keyline(props: KeylineProps): JSX.Element;
-
-export interface CardProps {
   children?: React.ReactNode;
-  style?: RNStyle;
 }
-/** Ledger card in a riveted iron frame with a gilt inner keyline. 16px padding. */
-export declare function Card(props: CardProps): JSX.Element;
+/** The one surface primitive: square corners, 1px border, gilt keyline inset 5. */
+export declare function Plate(props: PlateProps): JSX.Element;
 
 export interface ButtonProps {
-  title: string;
+  /** Label, rendered in engraved capitals. Optional with iconOnly. */
+  title?: string;
   onPress?: () => void;
-  /** primary = riveted iron plate, secondary = gold leaf, tertiary = flat iron outline. */
-  kind?: 'primary' | 'secondary' | 'tertiary';
-  disabled?: boolean;
+  /**
+   * gold (default) = THE one primary action per screen: gold leaf on a 4px base;
+   * iron = secondary: iron plate on a 4px base; ghost = tertiary: gilt outline.
+   */
+  kind?: 'gold' | 'iron' | 'ghost';
+  /** A bare 44x44 icon button (tertiary). Needs `icon` and `label`. */
+  iconOnly?: boolean;
   /** Leading icon, e.g. `Icons.Hammer`. */
   icon?: IconComponent;
+  /** Accessibility label (iconOnly). */
+  label?: string;
+  /** Icon/label colour override for ghost and iconOnly. */
+  color?: string;
+  disabled?: boolean;
   /** Tighter horizontal padding, for buttons that share a row. */
   compact?: boolean;
   style?: RNStyle;
 }
-/** Call to action. Primary and secondary are raised 3D plates that sink when pressed. */
+/** Call to action. Gold and iron are raised plates that sink onto their base when pressed. */
 export declare function Button(props: ButtonProps): JSX.Element;
-
-export interface IconButtonProps {
-  icon: IconComponent;
-  /** Accessibility label. */
-  label: string;
-  onPress?: () => void;
-  color?: string;
-  disabled?: boolean;
-}
-/** 44x44 bare icon button. */
-export declare function IconButton(props: IconButtonProps): JSX.Element;
 
 export interface StepperProps {
   value: number;
@@ -183,83 +208,61 @@ export interface StepperProps {
   step?: number;
   label?: string;
 }
-/** Minus / value / plus control with square iron-bordered buttons. */
+/** Minus / value / plus with square 44pt buttons; plus carries the gilt border. */
 export declare function Stepper(props: StepperProps): JSX.Element;
 
 export interface ScreenProps {
   children?: React.ReactNode;
   style?: RNStyle;
 }
-/** Full-height page on the paper background (flex: 1). */
+/** Full-height page on the theme ground (flex: 1). */
 export declare function Screen(props: ScreenProps): JSX.Element;
-
-/** Brushed-iron gradient that fills its (position: relative) parent. */
-export declare function IronFill(): JSX.Element;
-/** Gold-leaf gradient that fills its parent. */
-export declare function GoldFill(): JSX.Element;
-
-export interface RivetsProps {
-  size?: number;
-  /** Distance from the parent's padding box; negative sits on the border. */
-  inset?: number;
-}
-/** Four rivets, one per corner of the parent. */
-export declare function Rivets(props: RivetsProps): JSX.Element;
 
 export interface WordmarkProps {
   size?: number;
   align?: 'left' | 'center' | 'right';
 }
-/** The "Iron & Gold" wordmark: iron letters, gilt italic ampersand, gold GOLD. */
+/** "IRON & GOLD" in Cinzel: IRON in rivet grey, a gilt italic ampersand, GOLD in gold leaf. */
 export declare function Wordmark(props: WordmarkProps): JSX.Element;
+
+export interface SealProps {
+  /** notary (default) = the company stamp on certificates; coin = the Iron & Gold emblem (IG 1881). */
+  kind?: 'notary' | 'coin';
+  size?: number;
+  /** Letters struck in the seal (notary: company initials; coin: defaults to "IG"). */
+  label?: string;
+}
+/** Struck gold seal. */
+export declare function Seal(props: SealProps): JSX.Element;
 
 // ---------------------------------------------------------------------------------------------
 // Brand art
-
-export interface AvatarProps {
-  /** Tycoon portrait, 0-5. */
-  index?: number;
-  size?: number;
-  /** Adds a clockwork bot badge. */
-  bot?: boolean;
-  /** Gilt frame, e.g. for the acting player. */
-  ring?: boolean;
-}
-/** A tycoon portrait in an ink frame on its colour ground. */
-export declare function Avatar(props: AvatarProps): JSX.Element;
 
 export interface PortraitProps {
   /** 0 Baron, 1 Banker, 2 Cattle Queen, 3 Rail King, 4 Oilman, 5 Heiress. */
   index?: number;
   size?: number;
+  /** Adds a clockwork bot badge. */
+  bot?: boolean;
+  /** Gold halo for the acting or chosen tycoon. */
+  ring?: boolean;
 }
-/** Banknote cameo: sepia profile bust in a beaded gold oval. */
+/** A tycoon: banknote cameo in a round gold-rimmed frame on its colour ground. One cameo at every size. */
 export declare function Portrait(props: PortraitProps): JSX.Element;
 export declare const PORTRAIT_COUNT: number;
 
-export interface EmblemProps {
-  size?: number;
-}
-/** The "I&G 1881" gold coin emblem (the app icon). */
-export declare function Emblem(props: EmblemProps): JSX.Element;
-
-export interface CompanyIconProps {
+export interface CompanyMarkProps {
   id: CompanyId;
   size?: number;
-}
-/** Square company badge: company fill + ink glyph. The one icon for a company everywhere. */
-export declare function CompanyIcon(props: CompanyIconProps): JSX.Element;
-/** The lucide glyph for a company. */
-export declare function companyGlyph(id: CompanyId): IconComponent;
-
-export interface RaisedTileProps {
-  id: CompanyId;
-  size?: number;
-  /** Extrusion depth; defaults to 10% of size. */
+  /** A raised block with bevel, extruded side and shadow — for hero moments (charters, buyouts). */
+  raised?: boolean;
+  /** Extrusion depth when raised; defaults to 10% of size. */
   depth?: number;
 }
-/** A company tile with real depth: bevelled face, extruded side and a soft shadow. */
-export declare function RaisedTile(props: RaisedTileProps): JSX.Element;
+/** The one mark for a company everywhere: company fill, ink glyph, gold rim, square. */
+export declare function CompanyMark(props: CompanyMarkProps): JSX.Element;
+/** The lucide glyph for a company. */
+export declare function companyGlyph(id: CompanyId): IconComponent;
 
 export interface CertificateProps {
   id: CompanyId;
@@ -271,16 +274,8 @@ export interface CertificateProps {
   /** Certificate number. */
   number: number;
 }
-/** Engraved stock certificate on cream paper, with guilloché border, vignette, signatures and seal. */
+/** Engraved stock certificate on bond paper: guilloché in the company ink, vignette, signatures, notary seal. */
 export declare function Certificate(props: CertificateProps): JSX.Element;
-
-export interface SealProps {
-  size?: number;
-  /** Initials engraved in the seal. */
-  label: string;
-}
-/** Gold notarial seal. */
-export declare function Seal(props: SealProps): JSX.Element;
 
 // ---------------------------------------------------------------------------------------------
 // Game
@@ -319,7 +314,8 @@ export interface GameState {
   reason?: string;
   results: Array<{ seat: number; rank: number; cash: number }> | null;
 }
-export interface Dispatch {
+/** What one tycoon did on one turn (from describeTurn / turnsSince). */
+export interface TurnDispatch {
   turn: number;
   seat: number;
   player: Player;
@@ -341,7 +337,7 @@ export interface ActionBarProps {
   onDecide?: () => void;
   onResults?: () => void;
 }
-/** Bottom action bar; its buttons follow the game phase. */
+/** Bottom action bar; its buttons follow the game phase (one gold primary, iron Bell, ghost Pass). */
 export declare function ActionBar(props: ActionBarProps): JSX.Element;
 
 export interface BoardProps {
@@ -353,26 +349,8 @@ export interface BoardProps {
   onTilePress?: (tile: string) => void;
   onCompanyPress?: (id: CompanyId) => void;
 }
-/** The city map: 9 x 12 plots in three district bands. Fills its parent; give it a height. */
+/** The city map: 9 x 12 plots in three district bands (plots are internal). Fills its parent; give it a height. */
 export declare function Board(props: BoardProps): JSX.Element;
-
-export interface TileProps {
-  /** Plot id, e.g. "C7". */
-  id: string;
-  w: number;
-  h: number;
-  owner?: CompanyId | 'x';
-  companySize?: number;
-  district: DistrictKey;
-  mine?: boolean;
-  selected?: boolean;
-  trust?: boolean;
-  last?: boolean;
-  delay?: number;
-  onPress?: (id: string) => void;
-}
-/** One plot on the city map. */
-export declare function Tile(props: TileProps): JSX.Element;
 
 export interface DeedsTabProps {
   state: GameState;
@@ -400,23 +378,26 @@ export interface TycoonsTabProps {
 /** Player list with portraits, holdings and cash. */
 export declare function TycoonsTab(props: TycoonsTabProps): JSX.Element;
 
-export interface TabsProps {
-  tab: 'Deeds' | 'Market' | 'Tycoons';
-  onTab: (tab: 'Deeds' | 'Market' | 'Tycoons') => void;
+export interface TabItem {
+  key: string;
+  label: string;
+  /** Required for kind="switch". */
+  icon?: IconComponent;
+  /** Gold dot: this segment wants attention. */
+  flag?: boolean;
 }
-/** Deeds / Market / Tycoons tab strip with a gilt underline. */
+export interface TabsProps {
+  /** underline (default) = engraved labels over a gold underline; switch = compact icon segments, the lit one iron. */
+  kind?: 'underline' | 'switch';
+  /** Tab names, or items. Defaults to TAB_NAMES. */
+  items?: Array<string | TabItem>;
+  value: string;
+  onChange: (key: string) => void;
+}
+/** Tabs: the Deeds / Market / Tycoons strip, or the header's Map / Exchange switch. */
 export declare function Tabs(props: TabsProps): JSX.Element;
 export declare const TAB_NAMES: Array<'Deeds' | 'Market' | 'Tycoons'>;
 export declare const TAB_BODY_HEIGHT: number;
-
-export interface ViewSwitchProps {
-  view: 'map' | 'exchange';
-  onView: (view: 'map' | 'exchange') => void;
-  /** Flags the map segment when it's your turn. */
-  mine?: boolean;
-}
-/** Compact Map / Exchange segmented switch. */
-export declare function ViewSwitch(props: ViewSwitchProps): JSX.Element;
 
 export interface GameHeaderProps {
   state: GameState;
@@ -427,7 +408,7 @@ export interface GameHeaderProps {
   mine?: boolean;
   over?: boolean;
 }
-/** Game header: emblem, wordmark with turn line, view switch and your cash ingot. */
+/** Game header: coin seal, wordmark with turn line, Map / Exchange switch, your cash ingot, rail rule. */
 export declare function GameHeader(props: GameHeaderProps): JSX.Element;
 
 export interface ExchangeViewProps {
@@ -442,31 +423,29 @@ export interface ExchangeViewProps {
 /** The exchange: standings, your position, company race, closing bell and latest moves. */
 export declare function ExchangeView(props: ExchangeViewProps): JSX.Element;
 
-export interface DispatchLinesProps {
-  d: Dispatch;
-  max?: number;
-}
-/** The lines of one turn dispatch. */
-export declare function DispatchLines(props: DispatchLinesProps): JSX.Element;
-
-export interface DispatchToastProps {
-  dispatch: Dispatch | null;
-  /** Count of earlier dispatches folded into this one. */
+export interface DispatchProps {
+  /**
+   * toast (default) = telegram card that drops in from the top after another tycoon's turn (absolutely positioned);
+   * recap = "since your last turn" list; lines = just the lines of one dispatch.
+   */
+  as?: 'toast' | 'recap' | 'lines';
+  /** toast, lines. */
+  dispatch?: TurnDispatch | null;
+  /** recap. */
+  dispatches?: TurnDispatch[];
+  /** toast: count of earlier dispatches folded into this one. */
   extra?: number;
-  onDone: () => void;
+  /** lines: how many lines to show. */
+  max?: number;
+  /** toast: called when dismissed or timed out. */
+  onDone?: () => void;
 }
-/** Telegram card that drops in from the top after another tycoon's turn. Absolutely positioned. */
-export declare function DispatchToast(props: DispatchToastProps): JSX.Element | null;
-
-export interface DispatchRecapProps {
-  dispatches: Dispatch[];
-}
-/** "Since your last turn" list. */
-export declare function DispatchRecap(props: DispatchRecapProps): JSX.Element | null;
+/** Turn dispatches. */
+export declare function Dispatch(props: DispatchProps): JSX.Element | null;
 
 export interface HandoffCoverProps {
   player: Player | null;
-  recap?: Dispatch[];
+  recap?: TurnDispatch[];
   onReady?: () => void;
 }
 /** Full-screen pass-and-play cover (a Modal). */
@@ -494,7 +473,7 @@ export interface SheetProps {
   footer?: React.ReactNode;
   children?: React.ReactNode;
 }
-/** Bottom sheet on a Modal: iron top edge, display title, rail divider, scrolling body. Needs SafeAreaProvider. */
+/** Bottom sheet on a Modal: raised lacquer under a gold-leaf edge, drag handle, display title, gilt rule. Needs SafeAreaProvider. */
 export declare function Sheet(props: SheetProps): JSX.Element;
 
 export interface BellSheetProps {
@@ -516,17 +495,21 @@ export interface CertificateSheetProps {
   onPick?: (id: CompanyId) => void;
   onClose?: () => void;
 }
-/** Company picker, share certificate and share register. */
+/** Share register: the certificate, a strip of company marks to switch it, and the holders. */
 export declare function CertificateSheet(props: CertificateSheetProps): JSX.Element | null;
 
-export interface CharterSheetProps {
+export interface CompanySheetProps {
+  /** charter (default) = found a company, phase 'found'; survivor = name the survivor of a tied buyout, phase 'survivor'. */
+  mode?: 'charter' | 'survivor';
   visible: boolean;
   state: GameState;
+  /** survivor: shows your holding of each tied company. */
+  me?: Player | null;
   onPick?: (id: CompanyId) => void;
   onClose?: () => void;
 }
-/** Choose which company to charter. Renders only in the 'found' phase. */
-export declare function CharterSheet(props: CharterSheetProps): JSX.Element | null;
+/** Choose a company. Renders only in the matching phase. */
+export declare function CompanySheet(props: CompanySheetProps): JSX.Element | null;
 
 export interface InvestSheetProps {
   visible: boolean;
@@ -535,7 +518,7 @@ export interface InvestSheetProps {
   onBuy?: (cart: Partial<Record<CompanyId, number>>) => void;
   onClose?: () => void;
 }
-/** Buy up to 3 shares. Renders only in the 'buy' phase. */
+/** "Buy shares": up to 3 among chartered companies, iron Pass beside the gold Buy. Renders only in the 'buy' phase. */
 export declare function InvestSheet(props: InvestSheetProps): JSX.Element | null;
 
 export interface SettleSheetProps {
@@ -547,16 +530,6 @@ export interface SettleSheetProps {
 }
 /** Sell / swap / hold shares of an absorbed company. Renders only in the 'dispose' phase. */
 export declare function SettleSheet(props: SettleSheetProps): JSX.Element | null;
-
-export interface SurvivorSheetProps {
-  visible: boolean;
-  state: GameState;
-  me?: Player | null;
-  onPick?: (id: CompanyId) => void;
-  onClose?: () => void;
-}
-/** Name the survivor of a tied buyout. Renders only in the 'survivor' phase. */
-export declare function SurvivorSheet(props: SurvivorSheetProps): JSX.Element | null;
 
 export interface TickerSheetProps {
   visible: boolean;
@@ -615,8 +588,8 @@ export declare function activeCompanies(state: GameState): CompanyId[];
 export declare function classify(state: GameState, tile: string): { kind: string; [k: string]: any };
 export declare function effectOf(state: GameState, tile: string): string;
 export declare function netWorth(state: GameState, seat: number): number;
-export declare function describeTurn(state: GameState, recap: any): Dispatch;
-export declare function turnsSince(state: GameState, seat: number, limit?: number): Dispatch[];
+export declare function describeTurn(state: GameState, recap: any): TurnDispatch;
+export declare function turnsSince(state: GameState, seat: number, limit?: number): TurnDispatch[];
 export declare function latestTurn(state: GameState): any;
 
 /** The app's lucide icon set: Icons.Hammer, Icons.Bell, Icons.Landmark, ... */

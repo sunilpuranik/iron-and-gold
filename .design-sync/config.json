@@ -33,7 +33,7 @@
       "cardMode": "single",
       "viewport": "400x760"
     },
-    "CharterSheet": {
+    "CompanySheet": {
       "cardMode": "single",
       "viewport": "400x760"
     },
@@ -42,10 +42,6 @@
       "viewport": "400x760"
     },
     "SettleSheet": {
-      "cardMode": "single",
-      "viewport": "400x760"
-    },
-    "SurvivorSheet": {
       "cardMode": "single",
       "viewport": "400x760"
     },
@@ -67,22 +63,16 @@
     "ActionBar": {
       "cardMode": "column"
     },
-    "Avatar": {
-      "cardMode": "column"
-    },
     "Board": {
       "cardMode": "column"
     },
     "Button": {
       "cardMode": "column"
     },
-    "Card": {
-      "cardMode": "column"
-    },
     "Certificate": {
       "cardMode": "column"
     },
-    "CompanyIcon": {
+    "CompanyMark": {
       "cardMode": "column"
     },
     "DeedsTab": {
@@ -94,7 +84,13 @@
     "Money": {
       "cardMode": "column"
     },
-    "RaisedTile": {
+    "Plate": {
+      "cardMode": "column"
+    },
+    "Portrait": {
+      "cardMode": "column"
+    },
+    "Rule": {
       "cardMode": "column"
     },
     "T": {

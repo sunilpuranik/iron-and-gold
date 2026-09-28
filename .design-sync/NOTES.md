@@ -24,14 +24,20 @@
 - Seats are shuffled by newGame, so seat 0 is "Widow Pike" for seed 7, not the first listed tycoon.
 - The capture harness freezes Date.now; RN Animated measures time with it, so entrance animations park at frame 0.
   `liveClock()` in _kit re-bases Date.now on performance.now; call it at module top in any preview whose component
-  animates in (EventOverlay, DispatchToast). EventOverlay also stages content with real setTimeout delays (up to ~2s),
+  animates in (EventOverlay, Dispatch). EventOverlay also stages content with real setTimeout delays (up to ~2s),
   so its harness frame is mid-animation — it was graded from a settled screenshot taken at 3.5–4s.
-- DispatchToast auto-dismisses; its preview re-sends the dispatch on onDone so the card never goes blank.
+- Dispatch as="toast" auto-dismisses; its preview re-sends the dispatch on onDone so the card never goes blank.
 - Sheets/HandoffCover are RN Modals (portal to body): cardMode single, viewport 400x760.
 
 ## Known render warns
-- [RENDER_THIN] "rendered height is 0px" on BellSheet, CertificateSheet, CharterSheet, HandoffCover, InvestSheet,
-  SettleSheet, Sheet, SurvivorSheet, TickerSheet — Modal portals outside the measured root; screenshots are complete.
+- [RENDER_THIN] "rendered height is 0px" on BellSheet, CertificateSheet, CompanySheet, HandoffCover, InvestSheet,
+  SettleSheet, Sheet, TickerSheet — Modal portals outside the measured root; screenshots are complete.
+
+## Gilded Standard (v2)
+- 46 → 30 public components (the Gilded Standard handoff). v1 names (Card, Avatar, CompanyIcon, RaisedTile, Emblem,
+  Ingot, DoubleRule, RailRule, Hairline, IconButton, ViewSwitch, CharterSheet, SurvivorSheet, DispatchLines/Toast/Recap,
+  Tile, IronFill/GoldFill/Keyline/Rivets, LIGHT/DARK) are gone; stale cards for them should be removed on the next resync.
+- The `Dispatch` data type in index.d.ts is now `TurnDispatch` (the name `Dispatch` is the component).
 
 ## Re-sync risks
 - index.d.ts drift from src/ (hand-written contract; the most likely silent staleness).
