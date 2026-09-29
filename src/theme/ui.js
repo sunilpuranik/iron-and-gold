@@ -8,7 +8,7 @@ import { useTheme } from './theme';
 import { FONTS, GOLD, MIN_TARGET } from './tokens';
 import { T } from './text';
 import {
-  GoldFill, IronFill, Keyline, Plate, Rule,
+  GoldFill, IronFill, Keyline, Plate, Rule, useLayoutSize,
 } from './brand';
 import { feel } from '../feel/feel';
 
@@ -24,9 +24,11 @@ function dollars(amount, delta) {
 
 // A gold ingot with engraved numerals — for headline cash only (your wallet, winnings).
 function Ingot({ text, size, style }) {
+  const [box, onLayout] = useLayoutSize();
   return (
-    <View style={[{ paddingHorizontal: size * 0.75, paddingVertical: size * 0.18, alignSelf: 'flex-start' }, style]}>
-      <Svg style={{ position: 'absolute', left: 0, top: 0, right: 0, bottom: 0 }} width="100%" height="100%" viewBox="0 0 100 30" preserveAspectRatio="none">
+    <View onLayout={onLayout} style={[{ paddingHorizontal: size * 0.75, paddingVertical: size * 0.18, alignSelf: 'flex-start' }, style]}>
+      {box && (
+      <Svg style={{ position: 'absolute', left: 0, top: 0 }} width={box.width} height={box.height} viewBox="0 0 100 30" preserveAspectRatio="none">
         <Defs>
           <LinearGradient id="ig-ingot" x1="0" y1="0" x2="0" y2="1">
             <Stop offset="0" stopColor={GOLD.shine} />
@@ -38,6 +40,7 @@ function Ingot({ text, size, style }) {
         <Polygon points="7,0 93,0 100,30 0,30" fill="url(#ig-ingot)" stroke={GOLD.deep} strokeWidth="1" />
         <Polygon points="7,0 93,0 91,5 9,5" fill={GOLD.shine} opacity="0.8" />
       </Svg>
+      )}
       <T
         style={{
           fontFamily: FONTS.money, fontSize: size, color: GOLD.ink, letterSpacing: 0.5,
@@ -94,7 +97,8 @@ export function Button({
         accessibilityRole="button"
         accessibilityLabel={label || title}
         accessibilityState={{ disabled: !!disabled }}
-        onPress={disabled ? undefined : onPress}
+        disabled={!!disabled}
+        onPress={onPress}
         hitSlop={4}
         style={({ pressed }) => [{
           width: MIN_TARGET, height: MIN_TARGET, alignItems: 'center', justifyContent: 'center',
@@ -112,7 +116,8 @@ export function Button({
       <Pressable
         accessibilityRole="button"
         accessibilityState={{ disabled: !!disabled }}
-        onPress={disabled ? undefined : onPress}
+        disabled={!!disabled}
+        onPress={onPress}
         style={({ pressed }) => [{
           minHeight: MIN_TARGET + 4, paddingHorizontal: pad, borderWidth: 1, borderColor: th.dark ? GHOST_EDGE : th.accent,
           alignItems: 'center', justifyContent: 'center', flexDirection: 'row', gap: 8,
@@ -132,7 +137,8 @@ export function Button({
     <Pressable
       accessibilityRole="button"
       accessibilityState={{ disabled: !!disabled }}
-      onPress={disabled ? undefined : onPress}
+      disabled={!!disabled}
+        onPress={onPress}
       style={[{ paddingBottom: DEPTH, opacity: disabled ? 0.45 : 1 }, style]}
     >
       {({ pressed }) => {

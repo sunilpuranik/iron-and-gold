@@ -15,7 +15,9 @@ import Portrait from '../components/Portrait';
 import { BOT_NAMES } from '../game/data';
 import { newGame } from '../game/engine';
 import { loadLocalGame } from '../store/storage';
-import { createRoom, joinRoom, onlineEnabled } from '../net/online';
+import {
+  createRoom, ensureSession, fetchRoom, joinRoom, listMyRooms, myTurnAt, onlineEnabled,
+} from '../net/online';
 import { feel } from '../feel/feel';
 import { Seal, Wordmark } from '../theme/brand';
 
@@ -48,16 +50,50 @@ function SectionTitle({ children, aside }) {
   );
 }
 
+// One of my online tables: who is there, and whether it is waiting on me.
+function TableRow({ row, uid, onOpen }) {
+  const th = useTheme();
+  const names = row.lobby.players.filter((p) => p.id !== uid).map((p) => p.name);
+  const mine = myTurnAt(row, uid);
+  const status = row.status === 'lobby' ? 'In the lobby' : mine ? 'Your move' : 'Waiting on others';
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={`Table ${row.code}, ${status}`}
+      onPress={onOpen}
+      style={({ pressed }) => ({
+        flexDirection: 'row', alignItems: 'center', gap: 12, minHeight: MIN_TARGET + 8,
+        borderTopWidth: 1, borderColor: th.rule, opacity: pressed ? 0.6 : 1,
+      })}
+    >
+      <T v="plate" style={{ letterSpacing: 3, width: 64 }}>{row.code}</T>
+      <View style={{ flex: 1 }}>
+        <T v="body" numberOfLines={1}>{names.length ? `with ${names.join(', ')}` : 'Just you so far'}</T>
+        <T v="small" color={mine ? th.money : th.inkSoft}>{status}</T>
+      </View>
+      {mine && <View style={{ width: 8, height: 8, backgroundColor: th.money, transform: [{ rotate: '45deg' }] }} />}
+    </Pressable>
+  );
+}
+
 export default function HomeScreen({ profile, onProfile, onStartLocal, onResumeLocal, onLobby }) {
   const th = useTheme();
   const [saved, setSaved] = useState(null);
   const [code, setCode] = useState('');
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState(null);
+  const [tables, setTables] = useState(null); // { uid, rows } once signed in
   const seats = profile.seats || DEFAULT_SEATS;
 
   useEffect(() => {
     loadLocalGame().then((s) => setSaved(s && s.phase !== 'over' ? s : null));
+  }, []);
+
+  useEffect(() => {
+    if (!onlineEnabled) return;
+    Promise.all([ensureSession(), listMyRooms()])
+      .then(([uid, rows]) => setTables({ uid, rows }))
+      .catch((e) => setErr(e.message));
   }, []);
 
   const setSeats = (next) => onProfile({ ...profile, seats: next });
@@ -81,8 +117,10 @@ export default function HomeScreen({ profile, onProfile, onStartLocal, onResumeL
     setBusy(true);
     setErr(null);
     try {
+      const uid = await ensureSession();
       const row = await fn();
-      onLobby(row);
+      if (!row) throw new Error('That table is gone');
+      onLobby(row, uid);
     } catch (e) {
       setErr(e.message);
     } finally {
@@ -200,7 +238,7 @@ export default function HomeScreen({ profile, onProfile, onStartLocal, onResumeL
             <SectionTitle>Telegraph table (online)</SectionTitle>
             {!onlineEnabled ? (
               <T v="small" color={th.inkSoft}>
-                Online play is off. Add your Supabase URL and anon key to src/net/online.js to host rooms.
+                Online play is off. Set EXPO_PUBLIC_SUPABASE_URL and EXPO_PUBLIC_SUPABASE_ANON_KEY in .env (see DEPLOYMENT.md).
               </T>
             ) : (
               <>
@@ -223,6 +261,14 @@ export default function HomeScreen({ profile, onProfile, onStartLocal, onResumeL
                   />
                 </View>
                 {busy && <ActivityIndicator color={th.ink} style={{ marginTop: 8 }} />}
+                {tables && tables.rows.length > 0 && (
+                  <View style={{ marginTop: 16 }}>
+                    <T v="label" color={th.inkSoft} style={{ marginBottom: 4 }}>YOUR TABLES</T>
+                    {tables.rows.map((r) => (
+                      <TableRow key={r.code} row={r} uid={tables.uid} onOpen={() => online(() => fetchRoom(r.code))} />
+                    ))}
+                  </View>
+                )}
                 {err && <T v="small" color={th.jewel.carnelianText} style={{ marginTop: 8 }}>{err}</T>}
               </>
             )}

@@ -1,0 +1,11 @@
+# Supabase CLI config. Only the parts Iron & Gold cares about; everything else uses CLI defaults.
+project_id = "iron-and-gold"
+
+[auth]
+# Local dev only. On the hosted project, turn this on in the dashboard (see DEPLOYMENT.md).
+enable_anonymous_sign_ins = true
+
+[functions.game]
+# Players call it with their anonymous-session JWT.
+verify_jwt = true
+entrypoint = "./functions/game/index.js"

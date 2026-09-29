@@ -36,32 +36,27 @@ npx expo install expo-haptics expo-audio expo-font @react-native-async-storage/a
 npx expo install -- --save-dev jest-expo jest
 ```
 
-Then copy `App.js`, `src/`, `__tests__/`, `scripts/`, `supabase.sql` and the `jest` / `scripts` blocks of `package.json` into it.
+Then copy `App.js`, `src/`, `__tests__/`, `scripts/`, `supabase/` and the `jest` / `scripts` blocks of `package.json` into it.
 
 ---
 
 ## Online play (optional)
 
-The app runs offline-only until you give it Supabase keys.
+The app runs offline-only until `.env` has Supabase keys. Full setup, the Expo Go beta and its limits are in **[DEPLOYMENT.md](DEPLOYMENT.md)**. In short:
 
-1. Create a free project at [supabase.com](https://supabase.com).
-2. Open **SQL Editor**, paste in `supabase.sql`, and run it. The script:
-   - creates `rooms(code pk, lobby jsonb, state jsonb, seq int)`
-   - turns on a permissive RLS policy, which is only suitable for a prototype
-   - sets `replica identity full` and adds the table to the `supabase_realtime` publication
-3. In **Project Settings → API**, copy the **Project URL** and the **anon public** key into `src/net/online.js`:
-   ```js
-   export const SUPABASE_URL = 'https://xxxx.supabase.co';
-   export const SUPABASE_ANON_KEY = 'eyJ…';
-   ```
-4. Restart `npx expo start --tunnel`. On Home, **Host a room** gives you a 4-letter code to share. Friends enter it under **Join**.
+```bash
+cp .env.example .env                 # add EXPO_PUBLIC_SUPABASE_URL / EXPO_PUBLIC_SUPABASE_ANON_KEY
+npx supabase link --project-ref <ref>
+npm run db:push                      # tables, members-only RLS, lobby functions, realtime
+npm run deploy:functions             # the `game` Edge Function that checks every move
+```
 
 How online play works:
 
-- Every client subscribes to its room row over Supabase Realtime, and polls every 10 seconds as a fallback.
-- A player's move is applied locally by the engine. The whole state is then written back with an optimistic check (`update … where seq = prev`). If another write landed first, the client refreshes instead of overwriting it.
-- **The host's phone drives the bots.** Keep it open during a game that has bots.
-- Anyone who holds the anon key can read and write rooms. Don't use this setup for anything beyond playing with friends.
+- Each phone signs in anonymously and keeps the session, so it stays the same tycoon. Home lists **Your tables** and marks the ones waiting on your move.
+- Clients only read rooms they sit at. Lobby changes go through Postgres functions. Moves go to the `game` Edge Function, which replays them with the same engine and writes only if nobody moved first (`seq` check).
+- Your own move shows immediately (the engine is deterministic), then the server confirms it.
+- Bots move whenever anyone at the table has the game open.
 
 ---
 
@@ -175,7 +170,7 @@ Alternatively, skip the simulator and scan the QR code with an iPhone.
 ## Tests and simulation
 
 ```bash
-npm test            # jest-expo unit tests for the engine
+npm test            # jest-expo: engine, invariants, server referee, online client, buttons
 npm run simulate    # 200 bots-only games; checks that every game terminates
 npm run simulate -- 300 0   # 300 games with 2–6 players (0 = cycle through player counts)
 ```
@@ -194,6 +189,10 @@ The tests cover:
 - buying rules
 - every end condition
 - full bots-only games for 2–6 players, with and without the closing bell
+- invariants on every step of seeded games: tiles, shares and cash conserved, purity, determinism, JSON round trip, illegal input
+- the server referee: who may start, move and nudge bots; stale and illegal moves
+- the online client: anonymous session reuse, RPC arguments, error and 409 handling
+- UI primitives: gold/iron fills cover the whole button, disabled and pressed states, the ingot's measured size
 
 ---
 
@@ -233,8 +232,9 @@ src/game/rules.js           classify, price, sizes, bonuses, effectOf, canClose 
 src/game/engine.js          newGame, applyAction (pure, no React) + re-exports
 src/game/bot.js             botAction
 src/game/useLocalGame.js    pass-and-play controller + AsyncStorage save
-src/net/online.js           Supabase config, rooms, optimistic writes, realtime
-src/net/useOnlineGame.js    online controller (host drives bots)
+src/net/online.js           Supabase client, anonymous session, lobby RPCs, game ops, realtime
+src/net/gameOps.js          server-side referee (start / move / bot), shared with the Edge Function
+src/net/useOnlineGame.js    online controller (optimistic moves, anyone at the table nudges bots)
 src/screens/                Home, Lobby, Game
 src/components/game/        Board, Tile, Header, StatusStrip, Tabs (Deeds/Market/Tycoons), ActionBar, HandoffCover
 src/components/sheets/      CompanySheet (charter / tied buyout), Settle shares, Invest, Closing bell, Ticker
@@ -248,8 +248,9 @@ src/components/CompanyMark.js  the one mark per company (flat or raised), used e
 src/theme/                  "Gilded Standard" tokens (lacquer default, bond light), UI primitives
 src/feel/feel.js            haptics + playSting() stub
 scripts/simulate.mjs        bots-only games in Node
-__tests__/engine.test.js    engine unit tests
-supabase.sql                table, RLS, realtime publication
+__tests__/                  engine rules, engine invariants, server referee, online client, UI primitives
+supabase/migrations/        rooms + members tables, RLS, lobby functions, realtime
+supabase/functions/game/    Edge Function that checks and stores every move
 ```
 
 ### Engine API

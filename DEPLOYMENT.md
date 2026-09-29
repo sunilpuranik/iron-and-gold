@@ -1,0 +1,170 @@
+# Iron & Gold: closed beta deployment plan
+
+The goal: friends open Iron & Gold in **Expo Go**, host or join tables with a 4-letter code, close the app, and pick their games up later from **Your tables** on Home. Games can run over hours or days.
+
+**Backend:** Supabase. You do **not** need Firebase. The app already runs on Supabase, the free tier covers a closed beta, and it doesn't need a billing card.
+
+---
+
+## 1. What changed and how it fits together
+
+```
+ Phone (Expo Go)                               Supabase
+ ─────────────────                             ─────────────────────────────────────────
+ anonymous sign-in, session saved  ─────────►  Auth (anonymous users)
+ lobby: create/join/add bot/remove ─────────►  Postgres functions (create_room, join_room, …)
+ game moves + "move the bot"       ─────────►  Edge Function `game`
+                                                 └─ replays the move with the same engine
+                                                    (src/game, copied in at deploy) and
+                                                    writes it only if seq still matches
+ reads its own rooms + live updates ◄────────  rooms table (RLS: members only) + Realtime
+```
+
+| Before (prototype) | Now (beta) |
+|---|---|
+| Anyone with the anon key could read or overwrite any room | Players can read only the rooms they sit at. Nobody can write to a room directly. |
+| The client wrote the whole game state | The server re-checks every move with the engine; illegal or stale moves are refused (422/409) |
+| Identity was a random id in AsyncStorage | Anonymous Supabase user with a saved session, so each phone keeps the same tycoon |
+| The host's phone ran the bots; if the host left, the game stalled | Any player with the table open moves the bots, through the server |
+| No way back into a game after leaving it | **Your tables** on Home lists every unfinished table and marks the ones waiting on you |
+| Keys were pasted into `src/net/online.js` | `.env` (`EXPO_PUBLIC_SUPABASE_URL`, `EXPO_PUBLIC_SUPABASE_ANON_KEY`) |
+
+Files:
+
+- `supabase/migrations/20260928000000_online_rooms.sql`: tables, RLS, lobby functions, realtime, optional cleanup job. **It drops the old prototype `rooms` table.**
+- `supabase/functions/game/index.js`: the move referee. Its rules live in `src/net/gameOps.js`, which the jest tests cover.
+- `supabase/config.toml`: function entrypoint and JWT check.
+- `scripts/sync-engine.mjs`: copies `src/game/*` and `src/net/gameOps.js` into the function before deploy.
+
+---
+
+## 2. What I need from you (checklist)
+
+- [ ] A Supabase project (free), with its **Project URL** and **anon public key**
+- [ ] **Anonymous sign-ins** switched on in that project
+- [ ] The Supabase CLI logged in on your Mac (`npx supabase login`)
+- [ ] An Expo account, plus a free **Expo organization** that owns the project
+- [ ] Each tester's Expo account (username or email), so you can invite them to that organization. See the warning in step 5 for why.
+
+You don't need to give me any secrets. The anon key and URL go in your local `.env`, which is git-ignored. The service-role key never leaves Supabase: the Edge Function reads it from its environment automatically.
+
+---
+
+## 3. Supabase setup (about 15 minutes, once)
+
+1. **Create the project.** On [supabase.com](https://supabase.com) → New project. Pick a region near your friends and save the database password.
+2. **Turn on anonymous sign-ins.** Go to Authentication → Sign In / Providers → **Allow anonymous sign-ins** → on.
+   - Optional but recommended: in Authentication → Attack Protection, turn on CAPTCHA or keep the default rate limits. Anonymous sign-ins are rate-limited per IP by default.
+3. **Put the keys in `.env`.** Go to Project Settings → API:
+   ```bash
+   cp .env.example .env
+   # then edit .env:
+   # EXPO_PUBLIC_SUPABASE_URL=https://<ref>.supabase.co
+   # EXPO_PUBLIC_SUPABASE_ANON_KEY=<anon public key>
+   ```
+4. **Link the repo and push the schema:**
+   ```bash
+   npx supabase login
+   npx supabase link --project-ref <ref>      # the <ref> in your project URL
+   npm run db:push                            # applies supabase/migrations/*
+   ```
+   If you'd rather not use the CLI, paste the migration file into Dashboard → SQL Editor and run it.
+5. **Deploy the move referee:**
+   ```bash
+   npm run deploy:functions                   # sync:engine, then supabase functions deploy game
+   ```
+   Redeploy it whenever `src/game/*` or `src/net/gameOps.js` changes, so the server and the app play by the same rules.
+6. **Optional: cleanup.** In Database → Extensions, enable `pg_cron`, then re-run the last block of the migration. It deletes tables untouched for 14 days.
+
+**Smoke test (on your own devices).** Run `npx expo start`, then open the game on the iOS simulator and on your phone.
+
+- [ ] Home shows the **Telegraph table** section with **Host a room** (not "Online play is off").
+- [ ] Host a room on one device, and join it with the code on the other.
+- [ ] Add a bot, then start. Moves show up on both devices within about a second.
+- [ ] The bot plays while either device has the game open.
+- [ ] Force-quit one device and reopen it. The table shows under **Your tables**, marked **Your move** when it's your turn, and tapping it drops you back in.
+- [ ] In Dashboard → Table Editor → `rooms`, `status`, `seq` and `turn_of` change with every move.
+
+---
+
+## 4. Getting the app to friends through Expo Go
+
+> ⚠️ **Read this first: Expo Go needs a login on SDK 57.**
+> From SDK 57, Expo Go on **iOS** only runs a project when the person is logged in to an Expo account that has access to it. Expo says Android will follow. A public QR code no longer works for people outside your account. ([Expo changelog](https://expo.dev/changelog/expo-go-57-login), [Expo blog post](https://dev.to/expo/running-an-expo-sdk-57-app-in-expo-go-you-now-need-to-be-logged-in-on-both-ends-32ef))
+> So for an Expo Go beta, **each friend needs a free Expo account and must be a member of the organization that owns the project.** Please check the current invite rules on expo.dev before inviting people. If this is too much friction, see **Fallback** below.
+
+One-time setup:
+
+```bash
+npm install -g eas-cli
+eas login
+# On expo.dev: create an organization (for example "iron-and-gold-beta"), then invite each tester's
+# Expo account as a member (the "Viewer"/"Developer" role is enough to open the app).
+eas init                  # link this project; pick the organization as owner
+eas update:configure      # installs expo-updates, adds updates.url + runtimeVersion to app.json
+```
+
+Publish a beta build of the JavaScript:
+
+```bash
+npm test                               # 97 tests: engine, invariants, server referee, online client, buttons
+npm run publish:beta -- "Beta 1"       # = eas update --branch beta --message "Beta 1"
+```
+
+`eas update` bundles your local `.env` into the update, so publish from a machine that has the real keys.
+
+Testers:
+
+1. Install **Expo Go** (App Store or Play Store) and log in with the Expo account you invited.
+2. Open the project from Expo Go's home screen (it appears under the organization), or scan the QR code on the update's page at expo.dev.
+3. Enter a name and portrait, then **Host a room** or **Join** with a code.
+
+To ship a fix, run `npm run publish:beta -- "what changed"`. Testers get it the next time they open the project. If the fix touches the rules, run `npm run deploy:functions` **first**.
+
+**Fallback if Expo accounts are too much friction.** Android testers can install a real APK instead, with no Expo login needed:
+
+```bash
+eas build -p android --profile preview   # prints a link; share it
+```
+
+iOS has no free equivalent: it needs TestFlight, and TestFlight needs the $99/year Apple Developer account. Both options are covered under *Shipping* in `README.md`.
+
+---
+
+## 5. Limits and costs for a friends beta
+
+| Thing | Free tier | What it means here |
+|---|---|---|
+| Supabase database | 500 MB | Each game is about 30–60 KB, so tens of thousands of games fit. |
+| Edge Function calls | 500k / month | About 1 call per move. A full 4-player game is a few hundred calls. |
+| Realtime | 200 concurrent connections | Plenty. |
+| **Project pausing** | **Free projects pause after about 7 days with no activity** | If nobody plays for a week, open the dashboard and click *Restore*. |
+| EAS Update | Free plan monthly update quota | Fine for a beta. |
+
+---
+
+## 6. Known beta limitations (by design, for now)
+
+- **Hidden deeds aren't hidden from a determined player.** Members can read the whole game row, including other tycoons' hands. The app never shows them, but a friend with devtools could. The fix is to split private hands into a members-only-by-seat table. Worth doing before any public release.
+- **Bots only move while someone has the table open.** For async games that's fine: whoever opens it next watches the bots catch up.
+- **No push notifications yet.** "Your move" shows on Home under **Your tables**. Push needs `expo-notifications` plus a development or store build. Remote push no longer works in Expo Go on Android.
+- **One tycoon per phone.** Anonymous sessions live on the device; deleting the app, or clearing its data, forgets that player's tables. Upgrading to email or Apple/Google sign-in later keeps the same user id (`linkIdentity`), so nothing needs migrating.
+- **Guests can leave a lobby; hosts can't.** The host's table just waits under **Your tables**.
+
+---
+
+## 7. After the beta (not needed now)
+
+1. Private hands table plus an RLS policy by seat (see above).
+2. Push notifications: store Expo push tokens per user, and send one from the `game` function when `turn_of` changes to a human.
+3. Server-driven bots for tables nobody is watching: a scheduled Edge Function that nudges games stuck on a bot.
+4. Real accounts (link email or Apple/Google to the anonymous user).
+5. Store builds: `eas build` plus TestFlight or Play internal testing (see `README.md` → *Shipping*).
+
+---
+
+## 8. Rollback
+
+- **App:** `eas update:rollback` (or republish the previous commit) on the `beta` branch.
+- **Rules:** check out the previous commit, then run `npm run deploy:functions`.
+- **Database:** the migration drops the prototype `rooms` table. There was no production data, so there is nothing to roll back to. Future migrations should be additive.

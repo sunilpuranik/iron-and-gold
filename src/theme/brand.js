@@ -11,41 +11,44 @@ import {
 import { T } from './text';
 
 const FILL = { position: 'absolute', left: 0, top: 0, right: 0, bottom: 0 };
-const GOLD_OFFSETS = ['0', '0.18', '0.5', '1'];
+
+// Give an Svg real pixel sizes. Percentage-sized Svgs keep their first measurement under Fabric,
+// so anything that stretches measures its box and redraws at the new size.
+export function useLayoutSize() {
+  const [size, setSize] = useState(null);
+  const onLayout = (e) => {
+    const { width, height } = e.nativeEvent.layout;
+    setSize((old) => (old && old.width === width && old.height === height ? old : { width, height }));
+  };
+  return [size, onLayout];
+}
+const GOLD_OFFSETS = [0, 0.18, 0.5, 1];
+
+// Plate fills are native gradients (backgroundImage), not SVG: a percentage-sized Svg
+// keeps its first measured width under Fabric, leaving an unfilled strip once the plate grows.
+const gradient = (stops) => `linear-gradient(to bottom, ${stops.map(([c, at]) => `${c} ${at * 100}%`).join(', ')})`;
+const GOLD_GRADIENT = gradient(GOLD.stops.map((c, i) => [c, GOLD_OFFSETS[i]]));
+const GRAIN = 'linear-gradient(to bottom, rgba(255,255,255,0.05) 0px, rgba(255,255,255,0.05) 1px, rgba(255,255,255,0) 1px)';
 
 // Brushed iron: a vertical gradient with fine horizontal grain.
 export function IronFill() {
   const { iron } = useTheme();
   return (
-    <Svg style={FILL} width="100%" height="100%" preserveAspectRatio="none">
-      <Defs>
-        <LinearGradient id="ig-iron" x1="0" y1="0" x2="0" y2="1">
-          <Stop offset="0" stopColor={iron.hi} />
-          <Stop offset="0.45" stopColor={iron.mid} />
-          <Stop offset="1" stopColor={iron.lo} />
-        </LinearGradient>
-        <Pattern id="ig-grain" width="6" height="3" patternUnits="userSpaceOnUse">
-          <Rect x="0" y="0" width="6" height="1" fill="#FFFFFF" opacity="0.05" />
-        </Pattern>
-      </Defs>
-      <Rect x="0" y="0" width="100%" height="100%" fill="url(#ig-iron)" />
-      <Rect x="0" y="0" width="100%" height="100%" fill="url(#ig-grain)" />
-    </Svg>
+    <View
+      pointerEvents="none"
+      style={[FILL, {
+        backgroundColor: iron.mid,
+        experimental_backgroundImage: `${GRAIN}, ${gradient([[iron.hi, 0], [iron.mid, 0.45], [iron.lo, 1]])}`,
+        experimental_backgroundSize: '100% 3px, 100% 100%',
+        experimental_backgroundRepeat: 'repeat, no-repeat',
+      }]}
+    />
   );
 }
 
 // Gold leaf: shine at the top edge, leaf through the middle, deep at the foot.
 export function GoldFill() {
-  return (
-    <Svg style={FILL} width="100%" height="100%" preserveAspectRatio="none">
-      <Defs>
-        <LinearGradient id="ig-gold" x1="0" y1="0" x2="0" y2="1">
-          {GOLD.stops.map((c, i) => <Stop key={c} offset={GOLD_OFFSETS[i]} stopColor={c} />)}
-        </LinearGradient>
-      </Defs>
-      <Rect x="0" y="0" width="100%" height="100%" fill="url(#ig-gold)" />
-    </Svg>
-  );
+  return <View pointerEvents="none" style={[FILL, { backgroundColor: GOLD.leaf, experimental_backgroundImage: GOLD_GRADIENT }]} />;
 }
 
 // Inset engraved keyline.
@@ -122,9 +125,11 @@ function RailTrack({ style }) {
   const wood = th.dark ? '#6A5238' : '#7A5C3A';
   const woodLo = th.dark ? '#3E2F20' : '#4E3A24';
   const rail = th.dark ? '#9398A0' : th.iron.mid;
+  const [size, onLayout] = useLayoutSize();
   return (
-    <View style={[{ height: 16 }, style]}>
-      <Svg width="100%" height="16">
+    <View style={[{ height: 16 }, style]} onLayout={onLayout}>
+      {size && (
+      <Svg width={size.width} height="16">
         <Defs>
           <Pattern id="ig-ties" width="13" height="16" patternUnits="userSpaceOnUse">
             <Rect x="3" y="0.5" width="6.5" height="15" fill={wood} />
@@ -143,24 +148,16 @@ function RailTrack({ style }) {
         <Line x1="0" y1="7" x2="100%" y2="7" stroke={th.iron.lo} strokeWidth="0.8" />
         <Line x1="0" y1="12.5" x2="100%" y2="12.5" stroke={th.iron.lo} strokeWidth="0.8" />
       </Svg>
+      )}
     </View>
   );
 }
 
 // A gold hairline that fades out towards `from` ('left' or 'right').
-function FadeLine({ from, id }) {
+function FadeLine({ from }) {
   const th = useTheme();
-  return (
-    <Svg style={{ flex: 1 }} height="1">
-      <Defs>
-        <LinearGradient id={id} x1={from === 'left' ? '0' : '1'} y1="0" x2={from === 'left' ? '1' : '0'} y2="0">
-          <Stop offset="0" stopColor={th.accent} stopOpacity="0" />
-          <Stop offset="1" stopColor={th.accent} stopOpacity="1" />
-        </LinearGradient>
-      </Defs>
-      <Rect x="0" y="0" width="100%" height="1" fill={`url(#${id})`} />
-    </Svg>
-  );
+  const dir = from === 'left' ? 'to right' : 'to left';
+  return <View style={{ flex: 1, height: 1, experimental_backgroundImage: `linear-gradient(${dir}, ${th.accent}00, ${th.accent})` }} />;
 }
 
 // Dividers. hair between rows · gilt under section titles · ornament for set pieces · rail on the map only.
@@ -178,9 +175,9 @@ export function Rule({ kind = 'hair', style }) {
   if (kind === 'ornament') {
     return (
       <View style={[{ flexDirection: 'row', alignItems: 'center', gap: 10, height: 12 }, style]}>
-        <FadeLine from="left" id="ig-orn-l" />
+        <FadeLine from="left" />
         <View style={{ width: 7, height: 7, backgroundColor: th.accent, transform: [{ rotate: '45deg' }] }} />
-        <FadeLine from="right" id="ig-orn-r" />
+        <FadeLine from="right" />
       </View>
     );
   }

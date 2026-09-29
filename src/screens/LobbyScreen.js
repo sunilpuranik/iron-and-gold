@@ -9,8 +9,9 @@ import {
 import { AVATARS } from '../theme/tokens';
 import Portrait from '../components/Portrait';
 import { BOT_NAMES } from '../game/data';
-import { newGame } from '../game/engine';
-import { fetchRoom, mutateRoom, subscribeRoom } from '../net/online';
+import {
+  addBot as addBotTo, fetchRoom, gameOp, removePlayer, subscribeRoom,
+} from '../net/online';
 
 export default function LobbyScreen({ initialRow, profile, onStarted, onLeave }) {
   const th = useTheme();
@@ -40,11 +41,11 @@ export default function LobbyScreen({ initialRow, profile, onStarted, onLeave })
     if (row.state) onStarted(row);
   }, [row]);
 
-  const mutate = async (fn) => {
+  const act = async (fn) => {
     setErr(null);
     try {
-      const r = await mutateRoom(code, fn);
-      if (r.seq > rowRef.current.seq) {
+      const r = await fn();
+      if (r && r.seq > rowRef.current.seq) {
         rowRef.current = r;
         setRow(r);
       }
@@ -53,23 +54,16 @@ export default function LobbyScreen({ initialRow, profile, onStarted, onLeave })
     }
   };
 
-  const addBot = () => mutate((r) => {
-    const ps = r.lobby.players;
-    if (ps.length >= 6 || r.state) return null;
-    const name = BOT_NAMES.find((n) => !ps.some((p) => p.name === n)) || 'Bot';
-    const bot = { id: 'bot-' + Math.random().toString(36).slice(2, 8), name, avatar: ps.length % AVATARS.length, bot: true };
-    return { lobby: { ...r.lobby, players: [...ps, bot] } };
+  const addBot = () => act(() => {
+    const name = BOT_NAMES.find((n) => !players.some((p) => p.name === n)) || 'Bot';
+    return addBotTo(code, name, players.length % AVATARS.length);
   });
 
-  const remove = (id) => mutate((r) => (r.state ? null : {
-    lobby: { ...r.lobby, players: r.lobby.players.filter((p) => p.id !== id) },
-  }));
+  const remove = (id) => act(() => removePlayer(code, id));
 
-  const start = () => mutate((r) => {
-    if (r.state || r.lobby.players.length < 2) return null;
-    return { state: newGame(r.lobby.players) };
-  });
+  const start = () => act(() => gameOp(code, 'start', rowRef.current.seq));
 
+  // Guests give up their seat; the host's table stays open under "Your tables" on Home.
   const leave = async () => {
     if (!isHost) await remove(profile.id);
     onLeave();
@@ -121,7 +115,7 @@ export default function LobbyScreen({ initialRow, profile, onStarted, onLeave })
           <T v="accent" color={th.inkSoft} style={{ textAlign: 'center' }}>Waiting for the host to start…</T>
         )}
         <T v="small" color={th.inkSoft} style={{ textAlign: 'center' }}>
-          The host's phone runs the bots — keep it open during the game.
+          Bots move whenever anyone at the table has the game open. You can close the app and pick this table up later from Home.
         </T>
       </ScrollView>
     </SafeAreaView>

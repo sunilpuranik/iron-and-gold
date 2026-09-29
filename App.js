@@ -58,13 +58,14 @@ function Root() {
     body = (
       <LobbyScreen
         initialRow={screen.row}
-        profile={profile}
+        profile={{ ...profile, id: screen.uid }}
         onLeave={home}
-        onStarted={(row) => setScreen({ name: 'online', row })}
+        onStarted={(row) => setScreen({ name: 'online', row, uid: screen.uid })}
       />
     );
   } else if (screen.name === 'online') {
-    body = <OnlineGame row={screen.row} profile={profile} onExit={home} {...dispatchProps} />;
+    // Online, you are your Supabase user id; the local profile id is for pass-and-play only.
+    body = <OnlineGame row={screen.row} profile={{ ...profile, id: screen.uid }} onExit={home} {...dispatchProps} />;
   } else {
     body = (
       <HomeScreen
@@ -72,7 +73,7 @@ function Root() {
         onProfile={updateProfile}
         onStartLocal={(state) => setScreen({ name: 'local', state, key: Date.now() })}
         onResumeLocal={(state) => setScreen({ name: 'local', state, key: Date.now() })}
-        onLobby={(row) => setScreen(row.state ? { name: 'online', row } : { name: 'lobby', row })}
+        onLobby={(row, uid) => setScreen({ name: row.state ? 'online' : 'lobby', row, uid })}
       />
     );
   }
