@@ -104,6 +104,12 @@ eas init                  # link this project; pick the organization as owner
 eas update:configure      # installs expo-updates, adds updates.url + runtimeVersion to app.json
 ```
 
+> ⚠️ **Then fix the runtime version for Expo Go.** `eas update:configure` writes `"runtimeVersion": { "policy": "appVersion" }`, which publishes updates as runtime `1.0.0`. Expo Go rejects those with *"not compatible with this version of Expo Go"*. Expo Go only loads updates made for its SDK, so in `app.json` set:
+> ```json
+> "runtimeVersion": { "policy": "sdkVersion" }
+> ```
+> After publishing, `npx eas update:list --branch beta --limit 1` should show **Runtime Version `exposdk:57.0.0`**. If you move to development or store builds later, switch back to `appVersion`.
+
 Publish a beta build of the JavaScript:
 
 ```bash
@@ -115,7 +121,7 @@ npm run publish:beta -- "Beta 1"       # = eas update --branch beta --message "B
 
 Testers:
 
-1. Install **Expo Go** (App Store or Play Store) and log in with the Expo account you invited.
+1. Install or update **Expo Go** (App Store or Play Store) so it supports SDK 57, and log in with the Expo account you invited.
 2. Open the project from Expo Go's home screen (it appears under the organization), or scan the QR code on the update's page at expo.dev.
 3. Enter a name and portrait, then **Host a room** or **Join** with a code.
 

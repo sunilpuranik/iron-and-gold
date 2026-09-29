@@ -20,7 +20,17 @@
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
-      }
+      },
+      "permissions": [
+        "android.permission.RECORD_AUDIO",
+        "android.permission.MODIFY_AUDIO_SETTINGS",
+        "android.permission.FOREGROUND_SERVICE",
+        "android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK",
+        "android.permission.RECORD_AUDIO",
+        "android.permission.MODIFY_AUDIO_SETTINGS",
+        "android.permission.FOREGROUND_SERVICE",
+        "android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -36,6 +46,18 @@
       "backgroundColor": "#0B0907"
     },
     "description": "A frontier rail-town board game for 2–6 tycoons: build deeds, charter companies, buy shares and cash in on buyouts.",
-    "scheme": "ironandgold"
+    "scheme": "ironandgold",
+    "extra": {
+      "eas": {
+        "projectId": "50cc1911-d0cd-4b3b-ab29-8260b04cf139"
+      }
+    },
+    "owner": "puranik-co",
+    "runtimeVersion": {
+      "policy": "sdkVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/50cc1911-d0cd-4b3b-ab29-8260b04cf139"
+    }
   }
 }
