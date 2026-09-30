@@ -1,6 +1,6 @@
 # Iron & Gold
 
-A frontier rail-town board game for 2–6 tycoons, built with Expo (SDK 57, plain JavaScript), running in **Expo Go**.
+A frontier rail-town board game for 2–6 tycoons, built with Expo (SDK 58, plain JavaScript), running in **Expo Go**.
 It plays as pass-and-play on one phone, or online across phones through a Supabase table.
 
 > Frontier rail town, 1881. Build deeds on the town's 108 plots, charter companies, buy shares, and cash in when companies are bought out. When the closing bell rings, the tycoon with the most cash wins.
@@ -9,7 +9,7 @@ It plays as pass-and-play on one phone, or online across phones through a Supaba
 
 ## Quick start
 
-You need Node 20 or newer and the **Expo Go** app (SDK 57) on your phone.
+You need Node 22.13 or newer and the **Expo Go** app (SDK 58) on your phone.
 
 ```bash
 git clone <this repo> iron-and-gold

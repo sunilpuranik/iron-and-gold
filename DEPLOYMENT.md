@@ -89,7 +89,7 @@ You don't need to give me any secrets. The anon key and URL go in your local `.e
 
 ## 4. Getting the app to friends through Expo Go
 
-> ⚠️ **Read this first: Expo Go needs a login on SDK 57.**
+> ⚠️ **Read this first: Expo Go needs a login (since SDK 57).**
 > From SDK 57, Expo Go on **iOS** only runs a project when the person is logged in to an Expo account that has access to it. Expo says Android will follow. A public QR code no longer works for people outside your account. ([Expo changelog](https://expo.dev/changelog/expo-go-57-login), [Expo blog post](https://dev.to/expo/running-an-expo-sdk-57-app-in-expo-go-you-now-need-to-be-logged-in-on-both-ends-32ef))
 > So for an Expo Go beta, **each friend needs a free Expo account and must be a member of the organization that owns the project.** Please check the current invite rules on expo.dev before inviting people. If this is too much friction, see **Fallback** below.
 
@@ -108,7 +108,7 @@ eas update:configure      # installs expo-updates, adds updates.url + runtimeVer
 > ```json
 > "runtimeVersion": { "policy": "sdkVersion" }
 > ```
-> After publishing, `npx eas update:list --branch beta --limit 1` should show **Runtime Version `exposdk:57.0.0`**. If you move to development or store builds later, switch back to `appVersion`.
+> After publishing, `npx eas update:list --branch beta --limit 1` should show **Runtime Version `exposdk:58.0.0`**. The Android beta APK uses the same runtime so it can share the `beta` branch. For store builds, switch to `appVersion` or `fingerprint`.
 
 Publish a beta build of the JavaScript:
 
@@ -121,19 +121,23 @@ npm run publish:beta -- "Beta 1"       # = eas update --branch beta --message "B
 
 Testers:
 
-1. Install or update **Expo Go** (App Store or Play Store) so it supports SDK 57, and log in with the Expo account you invited.
-2. Open the project from Expo Go's home screen (it appears under the organization), or scan the QR code on the update's page at expo.dev.
-3. Enter a name and portrait, then **Host a room** or **Join** with a code.
+- **iPhone:** install **Expo Go** from the App Store, log in with the Expo account you invited, then open the project from Expo Go's home screen (under the organization) or scan the QR code on the update's page at expo.dev.
+- **Android:** install the beta APK (below). No Expo account is needed. Android Expo Go is unreliable here. On SDK 57 it marked every update *"not compatible"* and failed with *"Failed to download remote update"* on physical phones, because it didn't send the login with update requests ([expo/expo#50139](https://github.com/expo/expo/issues/50139), fixed in [#50498](https://github.com/expo/expo/pull/50498)). Expo Go 58.0.2 (28 Sep 2026) came out after that fix, so Expo Go may work on SDK 58, but it hasn't been confirmed on a real phone yet.
+- **Each Expo Go build runs one SDK.** When Expo ships a new SDK, the stores move testers' Expo Go to it and the project must be upgraded too (`npx expo install expo@^<next> --fix`), then republished and the APK rebuilt.
 
-To ship a fix, run `npm run publish:beta -- "what changed"`. Testers get it the next time they open the project. If the fix touches the rules, run `npm run deploy:functions` **first**.
+Then enter a name and portrait, and **Host a room** or **Join** with a code.
 
-**Fallback if Expo accounts are too much friction.** Android testers can install a real APK instead, with no Expo login needed:
+**Android APK (one-time per native change):**
 
 ```bash
-eas build -p android --profile preview   # prints a link; share it
+eas build -p android --profile preview   # ~15 min on EAS; prints an install link to share
 ```
 
-iOS has no free equivalent: it needs TestFlight, and TestFlight needs the $99/year Apple Developer account. Both options are covered under *Shipping* in `README.md`.
+- The `preview` profile reads `EXPO_PUBLIC_SUPABASE_URL` and `EXPO_PUBLIC_SUPABASE_ANON_KEY` from the **preview** environment on EAS (`eas env:list --environment preview`). Cloud builds never see your local `.env`.
+- The `preview` channel is pointed at the `beta` branch (`eas channel:edit preview --branch beta`), so APK testers get the same updates as Expo Go testers.
+- Rebuild the APK whenever you add or upgrade a native package (anything installed with `npx expo install` that has native code). The `sdkVersion` runtime policy doesn't detect those changes, so an old APK would receive JS that needs native code it doesn't have.
+
+To ship a fix, run `npm run publish:beta -- "what changed"`. Testers on both platforms get it the next time they open the app (close and reopen once more to apply it). If the fix touches the rules, run `npm run deploy:functions` **first**.
 
 ---
 

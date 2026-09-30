@@ -25,10 +25,6 @@
         "android.permission.RECORD_AUDIO",
         "android.permission.MODIFY_AUDIO_SETTINGS",
         "android.permission.FOREGROUND_SERVICE",
-        "android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK",
-        "android.permission.RECORD_AUDIO",
-        "android.permission.MODIFY_AUDIO_SETTINGS",
-        "android.permission.FOREGROUND_SERVICE",
         "android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK"
       ]
     },
@@ -37,14 +33,20 @@
     },
     "plugins": [
       "expo-audio",
-      "expo-font"
+      "expo-font",
+      "expo-asset",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash-icon.png",
+          "resizeMode": "contain",
+          "backgroundColor": "#0B0907",
+          "imageWidth": 200
+        }
+      ],
+      "expo-status-bar"
     ],
     "backgroundColor": "#0B0907",
-    "splash": {
-      "image": "./assets/splash-icon.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#0B0907"
-    },
     "description": "A frontier rail-town board game for 2–6 tycoons: build deeds, charter companies, buy shares and cash in on buyouts.",
     "scheme": "ironandgold",
     "extra": {
