@@ -51,7 +51,10 @@ async function rpc(name, args) {
   return data;
 }
 
-export const createRoom = (profile) => rpc('create_room', { p_name: profile.name, p_avatar: profile.avatar });
+export const createRoom = (profile, title) => rpc('create_room', {
+  p_name: profile.name, p_avatar: profile.avatar, p_title: title?.trim() || null,
+});
+export const renameRoom = (code, title) => rpc('rename_room', { p_code: code, p_title: title?.trim() || null });
 export const joinRoom = (code, profile) => rpc('join_room', { p_code: code.trim().toUpperCase(), p_name: profile.name, p_avatar: profile.avatar });
 export const addBot = (code, name, avatar) => rpc('add_bot', { p_code: code, p_name: name, p_avatar: avatar });
 export const removePlayer = (code, id) => rpc('remove_player', { p_code: code, p_id: id });
@@ -68,7 +71,7 @@ export async function listMyRooms() {
   await ensureSession();
   const { data, error } = await db()
     .from('rooms')
-    .select('code, lobby, status, turn_of, seq, updated_at')
+    .select('code, title, lobby, status, turn_of, seq, updated_at')
     .neq('status', 'over')
     .order('updated_at', { ascending: false })
     .limit(20);

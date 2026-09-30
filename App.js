@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, View } from 'react-native';
+import { ActivityIndicator, Platform, View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { useFonts } from 'expo-font';
@@ -17,6 +17,14 @@ import HomeScreen from './src/screens/HomeScreen';
 import LobbyScreen from './src/screens/LobbyScreen';
 import GameScreen from './src/screens/GameScreen';
 
+// On the web, a shared room link (…/?room=ABCD) opens the join screen with the code filled in.
+function linkedRoomCode() {
+  if (Platform.OS !== 'web' || typeof window === 'undefined') return '';
+  const code = new URLSearchParams(window.location.search).get('room') || '';
+  if (code) window.history.replaceState(null, '', window.location.pathname);
+  return /^[A-Za-z]{4}$/.test(code) ? code.toUpperCase() : '';
+}
+
 function LocalGame({ initial, onExit, ...rest }) {
   const ctl = useLocalGame(initial);
   return <GameScreen ctl={ctl} onExit={onExit} {...rest} />;
@@ -33,6 +41,7 @@ function Root() {
   const th = useTheme();
   const [profile, setProfile] = useState(null);
   const [screen, setScreen] = useState({ name: 'home' });
+  const [joinCode] = useState(linkedRoomCode);
 
   useEffect(() => {
     loadProfile().then(setProfile);
@@ -74,6 +83,7 @@ function Root() {
         onStartLocal={(state) => setScreen({ name: 'local', state, key: Date.now() })}
         onResumeLocal={(state) => setScreen({ name: 'local', state, key: Date.now() })}
         onLobby={(row, uid) => setScreen({ name: row.state ? 'online' : 'lobby', row, uid })}
+        joinCode={joinCode}
       />
     );
   }

@@ -121,11 +121,12 @@ npm run publish:beta -- "Beta 1"       # = eas update --branch beta --message "B
 
 Testers:
 
-- **iPhone:** install **Expo Go** from the App Store, log in with the Expo account you invited, then open the project from Expo Go's home screen (under the organization) or scan the QR code on the update's page at expo.dev.
-- **Android:** install the beta APK (below). No Expo account is needed. Android Expo Go is unreliable here. On SDK 57 it marked every update *"not compatible"* and failed with *"Failed to download remote update"* on physical phones, because it didn't send the login with update requests ([expo/expo#50139](https://github.com/expo/expo/issues/50139), fixed in [#50498](https://github.com/expo/expo/pull/50498)). Expo Go 58.0.2 (28 Sep 2026) came out after that fix, so Expo Go may work on SDK 58, but it hasn't been confirmed on a real phone yet.
+- **iPhone (easiest): use the web version (section 4a).** Open the link in Safari, then Share → **Add to Home Screen**. No Expo account, no install.
+- **iPhone, native:** install **Expo Go** from the App Store, log in with the Expo account you invited, then open the project from Expo Go's home screen (under the organization) or scan the QR code on the update's page at expo.dev.
+- **Android:** install the beta APK (below), or use the web version. No Expo account is needed. Android Expo Go is unreliable here. On SDK 57 it marked every update *"not compatible"* and failed with *"Failed to download remote update"* on physical phones, because it didn't send the login with update requests ([expo/expo#50139](https://github.com/expo/expo/issues/50139), fixed in [#50498](https://github.com/expo/expo/pull/50498)). Expo Go 58.0.2 (28 Sep 2026) came out after that fix, so Expo Go may work on SDK 58, but it hasn't been confirmed on a real phone yet.
 - **Each Expo Go build runs one SDK.** When Expo ships a new SDK, the stores move testers' Expo Go to it and the project must be upgraded too (`npx expo install expo@^<next> --fix`), then republished and the APK rebuilt.
 
-Then enter a name and portrait, and **Host a room** or **Join** with a code.
+Then enter a name and portrait, and pick **Play with friends** (host or join an online room) or **Play with bots**.
 
 **Android APK (one-time per native change):**
 
@@ -138,6 +139,20 @@ eas build -p android --profile preview   # ~15 min on EAS; prints an install lin
 - Rebuild the APK whenever you add or upgrade a native package (anything installed with `npx expo install` that has native code). The `sdkVersion` runtime policy doesn't detect those changes, so an old APK would receive JS that needs native code it doesn't have.
 
 To ship a fix, run `npm run publish:beta -- "what changed"`. Testers on both platforms get it the next time they open the app (close and reopen once more to apply it). If the fix touches the rules, run `npm run deploy:functions` **first**.
+
+### 4a. The web version (recommended for iPhone friends)
+
+The same game runs in a browser, hosted free on EAS Hosting. It uses the same Supabase backend, so web, APK and Expo Go players can share a table.
+
+```bash
+npm run deploy:web     # = expo export --platform web && eas deploy --prod
+```
+
+- The first deploy asks you to pick a subdomain, for example `https://iron-and-gold.expo.app`.
+- Put that URL in `.env` as `EXPO_PUBLIC_WEB_URL=https://…expo.app` and add it to EAS too (`eas env:create --environment preview --name EXPO_PUBLIC_WEB_URL --value https://…expo.app --visibility plaintext`). Then deploy the web again and run `npm run publish:beta`. After that, **Share code** in a lobby sends a link like `https://…expo.app/?room=ABCD`, which opens straight onto the join screen with the code filled in.
+- Friends on iPhone: open the link in **Safari**, then Share → **Add to Home Screen**. It opens full screen with the game's icon. Their anonymous session is kept in Safari's storage for that home-screen app, so their tables are still there next time.
+- Web is updated with `npm run deploy:web`, not `eas update`. Run both when you ship a fix.
+- Limits: no haptics on the web, and iOS may clear a home-screen web app's storage if it goes unused for a few weeks, which forgets that player's tables.
 
 ---
 

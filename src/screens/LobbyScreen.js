@@ -1,17 +1,37 @@
 import { useEffect, useRef, useState } from 'react';
-import { ScrollView, Share, View } from 'react-native';
+import {
+  Platform, ScrollView, Share, TextInput, View,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ChevronLeft, Plus, Share2, X } from 'lucide-react-native';
 import { useTheme } from '../theme/theme';
 import {
   Button, Plate, Rule, T,
 } from '../theme/ui';
-import { AVATARS } from '../theme/tokens';
+import { AVATARS, FONTS, MIN_TARGET } from '../theme/tokens';
 import Portrait from '../components/Portrait';
 import { BOT_NAMES } from '../game/data';
 import {
-  addBot as addBotTo, fetchRoom, gameOp, removePlayer, subscribeRoom,
+  addBot as addBotTo, fetchRoom, gameOp, removePlayer, renameRoom, subscribeRoom,
 } from '../net/online';
+
+// Where the web version lives (EXPO_PUBLIC_WEB_URL). With it, the share message carries a link
+// that opens the join screen with the code filled in, so friends need nothing installed.
+const WEB_URL = (process.env.EXPO_PUBLIC_WEB_URL || '').replace(/\/$/, '');
+
+async function shareRoom(code, title) {
+  const link = WEB_URL ? `${WEB_URL}/?room=${code}` : null;
+  const table = title ? `my Iron & Gold table "${title}"` : 'my Iron & Gold table';
+  const message = link
+    ? `Join ${table}: ${link}\n(room code ${code})`
+    : `Join ${table} — room code ${code}`;
+  try {
+    await Share.share({ message });
+  } catch {
+    // Browsers without the share sheet: copy the invite instead.
+    if (Platform.OS === 'web' && navigator.clipboard) await navigator.clipboard.writeText(message).catch(() => {});
+  }
+}
 
 export default function LobbyScreen({ initialRow, profile, onStarted, onLeave }) {
   const th = useTheme();
@@ -20,6 +40,8 @@ export default function LobbyScreen({ initialRow, profile, onStarted, onLeave })
   const rowRef = useRef(initialRow);
   const code = initialRow.code;
   const isHost = row.lobby.host === profile.id;
+  const [title, setTitle] = useState(initialRow.title || '');
+  const titleChanged = title.trim() !== (row.title || '');
   const players = row.lobby.players;
 
   useEffect(() => {
@@ -61,6 +83,8 @@ export default function LobbyScreen({ initialRow, profile, onStarted, onLeave })
 
   const remove = (id) => act(() => removePlayer(code, id));
 
+  const saveTitle = () => act(() => renameRoom(code, title));
+
   const start = () => act(() => gameOp(code, 'start', rowRef.current.seq));
 
   // Guests give up their seat; the host's table stays open under "Your tables" on Home.
@@ -73,10 +97,33 @@ export default function LobbyScreen({ initialRow, profile, onStarted, onLeave })
     <SafeAreaView style={{ flex: 1, backgroundColor: th.ground }}>
       <View style={{ flexDirection: 'row', alignItems: 'center', minHeight: 48 }}>
         <Button iconOnly icon={ChevronLeft} label="Leave room" onPress={leave} />
-        <T v="title" style={{ flex: 1 }}>Telegraph table</T>
+        <T v="title" style={{ flex: 1 }} numberOfLines={1}>{row.title || 'Telegraph table'}</T>
       </View>
       <Rule kind="gilt" />
       <ScrollView contentContainerStyle={{ padding: 16, gap: 16 }}>
+        {isHost && (
+          <Plate>
+            <T v="title" style={{ marginBottom: 8, fontSize: 16 }}>Room name</T>
+            <View style={{ flexDirection: 'row', gap: 8 }}>
+              <TextInput
+                value={title}
+                onChangeText={setTitle}
+                placeholder="Name this table (optional)"
+                placeholderTextColor={th.inkSoft}
+                maxLength={32}
+                accessibilityLabel="Room name"
+                returnKeyType="done"
+                onSubmitEditing={() => titleChanged && saveTitle()}
+                style={{
+                  flex: 1, minHeight: MIN_TARGET, borderWidth: 1, borderColor: th.field, paddingHorizontal: 12,
+                  color: th.ink, fontFamily: FONTS.ui, fontSize: 16, backgroundColor: th.ground,
+                }}
+              />
+              <Button title="Save" kind="ghost" disabled={!titleChanged} onPress={saveTitle} />
+            </View>
+          </Plate>
+        )}
+
         <Plate style={{ alignItems: 'center' }}>
           <T v="accent" color={th.inkSoft}>Room code</T>
           <T v="display" style={{ fontSize: 48, letterSpacing: 8 }}>{code}</T>
@@ -84,7 +131,7 @@ export default function LobbyScreen({ initialRow, profile, onStarted, onLeave })
             title="Share code"
             kind="ghost"
             icon={Share2}
-            onPress={() => Share.share({ message: `Join my Iron & Gold table — room code ${code}` })}
+            onPress={() => shareRoom(code, row.title)}
             style={{ alignSelf: 'stretch', marginTop: 8 }}
           />
         </Plate>

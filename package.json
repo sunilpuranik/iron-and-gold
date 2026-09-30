@@ -6,6 +6,7 @@
     "@expo-google-fonts/cinzel": "^0.4.2",
     "@expo-google-fonts/im-fell-english": "^0.4.0",
     "@expo-google-fonts/libre-franklin": "^0.4.2",
+    "@expo/metro-runtime": "~58.0.9",
     "@react-native-async-storage/async-storage": "2.2.0",
     "@supabase/supabase-js": "^2.117.2",
     "expo": "~58.0.0",
@@ -18,10 +19,13 @@
     "expo-updates": "~58.0.11",
     "lucide-react-native": "^1.48.0",
     "react": "19.3.0",
+    "react-dom": "19.3.0",
     "react-native": "0.88.0-rc.3",
     "react-native-safe-area-context": "~5.9.1",
     "react-native-svg": "15.15.5",
-    "react-native-url-polyfill": "^4.0.0"
+    "react-native-url-polyfill": "^4.0.0",
+    "react-native-web": "^0.21.2",
+    "undefined": "/private/tmp/claude-501/-Users-sunilpuranik-Development-iron-and-gold/ed1a95e4-f044-4bf3-813f-fc379255643c/scratchpad/npm-cache"
   },
   "scripts": {
     "start": "expo start",
@@ -34,7 +38,8 @@
     "sync:engine": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/sync-engine.mjs",
     "deploy:functions": "npm run sync:engine && supabase functions deploy game",
     "db:push": "npx supabase db push",
-    "publish:beta": "eas update --branch beta --message"
+    "publish:beta": "eas update --branch beta --message",
+    "deploy:web": "expo export --platform web && eas deploy --prod"
   },
   "private": true,
   "devDependencies": {

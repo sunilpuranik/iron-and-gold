@@ -69,6 +69,24 @@ test('joining upper-cases and trims the code and sends name and portrait', async
   expect(mockDb.rpc).toHaveBeenCalledWith('join_room', { p_code: 'ABCD', p_name: 'Ada', p_avatar: 3 });
 });
 
+test('hosting sends the room name, trimmed, or null when blank', async () => {
+  const online = load();
+  mockDb.rpc.mockResolvedValue({ data: { code: 'ABCD' }, error: null });
+  await online.createRoom({ name: 'Ada', avatar: 2 }, '  Friday rails ');
+  expect(mockDb.rpc).toHaveBeenLastCalledWith('create_room', {
+    p_name: 'Ada', p_avatar: 2, p_title: 'Friday rails',
+  });
+  await online.createRoom({ name: 'Ada', avatar: 2 }, '   ');
+  expect(mockDb.rpc).toHaveBeenLastCalledWith('create_room', { p_name: 'Ada', p_avatar: 2, p_title: null });
+});
+
+test('renaming a room goes through rename_room', async () => {
+  const online = load();
+  mockDb.rpc.mockResolvedValue({ data: { code: 'ABCD', title: 'Rails' }, error: null });
+  await online.renameRoom('ABCD', ' Rails ');
+  expect(mockDb.rpc).toHaveBeenCalledWith('rename_room', { p_code: 'ABCD', p_title: 'Rails' });
+});
+
 test('RPC errors surface their message', async () => {
   const online = load();
   mockDb.rpc.mockResolvedValue({ data: null, error: { message: 'That table is full' } });
