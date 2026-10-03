@@ -107,6 +107,21 @@
     },
     "Dispatch": {
       "cardMode": "column"
+    },
+    "FrontierScene": {
+      "cardMode": "column"
+    },
+    "WantedPoster": {
+      "cardMode": "column"
+    },
+    "NewGameCard": {
+      "cardMode": "column"
+    },
+    "ContinueCard": {
+      "cardMode": "column"
+    },
+    "SaloonPanel": {
+      "cardMode": "column"
     }
   },
   "readmeHeader": ".design-sync/conventions.md"

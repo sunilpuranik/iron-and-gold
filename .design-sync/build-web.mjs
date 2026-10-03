@@ -3,6 +3,11 @@
 //   react-native        -> react-native-web (installed in .ds-sync/node_modules)
 //   *.web.js variants    preferred, the way Expo web resolves them
 //   expo-haptics        -> no-op (haptics don't exist in a browser; feel.js already swallows failures)
+//   @react-native/assets-registry/registry -> empty registry (react-native-svg still imports it; RN 0.88
+//                          dropped the package, and no DS component renders a bundled image asset)
+//   @supabase/supabase-js, @react-native-async-storage/async-storage, react-native-url-polyfill/auto -> empty
+//                          (src/net/online.js requires them lazily inside db(); the splash's SaloonPanel imports
+//                          online.js only for myTurnAt, and designs never open a connection)
 //   react / react-dom    left external - the converter maps them to window.React / window.ReactDOM
 // Output: .design-sync/.cache/web/{index.mjs,index.d.ts,package.json}
 // Usage (repo root): node .design-sync/build-web.mjs
@@ -23,13 +28,18 @@ mkdirSync(out, { recursive: true });
 const stubs = {
   name: 'web-stubs',
   setup(b) {
-    b.onResolve({ filter: /^expo-haptics$/ }, () => ({ path: 'expo-haptics', namespace: 'stub' }));
-    b.onLoad({ filter: /.*/, namespace: 'stub' }, () => ({
-      contents: 'const n = () => Promise.resolve();'
+    const STUBS = {
+      'expo-haptics': 'const n = () => Promise.resolve();'
         + 'export const selectionAsync = n, impactAsync = n, notificationAsync = n;'
         + 'export const ImpactFeedbackStyle = {}, NotificationFeedbackType = {};',
-      loader: 'js',
-    }));
+      '@react-native/assets-registry/registry': 'export const getAssetByID = () => undefined;'
+        + 'export const registerAsset = () => 0;',
+      '@supabase/supabase-js': 'export const createClient = () => { throw new Error("Online play is not available in designs"); };',
+      '@react-native-async-storage/async-storage': 'export default {};',
+      'react-native-url-polyfill/auto': '',
+    };
+    b.onResolve({ filter: /^(expo-haptics|@react-native\/assets-registry\/registry|@supabase\/supabase-js|@react-native-async-storage\/async-storage|react-native-url-polyfill\/auto)$/ }, (args) => ({ path: args.path, namespace: 'stub' }));
+    b.onLoad({ filter: /.*/, namespace: 'stub' }, (args) => ({ contents: STUBS[args.path], loader: 'js' }));
     // react-native (and deep imports) -> react-native-web
     b.onResolve({ filter: /^react-native(\/.*)?$/ }, (args) => (
       args.path === 'react-native' ? { path: join(rnw, 'dist', 'index.js') } : undefined
@@ -55,6 +65,9 @@ await build({
   define: {
     __DEV__: 'false',
     'process.env.NODE_ENV': '"production"',
+    // src/net/online.js: no Supabase project in designs, so onlineEnabled is false
+    'process.env.EXPO_PUBLIC_SUPABASE_URL': '""',
+    'process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY': '""',
     global: 'globalThis',
   },
   logLevel: 'warning',

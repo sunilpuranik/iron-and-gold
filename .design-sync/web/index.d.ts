@@ -98,6 +98,10 @@ export declare const BOND_THEME: ThemePalette;
 /** Portrait background colours, indexed by avatar. */
 export declare const AVATARS: string[];
 export declare const TYCOON_TITLES: string[];
+/** Splash wanted-poster epithets, one per portrait (same order as TYCOON_TITLES). */
+export declare const TYCOON_EPITHETS: string[];
+/** Splash wanted-poster mottos, one per portrait (same order as TYCOON_TITLES). */
+export declare const TYCOON_MOTTOS: string[];
 /** Minimum touch target (44). */
 export declare const MIN_TARGET: number;
 /** Blend two #RRGGBB colours; t = 0 -> a, 1 -> b. */
@@ -461,6 +465,93 @@ export interface EventOverlayProps {
 }
 /** Celebration card for a charter or buyout, with stamp and falling coins. Absolutely positioned. */
 export declare function EventOverlay(props: EventOverlayProps): JSX.Element;
+
+// ---------------------------------------------------------------------------------------------
+// Splash (the home screen: the "Splash — Gold Rush" design)
+
+export interface FrontierSceneProps {
+  width: number;
+  height: number;
+  /** Safe-area top inset; pads the title block down from the notch. */
+  topInset?: number;
+}
+/**
+ * The splash hero: dusk over the frontier (sunburst, mesas, saguaros), a train and riders crossing on a
+ * scrolling rail line, falling gold coins, and the title block (coin Seal, Wordmark, tagline, "A FRONTIER
+ * RAIL TOWN · 1881"). Animated loops; holds still with Reduce Motion. Fills exactly width × height.
+ */
+export declare function FrontierScene(props: FrontierSceneProps): JSX.Element;
+
+export interface WantedPosterProps {
+  /** Your alias (max 16 chars). */
+  name: string;
+  onName?: (name: string) => void;
+  /** The chosen magnate, a Portrait index 0-5. */
+  avatar: number;
+  onAvatar?: (index: number) => void;
+  /** Narrow-phone sizing. */
+  compact?: boolean;
+}
+/**
+ * A "WANTED" poster on bond paper (cream, double-ruled, slightly askew, foxed): the chosen magnate's large
+ * portrait with an ENLISTED stamp, epithet, title and motto, an ALIAS field, and the six magnates to pick from.
+ */
+export declare function WantedPoster(props: WantedPosterProps): JSX.Element;
+
+export interface NewGameCardProps {
+  onPress?: () => void;
+  /** Card width, for the light sweep across the gold plate. */
+  width: number;
+  compact?: boolean;
+}
+/** The primary splash action: a gold Plate "NEW BOT GAME" card with a bot ring, a chevron and a periodic shine. */
+export declare function NewGameCard(props: NewGameCardProps): JSX.Element;
+
+export interface ContinueCardProps {
+  /** The saved local game. */
+  saved: GameState;
+  /** Your player id in that game (ranks you by net worth). */
+  myId: string;
+  onPress?: () => void;
+  /** Shortens the title to "CONTINUE". */
+  compact?: boolean;
+}
+/** Iron Plate "CONTINUE BOT GAME" card with an IN PLAY tag, "Turn N · you're 2nd · $12.4k" and a gold progress bar (plots dealt). */
+export declare function ContinueCard(props: ContinueCardProps): JSX.Element;
+
+/** An online room row as the Saloon lists it. */
+export interface SaloonRoom {
+  code: string;
+  title?: string | null;
+  status: 'lobby' | 'playing' | 'over';
+  /** The uid whose move it is (status 'playing'). */
+  turn_of?: string | null;
+  lobby: { host: string; players: Array<{ id: string; name: string }> };
+}
+
+export interface SaloonPanelProps {
+  /** false shows "Online play isn't set up in this build." */
+  enabled: boolean;
+  /** Your rooms; null while loading (shows a spinner). */
+  tables: { uid: string; rows: SaloonRoom[] } | null;
+  /** The search field; a 4-letter value is treated as a room code and offers "Join". */
+  query: string;
+  onQuery?: (query: string) => void;
+  busy?: boolean;
+  /** Error line under the panel. */
+  err?: string | null;
+  onHost?: () => void;
+  onJoin?: (code: string) => void;
+  onOpen?: (room: SaloonRoom) => void;
+  /** Host only: close a table (trash button on the row). */
+  onDelete?: (room: SaloonRoom) => void;
+  compact?: boolean;
+}
+/** "THE SALOON · LOBBY": the online lobby panel — + Host, MY ROOMS, search-or-code field and room rows (IN PLAY / WAITING, OPEN / REJOIN). */
+export declare function SaloonPanel(props: SaloonPanelProps): JSX.Element;
+
+/** The splash sign-off: "Fortunes are made on the rails, and lost there too." between two gilt rules. */
+export declare function FooterQuote(): JSX.Element;
 
 // ---------------------------------------------------------------------------------------------
 // Sheets

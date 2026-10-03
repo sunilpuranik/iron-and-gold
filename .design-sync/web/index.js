@@ -4,7 +4,8 @@
 // Theme
 export { ThemeProvider, useTheme } from '../../src/theme/theme';
 export {
-  FONTS, TYPE, GOLD, IRON, BOND, JEWEL, SPACE, KEYLINE, RADIUS, LACQUER, BOND_THEME, AVATARS, TYCOON_TITLES, MIN_TARGET, mix,
+  FONTS, TYPE, GOLD, IRON, BOND, JEWEL, SPACE, KEYLINE, RADIUS, LACQUER, BOND_THEME, AVATARS, TYCOON_TITLES, TYCOON_EPITHETS, TYCOON_MOTTOS,
+  MIN_TARGET, mix,
 } from '../../src/theme/tokens';
 export { SafeAreaProvider } from 'react-native-safe-area-context';
 
@@ -33,6 +34,13 @@ export { default as GameHeader } from '../../src/components/game/Header';
 export { default as MarketTab } from '../../src/components/game/MarketTab';
 export { default as Tabs, TAB_NAMES, TAB_BODY_HEIGHT } from '../../src/components/game/Tabs';
 export { default as TycoonsTab } from '../../src/components/game/TycoonsTab';
+
+// Splash (the "Splash — Gold Rush" home screen)
+export { default as FrontierScene } from '../../src/components/home/FrontierScene';
+export { default as WantedPoster } from '../../src/components/home/WantedPoster';
+export {
+  NewGameCard, ContinueCard, SaloonPanel, FooterQuote,
+} from '../../src/components/home/PlayCards';
 
 // Sheets
 export { default as Sheet } from '../../src/components/sheets/Sheet';

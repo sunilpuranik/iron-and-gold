@@ -9,8 +9,17 @@
   (seen in the Gilded Standard sync: a new ThemeProvider prop was silently ignored).
 - Aliases in build-web: react-native -> react-native-web (installed only in `.ds-sync/node_modules`, never in the app's
   package.json), `.web.js` resolution first, expo-haptics stubbed (no haptics in a browser).
-- `.ds-sync` deps: `npm i esbuild ts-morph @types/react@19 react@19.2.3 react-dom@19.2.3 react-native-web playwright`
-  then `npx playwright install chromium`. React/react-dom versions must match the app's react (19.2.3).
+- `.ds-sync` deps: `npm i esbuild ts-morph @types/react@19 react@<app's react> react-dom@<same> react-native-web@<app's rnw> playwright`
+  then `npx playwright install chromium`. React/react-dom must match the app's react (19.3.0 since the SDK 58 upgrade) and
+  react-native-web should match the app's own copy (0.21.3), so cards render like the live web app.
+- This Mac's ~/.npm cache has root-owned entries (EACCES on rename). Pass `--cache <scratch dir>` to npm installs.
+- build-web stubs `@react-native/assets-registry/registry`: react-native-svg still imports it, but RN 0.88 dropped the
+  package (`@react-native/asset-utils` replaced it). No DS component renders a bundled image asset, so an empty registry is safe.
+- build-web also stubs `@supabase/supabase-js`, `@react-native-async-storage/async-storage` and
+  `react-native-url-polyfill/auto` (src/net/online.js requires them lazily inside db(); SaloonPanel imports online.js only for
+  `myTurnAt`), and defines `process.env.EXPO_PUBLIC_SUPABASE_URL/ANON_KEY` as "" — without the defines the whole bundle dies
+  at load with `ReferenceError: process is not defined` and every card reports "root empty" / [BUNDLE_EXPORT] 36/36.
+  Any new `process.env.X` read in src/ needs the same define.
 - Converter invocation: `--node-modules ./.ds-sync/node_modules` (the repo root node_modules has no react-dom).
 - The public API contract is HAND-WRITTEN in `.design-sync/web/index.d.ts`. When a component's props change in src/,
   update index.d.ts too — nothing checks it against the JS. Same for new components: add to web/index.js AND index.d.ts.
@@ -36,6 +45,11 @@
 - Dispatch as="toast" auto-dismisses; its preview re-sends the dispatch on onDone so the card never goes blank.
 - Sheets/HandoffCover are RN Modals (portal to body): cardMode single, viewport 400x760.
 
+## Web layering gotcha
+- On react-native-web a bare lucide icon (`<svg>`, position:static) placed as a direct child of a gold/iron `Plate` is painted
+  UNDER the Plate's absolutely positioned GoldFill/IronFill — invisible on web, fine on native. Wrap it in a View (fixed in
+  PlayCards' Chevron, 2026-10-01). Check this first when an icon is missing from a card.
+
 ## Known render warns
 - [RENDER_THIN] "rendered height is 0px" on BellSheet, CertificateSheet, CompanySheet, HandoffCover, InvestSheet,
   SettleSheet, Sheet, TickerSheet — Modal portals outside the measured root; screenshots are complete.
@@ -48,11 +62,19 @@
 - The `Dispatch` data type in index.d.ts is now `TurnDispatch` (the name `Dispatch` is the component).
 
 ## Remote files not produced by this build
-- `templates/gilded-standard/*` and `github.md` in the project were uploaded by hand - never delete them in a sync.
+- `templates/gilded-standard/*`, `templates/splash/*` (the "Splash — Gold Rush" design, implemented in the app as
+  src/components/home/{FrontierScene,WantedPoster,PlayCards}.js and synced as components since 2026-10-01), `uploads/` and `github.md` in the project were made by
+  hand in Claude Design - never delete them in a sync.
 - Font deletes are not in the diff's `deletePaths` (it tracks component files only): when a font leaves `fonts/`, review
   `list_files` and add the stale `fonts/<file>` to the plan's deletes by hand (done for IMFellEnglishSC in the v2 sync).
 
 ## Re-sync risks
+- The app runs Expo SDK 58 on React Native 0.88.0-rc.3 (a release candidate). When RN 0.88 goes stable, bump the app, rebuild
+  and expect a bundle-only upload; re-check that react-native-svg no longer needs the assets-registry stub.
+- Splash components (FrontierScene, WantedPoster, NewGameCard, ContinueCard, SaloonPanel, FooterQuote) are exported and
+  carded. Their props live in index.d.ts by hand (incl. the `SaloonRoom` row shape, mirroring online.js listMyRooms' select) —
+  re-check when HomeScreen/PlayCards/online.js change. FrontierScene's preview calls liveClock() (title rises in; train/riders/
+  coins loop), so its frame varies a little between captures.
 - index.d.ts drift from src/ (hand-written contract; the most likely silent staleness).
 - react-native-web / lucide / react-native-svg upgrades change the web rendering; re-verify visually if bumped.
 - `.design-sync/.cache/web` is regenerated; if build-web.mjs is skipped the converter bundles a stale dist.
