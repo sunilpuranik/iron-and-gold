@@ -90,4 +90,10 @@ export const BOND_THEME = {
 
 export const AVATARS = ['#5E8C86', '#A4552E', '#8E3B32', '#3E6470', '#2F4A3A', '#8A6A22'];
 export const TYCOON_TITLES = ['The Baron', 'The Banker', 'The Cattle Queen', 'The Rail King', 'The Oilman', 'The Heiress'];
+// Splash "wanted poster" copy, one per portrait (same order as TYCOON_TITLES).
+export const TYCOON_EPITHETS = ['Robber Baron', 'The Financier', 'Queen of the Range', 'Locomotive King', 'Oil Magnate', 'Old Money'];
+export const TYCOON_MOTTOS = [
+  'Every rail is a leash.', 'I lend. Nations borrow.', 'The herd goes where I point.',
+  'Steel never sleeps.', 'Black gold, bottled.', 'Old money, new tricks.',
+];
 export const MIN_TARGET = 44;

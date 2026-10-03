@@ -15,6 +15,7 @@ export function useOnlineGame(code, profile, initialRow) {
   const [error, setError] = useState(null);
   const [hold, setHold] = useState(false); // pause bots while a big moment is on screen
   const [retry, setRetry] = useState(0); // bumps to re-nudge a bot after a network failure
+  const [gone, setGone] = useState(false); // the host closed the table
   const rowRef = useRef(initialRow);
   const busy = useRef(false);
 
@@ -29,7 +30,8 @@ export function useOnlineGame(code, profile, initialRow) {
   // Realtime, plus a slow poll and a refresh on foreground in case an event is missed.
   useEffect(() => {
     const unsub = subscribeRoom(code, (r) => accept(r));
-    const refresh = () => fetchRoom(code).then((r) => accept(r)).catch(() => {});
+    // fetchRoom resolves null once the row is gone: the host deleted the table.
+    const refresh = () => fetchRoom(code).then((r) => (r ? accept(r) : setGone(true))).catch(() => {});
     refresh();
     const poll = setInterval(refresh, POLL_MS);
     const sub = AppState.addEventListener('change', (s) => s === 'active' && refresh());
@@ -84,6 +86,6 @@ export function useOnlineGame(code, profile, initialRow) {
   }, [row, state, hold, send, retry]);
 
   return {
-    state, mySeat, dispatch, cover: null, onReady: null, error, isHost, setHold,
+    state, mySeat, dispatch, cover: null, onReady: null, error, isHost, setHold, gone,
   };
 }

@@ -1,5 +1,7 @@
 // Shared primitives: text, money, rules, plates, gold / iron / ghost buttons, steppers.
-import { Pressable, View } from 'react-native';
+import {
+  Alert, Platform, Pressable, View,
+} from 'react-native';
 import { Minus, Plus } from 'lucide-react-native';
 import Svg, {
   Defs, LinearGradient, Polygon, Stop,
@@ -13,6 +15,20 @@ import {
 import { feel } from '../feel/feel';
 
 export { T, Plate, Rule };
+
+// Ask before something that can't be undone. The web has no Alert, so it uses the browser's confirm.
+export function confirmAction({
+  title, message, ok, cancel = 'Cancel', onOk,
+}) {
+  if (Platform.OS === 'web') {
+    if (window.confirm(`${title}\n\n${message}`)) onOk();
+    return;
+  }
+  Alert.alert(title, message, [
+    { text: cancel, style: 'cancel' },
+    { text: ok, style: 'destructive', onPress: onOk },
+  ]);
+}
 
 const MONEY_SIZE = { small: 11, body: 14, title: 18 };
 

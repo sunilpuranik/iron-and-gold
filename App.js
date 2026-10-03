@@ -34,6 +34,9 @@ function OnlineGame({
   row, profile, onExit, ...rest
 }) {
   const ctl = useOnlineGame(row.code, profile, row);
+  useEffect(() => {
+    if (ctl.gone) onExit('The host closed that table.');
+  }, [ctl.gone]);
   return <GameScreen ctl={ctl} onExit={onExit} {...rest} />;
 }
 
@@ -52,7 +55,8 @@ function Root() {
     saveProfile(p);
   }, []);
 
-  const home = useCallback(() => setScreen({ name: 'home' }), []);
+  // Screens may pass a notice back ("The host closed that table."); button presses pass an event.
+  const home = useCallback((notice) => setScreen({ name: 'home', notice: typeof notice === 'string' ? notice : null }), []);
   const dispatchProps = profile ? {
     dispatches: profile.dispatches !== false,
     onDispatches: (on) => updateProfile({ ...profile, dispatches: on }),
@@ -84,6 +88,7 @@ function Root() {
         onResumeLocal={(state) => setScreen({ name: 'local', state, key: Date.now() })}
         onLobby={(row, uid) => setScreen({ name: row.state ? 'online' : 'lobby', row, uid })}
         joinCode={joinCode}
+        notice={screen.notice}
       />
     );
   }

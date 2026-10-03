@@ -87,6 +87,13 @@ test('renaming a room goes through rename_room', async () => {
   expect(mockDb.rpc).toHaveBeenCalledWith('rename_room', { p_code: 'ABCD', p_title: 'Rails' });
 });
 
+test('closing a table goes through delete_room', async () => {
+  const online = load();
+  mockDb.rpc.mockResolvedValue({ data: null, error: null });
+  await online.deleteRoom('ABCD');
+  expect(mockDb.rpc).toHaveBeenCalledWith('delete_room', { p_code: 'ABCD' });
+});
+
 test('RPC errors surface their message', async () => {
   const online = load();
   mockDb.rpc.mockResolvedValue({ data: null, error: { message: 'That table is full' } });

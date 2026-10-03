@@ -54,6 +54,7 @@ async function rpc(name, args) {
 export const createRoom = (profile, title) => rpc('create_room', {
   p_name: profile.name, p_avatar: profile.avatar, p_title: title?.trim() || null,
 });
+export const deleteRoom = (code) => rpc('delete_room', { p_code: code });
 export const renameRoom = (code, title) => rpc('rename_room', { p_code: code, p_title: title?.trim() || null });
 export const joinRoom = (code, profile) => rpc('join_room', { p_code: code.trim().toUpperCase(), p_name: profile.name, p_avatar: profile.avatar });
 export const addBot = (code, name, avatar) => rpc('add_bot', { p_code: code, p_name: name, p_avatar: avatar });

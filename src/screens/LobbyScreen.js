@@ -3,16 +3,18 @@ import {
   Platform, ScrollView, Share, TextInput, View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { ChevronLeft, Plus, Share2, X } from 'lucide-react-native';
+import {
+  ChevronLeft, Plus, Share2, Trash2, X,
+} from 'lucide-react-native';
 import { useTheme } from '../theme/theme';
 import {
-  Button, Plate, Rule, T,
+  Button, Plate, Rule, T, confirmAction,
 } from '../theme/ui';
 import { AVATARS, FONTS, MIN_TARGET } from '../theme/tokens';
 import Portrait from '../components/Portrait';
 import { BOT_NAMES } from '../game/data';
 import {
-  addBot as addBotTo, fetchRoom, gameOp, removePlayer, renameRoom, subscribeRoom,
+  addBot as addBotTo, deleteRoom, fetchRoom, gameOp, removePlayer, renameRoom, subscribeRoom,
 } from '../net/online';
 
 // Where the web version lives (EXPO_PUBLIC_WEB_URL). With it, the share message carries a link
@@ -52,7 +54,10 @@ export default function LobbyScreen({ initialRow, profile, onStarted, onLeave })
       }
     };
     const unsub = subscribeRoom(code, accept);
-    const poll = setInterval(() => fetchRoom(code).then(accept).catch(() => {}), 5000);
+    // A null row means the host closed the table.
+    const poll = setInterval(() => fetchRoom(code)
+      .then((r) => (r ? accept(r) : onLeave('The host closed that table.')))
+      .catch(() => {}), 5000);
     return () => {
       unsub();
       clearInterval(poll);
@@ -84,6 +89,21 @@ export default function LobbyScreen({ initialRow, profile, onStarted, onLeave })
   const remove = (id) => act(() => removePlayer(code, id));
 
   const saveTitle = () => act(() => renameRoom(code, title));
+
+  const close = () => confirmAction({
+    title: 'Close this table?',
+    message: 'The room is deleted for everyone. This cannot be undone.',
+    ok: 'Close table',
+    onOk: async () => {
+      setErr(null);
+      try {
+        await deleteRoom(code);
+        onLeave();
+      } catch (e) {
+        setErr(e.message);
+      }
+    },
+  });
 
   const start = () => act(() => gameOp(code, 'start', rowRef.current.seq));
 
@@ -160,6 +180,9 @@ export default function LobbyScreen({ initialRow, profile, onStarted, onLeave })
           <Button title={players.length < 2 ? 'Need 2 tycoons to start' : 'Ring the opening bell'} disabled={players.length < 2} onPress={start} />
         ) : (
           <T v="accent" color={th.inkSoft} style={{ textAlign: 'center' }}>Waiting for the host to start…</T>
+        )}
+        {isHost && (
+          <Button title="Close this table" kind="ghost" icon={Trash2} color={th.jewel.carnelianText} onPress={close} />
         )}
         <T v="small" color={th.inkSoft} style={{ textAlign: 'center' }}>
           Bots move whenever anyone at the table has the game open. You can close the app and pick this table up later from Home.

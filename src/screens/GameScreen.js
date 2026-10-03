@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Alert, Platform, View } from 'react-native';
+import { View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../theme/theme';
-import { T } from '../theme/ui';
+import { T, confirmAction } from '../theme/ui';
 import { actorOf, canClose } from '../game/engine';
 import { feel, playSting } from '../feel/feel';
 import Header from '../components/game/Header';
@@ -119,17 +119,13 @@ export default function GameScreen({
     setSheet(null);
   };
 
-  const ringBell = () => {
-    const ring = () => dispatch({ type: 'close', cart: {} });
-    if (Platform.OS === 'web') {
-      if (window.confirm('Ring the closing bell? Final bonuses are paid and the game ends.')) ring();
-      return;
-    }
-    Alert.alert('Ring the closing bell?', 'Final bonuses are paid, every share is sold, and the richest tycoon wins.', [
-      { text: 'Not yet', style: 'cancel' },
-      { text: 'Ring it', style: 'destructive', onPress: ring },
-    ]);
-  };
+  const ringBell = () => confirmAction({
+    title: 'Ring the closing bell?',
+    message: 'Final bonuses are paid, every share is sold, and the richest tycoon wins.',
+    ok: 'Ring it',
+    cancel: 'Not yet',
+    onOk: () => dispatch({ type: 'close', cart: {} }),
+  });
 
   const decisionVisible = mine && !event && DECISIONS.includes(state.phase) && dismissed !== state.seq;
   const closeDecision = () => setDismissed(state.seq);
