@@ -102,7 +102,7 @@ function Root() {
 }
 
 export default function App() {
-  const [loaded] = useFonts({
+  const [loaded, fontError] = useFonts({
     IMFellEnglish_400Regular_Italic,
     LibreFranklin_400Regular,
     LibreFranklin_500Medium,
@@ -110,7 +110,10 @@ export default function App() {
     Cinzel_600SemiBold,
     Cinzel_700Bold,
   });
-  if (!loaded) return null;
+  // On web the @font-face rules are injected straight away and the browser swaps the fonts in, so
+  // don't wait: in Safari, expo-font's document.fonts.load() never settles and times out after 12s
+  // with ERR_DOWNLOAD. Anywhere, a failed load renders with fallback fonts rather than a blank screen.
+  if (!loaded && !fontError && Platform.OS !== 'web') return null;
   return (
     <SafeAreaProvider>
       <ThemeProvider>
