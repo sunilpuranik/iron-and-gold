@@ -15,12 +15,12 @@ You need Node 22.13 or newer and the **Expo Go** app (SDK 58) on your phone.
 git clone <this repo> iron-and-gold
 cd iron-and-gold
 npm install
-npx expo start --tunnel
+npm start -- --tunnel
 ```
 
 To open the game, scan the QR code: use the Camera app on iOS or Expo Go on Android.
 Friends on other networks can scan the same QR code because `--tunnel` routes through ngrok. The first time you run it, Expo may ask to install `@expo/ngrok`; answer yes.
-If everyone is on the same Wi-Fi, `npx expo start` without `--tunnel` is faster.
+If everyone is on the same Wi-Fi, `npm start` without `--tunnel` is faster. (`npm start` runs against the dev backend, or offline: see *Branches, environments and shipping*.)
 
 ### Starting from a blank Expo app instead
 
@@ -40,6 +40,57 @@ Then copy `App.js`, `src/`, `__tests__/`, `scripts/`, `supabase/` and the `jest`
 
 ---
 
+## Branches, environments and shipping
+
+This repo is meant to be driven from Claude Code. Each command is a project skill in `.claude/skills/`: type it as a slash command, or just say it ("deploy dev", "roll back prod"). Underneath, everything runs through `scripts/ship.mjs`, so the same thing works without Claude as `npm run ship -- <args>`.
+
+| You say (Claude) | Or run | What happens |
+|---|---|---|
+| `/deploy local web` | `npm run local:web` | Game in your browser at http://localhost:8081, hot reload |
+| `/deploy local app` | `npm start` | QR code for Expo Go on your phone (`-- --tunnel` off Wi-Fi) |
+| `/deploy dev` | `npm run deploy:dev` | Cloud dev: web at **https://iron-and-gold--dev.expo.app** plus an app update on EAS branch `dev` |
+| `/promote` | (git merge) | Merge `dev` into `main` after the tests pass |
+| `/deploy prod` | `npm run deploy:prod` | Beta release from `main`: shows a plan, then (with `--yes`) tests → migrations → game function → web preview → Safari + Chrome smoke test → promote → app update → release tag |
+| `/rollback prod` | `npm run rollback` | Put testers back on the previous release (web, app and game function) |
+| `/rollback local` | (git) | Get an earlier version back on your machine without losing work |
+| `/status` | `npm run status` | What's live for testers, what's waiting on `main` / `dev` |
+
+### Branches
+
+```
+feature/<name> ──► dev ──(/promote)──► main ──(/deploy prod)──► beta testers
+                    │                    ▲
+                    └─ /deploy dev       └─ hotfix/<name> for urgent fixes to what testers have
+```
+
+- **`main`**: exactly what beta testers run. Releases go out only from here, clean and pushed.
+- **`dev`**: the working branch. New work goes on `feature/<name>` branches off `dev` and merges back when it's done.
+- **Hotfix**: branch `hotfix/<name>` from `main`, fix, merge to `main`, `/deploy prod`, then merge `main` back into `dev`.
+- **Releases** are annotated tags `beta-YYYY-MM-DD`. Each one records the web deployment id, the app update group and the Supabase project, which is what lets rollback put back exactly that version. `git tag -n3 --sort=-creatordate 'beta-*'` lists them.
+
+### Environments
+
+| | Local | Dev (cloud) | Prod (beta) |
+|---|---|---|---|
+| Web | localhost:8081 | iron-and-gold--dev.expo.app | iron-and-gold.expo.app |
+| App | Expo Go via QR | EAS update branch `dev` | EAS update branch `beta` (Expo Go + APK on channel `preview`) |
+| Backend | `.env.dev` | `.env.dev` | `.env` |
+
+`.env` holds the **beta** Supabase project, the one testers' tables live in. `.env.dev` holds a **second**, free Supabase project for development: copy `.env.example`, fill it in, then run `npm run ship -- dev --db --functions` once to set up its tables and game function. Until `.env.dev` exists, local and dev builds run **offline** (bots and pass-and-play only). That's deliberate: nothing you try locally or on dev can touch testers' games. The script refuses a `.env.dev` that points at the beta project.
+
+### Testing locally, and rolling back
+
+- `npm test`: 100 jest tests (engine, invariants, server referee, online client, UI). They also run in GitHub Actions on every push to `main` / `dev` and on every PR.
+- `/deploy local web` or `/deploy local app`: play your change. Then `/deploy dev` to try it on real phones and in Safari.
+- `npm run smoke -- <url>`: opens any build in Safari (iPhone and Mac, via WebKit) and Chrome, and fails on a blank page or a page error. Screenshots land in `.smoke/`. Releases run this before promoting anything. First run on a new machine: `npx playwright install webkit chromium`.
+- **Didn't like it?**
+  - Locally: `git stash` parks uncommitted work, and `git switch --detach <commit>` tries an older version. `git switch -` and `git stash pop` bring you back. `git revert <commit>` undoes a commit but keeps the history.
+  - Dev: check out the version you want and `/deploy dev` again.
+  - Prod: `/rollback prod`. Web flips instantly; app testers get it on their next open. Then `git revert` the bad commits on `main` so the next release doesn't bring them back.
+  - Database migrations are never rolled back automatically, so keep them additive.
+
+---
+
 ## Online play (optional)
 
 The app runs offline-only until `.env` has Supabase keys. Full setup, the Expo Go beta and its limits are in **[DEPLOYMENT.md](DEPLOYMENT.md)**. In short:
@@ -47,8 +98,8 @@ The app runs offline-only until `.env` has Supabase keys. Full setup, the Expo G
 ```bash
 cp .env.example .env                 # add EXPO_PUBLIC_SUPABASE_URL / EXPO_PUBLIC_SUPABASE_ANON_KEY
 npx supabase link --project-ref <ref>
-npm run db:push                      # tables, members-only RLS, lobby functions, realtime
-npm run deploy:functions             # the `game` Edge Function that checks every move
+npx supabase db push                 # tables, members-only RLS, lobby functions, realtime
+npm run sync:engine && npx supabase functions deploy game   # the `game` Edge Function that checks every move
 ```
 
 How online play works:

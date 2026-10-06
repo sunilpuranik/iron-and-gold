@@ -66,14 +66,14 @@ You don't need to give me any secrets. The anon key and URL go in your local `.e
    ```bash
    npx supabase login
    npx supabase link --project-ref <ref>      # the <ref> in your project URL
-   npm run db:push                            # applies supabase/migrations/*
+   npx supabase db push                       # applies supabase/migrations/* (first time; releases do it after)
    ```
    If you'd rather not use the CLI, paste the migration file into Dashboard → SQL Editor and run it.
 5. **Deploy the move referee:**
    ```bash
-   npm run deploy:functions                   # sync:engine, then supabase functions deploy game
+   npm run sync:engine && npx supabase functions deploy game   # first time; releases redeploy it when rules change
    ```
-   Redeploy it whenever `src/game/*` or `src/net/gameOps.js` changes, so the server and the app play by the same rules.
+   After the first setup, `npm run ship -- prod` (or `/deploy prod` in Claude) redeploys it automatically whenever `src/game/*` or `src/net/gameOps.js` changed, so the server and the app play by the same rules.
 6. **Optional: cleanup.** In Database → Extensions, enable `pg_cron`, then re-run the last block of the migration. It deletes tables untouched for 14 days.
 
 **Smoke test (on your own devices).** Run `npx expo start`, then open the game on the iOS simulator and on your phone.
@@ -114,7 +114,7 @@ Publish a beta build of the JavaScript:
 
 ```bash
 npm test                               # 97 tests: engine, invariants, server referee, online client, buttons
-npm run publish:beta -- "Beta 1"       # = eas update --branch beta --message "Beta 1"
+npm run ship -- prod                   # prints the release plan; add --yes to release (or /deploy prod in Claude)
 ```
 
 `eas update` bundles your local `.env` into the update, so publish from a machine that has the real keys.
@@ -138,20 +138,20 @@ eas build -p android --profile preview   # ~15 min on EAS; prints an install lin
 - The `preview` channel is pointed at the `beta` branch (`eas channel:edit preview --branch beta`), so APK testers get the same updates as Expo Go testers.
 - Rebuild the APK whenever you add or upgrade a native package (anything installed with `npx expo install` that has native code). The `sdkVersion` runtime policy doesn't detect those changes, so an old APK would receive JS that needs native code it doesn't have.
 
-To ship a fix, run `npm run publish:beta -- "what changed"`. Testers on both platforms get it the next time they open the app (close and reopen once more to apply it). If the fix touches the rules, run `npm run deploy:functions` **first**.
+To ship a fix, release from `main` with `/deploy prod` (or `npm run ship -- prod --yes`). It redeploys the game function first if the rules changed. Testers on both platforms get it the next time they open the app (close and reopen once more to apply it). See README → *Branches, environments and shipping*.
 
 ### 4a. The web version (recommended for iPhone friends)
 
 The same game runs in a browser, hosted free on EAS Hosting. It uses the same Supabase backend, so web, APK and Expo Go players can share a table.
 
 ```bash
-npm run deploy:web     # = expo export --platform web && eas deploy --prod
+npm run ship -- prod web --yes   # export, preview deploy, Safari + Chrome smoke test, then promote
 ```
 
 - The first deploy asks you to pick a subdomain, for example `https://iron-and-gold.expo.app`.
-- Put that URL in `.env` as `EXPO_PUBLIC_WEB_URL=https://…expo.app` and add it to EAS too (`eas env:create --environment preview --name EXPO_PUBLIC_WEB_URL --value https://…expo.app --visibility plaintext`). Then deploy the web again and run `npm run publish:beta`. After that, **Share code** in a lobby sends a link like `https://…expo.app/?room=ABCD`, which opens straight onto the join screen with the code filled in.
+- Put that URL in `.env` as `EXPO_PUBLIC_WEB_URL=https://…expo.app` and add it to EAS too (`eas env:create --environment preview --name EXPO_PUBLIC_WEB_URL --value https://…expo.app --visibility plaintext`). Then release again (`npm run ship -- prod --yes`). After that, **Share code** in a lobby sends a link like `https://…expo.app/?room=ABCD`, which opens straight onto the join screen with the code filled in.
 - Friends on iPhone: open the link in **Safari**, then Share → **Add to Home Screen**. It opens full screen with the game's icon. Their anonymous session is kept in Safari's storage for that home-screen app, so their tables are still there next time.
-- Web is updated with `npm run deploy:web`, not `eas update`. Run both when you ship a fix.
+- `npm run ship -- prod` updates both web and app in one release.
 - Limits: no haptics on the web, and iOS may clear a home-screen web app's storage if it goes unused for a few weeks, which forgets that player's tables.
 
 ---
@@ -190,6 +190,6 @@ npm run deploy:web     # = expo export --platform web && eas deploy --prod
 
 ## 8. Rollback
 
-- **App:** `eas update:rollback` (or republish the previous commit) on the `beta` branch.
-- **Rules:** check out the previous commit, then run `npm run deploy:functions`.
+- **App only:** `npm run ship -- rollback prod app --yes`.
+- **Everything:** `/rollback prod` (or `npm run ship -- rollback prod --yes`) re-promotes the previous release's web deployment, republishes its app update and redeploys its game function if the rules differ.
 - **Database:** the migration drops the prototype `rooms` table. There was no production data, so there is nothing to roll back to. Future migrations should be additive.

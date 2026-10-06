@@ -54,3 +54,8 @@ ds-bundle/
 supabase/functions/_shared/
 supabase/.temp/
 supabase/.branches/
+.env.dev
+
+# ship.mjs: smoke-test screenshots, rollback scratch checkout
+.smoke/
+.rollback-worktree/
