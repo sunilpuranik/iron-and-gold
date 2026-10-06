@@ -109,17 +109,30 @@ function exportWeb(env) {
   run('npx', ['expo', 'export', '--platform', 'web', '--clear'], { env: env.vars });
 }
 
-// eas deploy; returns { id, url }.
+// eas deploy; returns { id, url } of the new deployment (its own URL works immediately).
 function easDeploy(args) {
   const out = run('npx', ['eas-cli', 'deploy', '--non-interactive', '--json', ...args], { capture: true });
-  const text = out.slice(out.indexOf('{'));
   let json = {};
-  try { json = JSON.parse(text); } catch { /* fall back to scraping */ }
-  const all = JSON.stringify(json) + out;
-  const id = json?.deployment?.id || json?.id || all.match(/--([a-z0-9]{6,})\.expo\.app/)?.[1];
-  const url = json?.deployment?.url || all.match(/https:\/\/[a-z0-9-]+--[a-z0-9]+\.expo\.app/)?.[0];
+  try { json = JSON.parse(out.slice(out.indexOf('{'))); } catch { /* fall back to scraping */ }
+  const id = json.identifier || out.match(/--([a-z0-9]{6,})\.expo\.app/)?.[1];
   if (!id) die(`couldn't read the deployment id from eas deploy:\n${out.slice(0, 800)}`);
-  return { id, url: url || `https://${PROJECT}--${id}.expo.app` };
+  return { id, url: json.url || `https://${PROJECT}--${id}.expo.app` };
+}
+
+// An alias (dev, or production) takes a minute or so to switch to a new deployment. Wait until it
+// serves the same bundle as the deployment itself.
+async function waitForAlias(aliasUrl, deploymentUrl) {
+  const bundle = async (u) => (await fetch(u, { cache: 'no-store' }).then((r) => r.text()).catch(() => ''))
+    .match(/_expo\/static\/js\/web\/[^"]+\.js/)?.[0];
+  const want = await bundle(deploymentUrl);
+  if (!want) die(`couldn't read the bundle name from ${deploymentUrl}`);
+  process.stdout.write(`  waiting for ${aliasUrl} to serve the new build`);
+  for (let i = 0; i < 60; i++) {
+    if (await bundle(aliasUrl) === want) { console.log(' ✓'); return; }
+    process.stdout.write('.');
+    await new Promise((r) => setTimeout(r, 5000));
+  }
+  die(`${aliasUrl} still isn't serving the new build after 5 minutes (deployment ${deploymentUrl} is fine)`);
 }
 
 function smoke(url) {
@@ -184,7 +197,7 @@ function local(what = 'web') {
   else die(`local ${what}? use: local web | local app`);
 }
 
-function dev(what = 'all') {
+async function dev(what = 'all') {
   if (!['web', 'app', 'all'].includes(what)) die(`dev ${what}? use: dev web | dev app | dev all`);
   const env = envFor('dev');
   const branch = git('rev-parse', '--abbrev-ref', 'HEAD');
@@ -198,7 +211,8 @@ function dev(what = 'all') {
   if (what !== 'app') {
     exportWeb(env);
     const d = easDeploy(['--alias', 'dev', '--environment', 'development']);
-    smoke(URLS.dev);
+    smoke(d.url);
+    await waitForAlias(URLS.dev, d.url);
     say(`Dev web is live: ${URLS.dev}  (this deployment: ${d.url})`);
   }
   if (what !== 'web') {
@@ -207,7 +221,7 @@ function dev(what = 'all') {
   }
 }
 
-function prod(what = 'all') {
+async function prod(what = 'all') {
   if (!['web', 'app', 'all'].includes(what)) die(`prod ${what}? use: prod | prod web | prod app`);
   const branch = git('rev-parse', '--abbrev-ref', 'HEAD');
   if (branch !== 'main') die(`prod releases go out from main (you're on ${branch}). Merge first: git checkout main && git merge ${branch}`);
@@ -250,6 +264,7 @@ function prod(what = 'all') {
     const d = easDeploy(['--environment', 'preview']);
     smoke(d.url);
     run('npx', ['eas-cli', 'deploy:alias', '--prod', '--id', d.id, '--non-interactive']);
+    await waitForAlias(URLS.prod, d.url);
     web = d.id;
     say(`Web promoted: ${URLS.prod} (deployment ${d.id})`);
   }
@@ -264,7 +279,7 @@ function prod(what = 'all') {
   say(`Released ${tag}. Roll back with: npm run ship -- rollback prod`);
 }
 
-function rollback(where = 'prod', what = 'all') {
+async function rollback(where = 'prod', what = 'all') {
   if (where !== 'prod') die('rollback dev: just redeploy the commit you want (git checkout <commit> && npm run ship -- dev). Local: see README "Rolling back".');
   const tags = releases();
   if (tags.length < 1) die('no releases tagged yet');
@@ -285,6 +300,7 @@ function rollback(where = 'prod', what = 'all') {
   if (['web', 'all'].includes(what)) {
     if (!target.web) die(`${target.tag} has no web deployment recorded`);
     run('npx', ['eas-cli', 'deploy:alias', '--prod', '--id', target.web, '--non-interactive']);
+    await waitForAlias(URLS.prod, `https://${PROJECT}--${target.web}.expo.app`);
   }
   if (['app', 'all'].includes(what)) {
     if (!target.group) die(`${target.tag} has no update group recorded`);
@@ -322,9 +338,9 @@ function status() {
 const [cmd, a, b] = positional;
 switch (cmd) {
   case 'local': local(a); break;
-  case 'dev': dev(a); break;
-  case 'prod': prod(a); break;
-  case 'rollback': rollback(a, b); break;
+  case 'dev': await dev(a); break;
+  case 'prod': await prod(a); break;
+  case 'rollback': await rollback(a, b); break;
   case 'status': status(); break;
   case 'smoke': if (!a) die('smoke <url>'); smoke(a); break;
   default:
