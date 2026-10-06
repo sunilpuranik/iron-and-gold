@@ -26,10 +26,20 @@ async function write(key, value) {
   }
 }
 
+// A first-time player gets a frontier alias and a magnate at random, so they can play on the first
+// tap and still look like somebody at a friend's table. Both are editable on the wanted poster.
+export const STARTER_ALIASES = [
+  'Dusty Rhodes', 'Calamity Kate', 'Silver Jack', 'Rattlesnake Ruth', 'Copper Sam', 'Deadeye Dora',
+  'Lucky Lou', 'Iron Ike', 'Big Nose Nell', 'Tumbleweed Tom', 'Sundown Sal', 'Whiskey Will',
+];
+const pick = (list) => list[Math.floor(Math.random() * list.length)];
+
 export async function loadProfile() {
   const p = await read(PROFILE);
   if (p && p.id) return p;
-  const fresh = { id: randomId(), name: 'Tycoon', avatar: 0, seats: null };
+  const fresh = {
+    id: randomId(), name: pick(STARTER_ALIASES), avatar: Math.floor(Math.random() * 6), seats: null, firstRun: true,
+  };
   await write(PROFILE, fresh);
   return fresh;
 }

@@ -103,12 +103,50 @@ export function NewGameCard({ onPress, width, compact }) {
           <Ring color={GOLD.ink} width={2} size={compact ? 46 : 56}><Bot size={compact ? 24 : 30} color={GOLD.ink} strokeWidth={1.8} /></Ring>
           <View style={{ flex: 1, minWidth: 0 }}>
             <T style={{ fontFamily: FONTS.display, fontSize: compact ? 18 : 22, letterSpacing: compact ? 1.2 : 1.8 }} color={GOLD.ink}>NEW BOT GAME</T>
-            <T style={{ fontFamily: FONTS.ui, fontSize: 15, marginTop: 3 }} color="#3A2A0C">Start fresh against the house. Pick your rivals.</T>
+            <T style={{ fontFamily: FONTS.ui, fontSize: 15, marginTop: 3 }} color="#3A2A0C">Deal in now against the house.</T>
           </View>
           <Chevron color={GOLD.ink} />
         </Plate>
       </View>
     </CardPress>
+  );
+}
+
+// A friend's room link (…/?room=ABCD) lands here: one tap to sit down at their table under your alias.
+export function InviteCard({
+  code, name, onName, onJoin, busy, compact,
+}) {
+  return (
+    <View style={{
+      shadowColor: '#E4A548', shadowOpacity: 0.3, shadowRadius: 22, shadowOffset: { width: 0, height: 10 }, elevation: 10,
+    }}
+    >
+      <Plate material="gold" pad={0} style={{ paddingVertical: compact ? 16 : 20, paddingHorizontal: compact ? 16 : 24, gap: 12 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: compact ? 12 : 18 }}>
+          <Ring color={GOLD.ink} width={2} size={compact ? 46 : 56}><HouseIcon size={compact ? 22 : 28} color={GOLD.ink} strokeWidth={1.8} /></Ring>
+          <View style={{ flex: 1, minWidth: 0 }}>
+            <T style={{ fontFamily: FONTS.engraved, fontSize: 12, letterSpacing: 2.4 }} color="#3A2A0C">YOU'RE INVITED</T>
+            <T style={{ fontFamily: FONTS.display, fontSize: compact ? 20 : 24, letterSpacing: 1.6 }} color={GOLD.ink}>TABLE {code}</T>
+          </View>
+        </View>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+          <TextInput
+            value={name}
+            onChangeText={onName}
+            placeholder="Your name"
+            placeholderTextColor="#6B4C15"
+            maxLength={16}
+            autoCorrect={false}
+            accessibilityLabel="Your name at the table"
+            style={{
+              flex: 1, minHeight: 44, paddingHorizontal: 12, fontFamily: FONTS.uiMedium, fontSize: 16, color: GOLD.ink,
+              backgroundColor: 'rgba(255,240,200,0.55)', borderWidth: 1, borderColor: GOLD.burnish,
+            }}
+          />
+          <Button title="Join" kind="iron" onPress={onJoin} disabled={busy || !name.trim()} />
+        </View>
+      </Plate>
+    </View>
   );
 }
 
