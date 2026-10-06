@@ -15,10 +15,6 @@ import { Seal } from '../../theme/brand';
 import CompanyMark from '../CompanyMark';
 import { feel } from '../../feel/feel';
 
-const BADGE = 52;
-const STEP = 60;
-const SURV_X = 220;
-const ROW_W = SURV_X + BADGE;
 
 function useAnim(delay, config = {}) {
   const v = useRef(new Animated.Value(0)).current;
@@ -157,7 +153,9 @@ function FoundBody({ fx, state }) {
   );
 }
 
-function Counter({ from, to, delay }) {
+function Counter({
+  from, to, delay, size = 26,
+}) {
   const [n, setN] = useState(from);
   useEffect(() => {
     const v = new Animated.Value(from);
@@ -171,20 +169,57 @@ function Counter({ from, to, delay }) {
       v.removeListener(id);
     };
   }, []);
-  return <T style={{ fontFamily: FONTS.money, fontSize: 26 }}>{n}</T>;
+  return <T style={{ fontFamily: FONTS.money, fontSize: size }}>{n}</T>;
+}
+
+// The deal row: each bought-out company nudges toward the buyer, dims, and gets a red BOUGHT OUT
+// stamp; the buyer pulses as it takes their plots. Names stay on screen so it's clear who bought whom.
+const MINI = 46;
+
+function Acquired({ a, merge, stamp }) {
+  const th = useTheme();
+  return (
+    <View style={{ alignItems: 'center', width: MINI + 22 }}>
+      <Animated.View
+        style={{
+          opacity: merge.interpolate({ inputRange: [0, 1], outputRange: [1, 0.7] }),
+          transform: [
+            { translateX: merge.interpolate({ inputRange: [0, 0.6, 1], outputRange: [0, 14, 0] }) },
+            { scale: merge.interpolate({ inputRange: [0, 0.6, 1], outputRange: [1, 0.86, 0.92] }) },
+          ],
+        }}
+      >
+        <CompanyMark raised id={a.co} size={MINI} depth={4} />
+      </Animated.View>
+      <Animated.View
+        style={{
+          position: 'absolute', top: MINI - 16, left: -10, right: -10, alignItems: 'center',
+          opacity: stamp,
+          transform: [{ scale: stamp.interpolate({ inputRange: [0, 1], outputRange: [2.2, 1] }) }, { rotate: '-14deg' }],
+        }}
+      >
+        <View style={{ borderWidth: 2, borderColor: th.jewel.carnelianText, backgroundColor: th.raised, paddingHorizontal: 4, paddingVertical: 1 }}>
+          <T numberOfLines={1} style={{ fontFamily: FONTS.money, fontSize: 9, letterSpacing: 1, color: th.jewel.carnelianText }}>BOUGHT OUT</T>
+        </View>
+      </Animated.View>
+      <T v="small" color={th.inkSoft} numberOfLines={1} style={{ marginTop: 6 }}>{company(a.co).short}</T>
+      <T v="small" color={th.inkFaint} numberOfLines={1}>{a.size} plots</T>
+    </View>
+  );
 }
 
 function BuyoutBody({ fx, state }) {
   const th = useTheme();
   const d = fx.detail;
   const merge = useAnim(750, { duration: 650, easing: Easing.inOut(Easing.cubic) });
+  const stamp = useAnim(1300, { spring: true, bounciness: 6, speed: 14 });
   const pulse = useRef(new Animated.Value(1)).current;
   const trust = useAnim(2000, { spring: true, bounciness: 8 });
   const summary = useAnim(1700);
   useEffect(() => {
     const a = Animated.sequence([
       Animated.delay(1350),
-      Animated.spring(pulse, { toValue: 1.3, useNativeDriver: true, speed: 30, bounciness: 0 }),
+      Animated.spring(pulse, { toValue: 1.25, useNativeDriver: true, speed: 30, bounciness: 0 }),
       Animated.spring(pulse, { toValue: 1, useNativeDriver: true, bounciness: 12 }),
     ]);
     a.start();
@@ -196,48 +231,38 @@ function BuyoutBody({ fx, state }) {
   }, []);
 
   const surv = company(fx.id);
+  const names = d.absorbed.map((a) => company(a.co).name);
   return (
     <>
-      <View style={{ width: ROW_W, height: BADGE + 34, alignSelf: 'center', marginTop: 16 }}>
-        {d.absorbed.map((a, i) => (
-          <Animated.View
-            key={a.co}
-            style={{
-              position: 'absolute', left: i * STEP, top: 0, alignItems: 'center',
-              opacity: merge.interpolate({ inputRange: [0, 0.85, 1], outputRange: [1, 0.6, 0] }),
-              transform: [
-                { translateX: merge.interpolate({ inputRange: [0, 1], outputRange: [0, SURV_X - i * STEP] }) },
-                { scale: merge.interpolate({ inputRange: [0, 1], outputRange: [1, 0.35] }) },
-              ],
-            }}
-          >
-            <CompanyMark raised id={a.co} size={BADGE} depth={5} />
-            <T v="small" color={th.inkSoft}>{a.size} plots</T>
+      <View style={{ flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'center', gap: 6, marginTop: 18 }}>
+        {d.absorbed.map((a) => <Acquired key={a.co} a={a} merge={merge} stamp={stamp} />)}
+        <View style={{ height: MINI, justifyContent: 'center', paddingHorizontal: 2 }}>
+          <ChevronsRight size={26} color={th.accent} strokeWidth={1.75} />
+        </View>
+        <View style={{ alignItems: 'center', width: MINI + 30 }}>
+          <Animated.View style={{ transform: [{ scale: pulse }] }}>
+            <CompanyMark raised id={fx.id} size={MINI + 10} depth={5} />
           </Animated.View>
-        ))}
-        <Animated.View
-          style={{
-            position: 'absolute', left: SURV_X - 42, top: 12,
-            opacity: merge.interpolate({ inputRange: [0, 0.5], outputRange: [1, 0], extrapolate: 'clamp' }),
-          }}
-        >
-          <ChevronsRight size={28} color={th.accent} strokeWidth={1.75} />
-        </Animated.View>
-        <Animated.View style={{ position: 'absolute', left: SURV_X, top: 0, alignItems: 'center', transform: [{ scale: pulse }] }}>
-          <CompanyMark raised id={fx.id} size={BADGE} depth={5} />
-          <Animated.View style={{ opacity: merge.interpolate({ inputRange: [0, 0.6], outputRange: [1, 0], extrapolate: 'clamp' }) }}>
-            <T v="small" color={th.inkSoft}>{d.before} plots</T>
-          </Animated.View>
-        </Animated.View>
+          <T v="small" color={th.ink} numberOfLines={1} style={{ marginTop: 6 }}>{surv.short}</T>
+          <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 3 }}>
+            <Counter from={d.before} to={d.after} delay={1350} size={13} />
+            <T v="small" color={th.inkFaint}>plots</T>
+          </View>
+        </View>
       </View>
 
-      <View style={{ alignItems: 'center', marginTop: 4 }}>
+      <View style={{ alignItems: 'center', marginTop: 10 }}>
         <T v="display" style={{ textAlign: 'center' }}>{surv.name}</T>
-        <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 8 }}>
-          <Counter from={d.before} to={d.after} delay={1350} />
-          <T v="plate" style={{ fontSize: 13 }}>plots · now</T>
+        <T v="plate" color={th.accent} style={{ fontSize: 12, marginTop: 2 }}>BUYS OUT</T>
+        <T v="title" color={th.jewel.carnelianText} style={{ textAlign: 'center', marginTop: 2 }}>
+          {names.join(' & ')}
+        </T>
+        <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 6, marginTop: 8 }}>
+          <T v="plate" style={{ fontSize: 12 }}>{surv.short} now</T>
+          <T style={{ fontFamily: FONTS.money, fontSize: 18 }}>{d.after}</T>
+          <T v="plate" style={{ fontSize: 12 }}>plots ·</T>
           <Money amount={d.price} v="title" />
-          <T v="plate" style={{ fontSize: 13 }}>a share</T>
+          <T v="plate" style={{ fontSize: 12 }}>a share</T>
         </View>
         {d.trust && (
           <Animated.View
@@ -253,8 +278,7 @@ function BuyoutBody({ fx, state }) {
 
       <Animated.View style={{ opacity: summary, marginTop: 12, gap: 6 }}>
         <T v="accent" color={th.inkSoft} style={{ textAlign: 'center' }}>
-          {state.players[d.seat].name} built on {fx.tile} and {surv.short} bought out{' '}
-          {d.absorbed.map((a) => `${company(a.co).short} at $${a.price}`).join(' and ')} a share.
+          {state.players[d.seat].name} built on {fx.tile}, joining them. {d.absorbed.map((a) => `${company(a.co).short} shares are valued at $${a.price}`).join('; ')}.
         </T>
         {d.bonuses.map((b, i) => {
           const p = state.players[b.seat];
@@ -271,7 +295,9 @@ function BuyoutBody({ fx, state }) {
         })}
         {!d.bonuses.length && <T v="small" color={th.inkSoft} style={{ textAlign: 'center' }}>Nobody held shares — no bonuses paid.</T>}
         {d.holders > 0 && (
-          <T v="small" color={th.inkSoft} style={{ textAlign: 'center' }}>Shareholders now sell, swap or hold their old shares.</T>
+          <T v="small" color={th.inkSoft} style={{ textAlign: 'center' }}>
+            {names.length > 1 ? 'Their' : `${company(d.absorbed[0].co).short}`} shareholders now sell, swap or hold their shares.
+          </T>
         )}
       </Animated.View>
     </>
