@@ -139,11 +139,11 @@ export function InviteCard({
             autoCorrect={false}
             accessibilityLabel="Your name at the table"
             style={{
-              flex: 1, minHeight: 44, paddingHorizontal: 12, fontFamily: FONTS.uiMedium, fontSize: 16, color: GOLD.ink,
+              flex: 1, minWidth: 0, minHeight: 44, paddingHorizontal: 12, fontFamily: FONTS.uiMedium, fontSize: 16, color: GOLD.ink,
               backgroundColor: 'rgba(255,240,200,0.55)', borderWidth: 1, borderColor: GOLD.burnish,
             }}
           />
-          <Button title="Join" kind="iron" onPress={onJoin} disabled={busy || !name.trim()} />
+          <Button title="Join" kind="iron" compact={compact} onPress={onJoin} disabled={busy || !name.trim()} />
         </View>
       </Plate>
     </View>

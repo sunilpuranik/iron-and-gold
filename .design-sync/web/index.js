@@ -39,7 +39,7 @@ export { default as TycoonsTab } from '../../src/components/game/TycoonsTab';
 export { default as FrontierScene } from '../../src/components/home/FrontierScene';
 export { default as WantedPoster } from '../../src/components/home/WantedPoster';
 export {
-  NewGameCard, ContinueCard, SaloonPanel, FooterQuote,
+  NewGameCard, ContinueCard, SaloonPanel, FooterQuote, InviteCard,
 } from '../../src/components/home/PlayCards';
 
 // Sheets
