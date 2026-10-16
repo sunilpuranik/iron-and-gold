@@ -4,7 +4,7 @@ import {
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
-  Bot, ChevronLeft, Plus, User, X,
+  BookOpen, Bot, ChevronLeft, Plus, User, X,
 } from 'lucide-react-native';
 import { useTheme } from '../theme/theme';
 import {
@@ -21,7 +21,8 @@ import {
 } from '../components/home/PlayCards';
 import { BOT_NAMES } from '../game/data';
 import { newGame } from '../game/engine';
-import { loadLocalGame } from '../store/storage';
+import { loadLocalGame, saveTutor } from '../store/storage';
+import RulesSheet from '../components/sheets/RulesSheet';
 import {
   createRoom, deleteRoom, ensureSession, fetchRoom, joinRoom, listMyRooms, onlineEnabled,
 } from '../net/online';
@@ -84,6 +85,7 @@ export default function HomeScreen({
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState(notice || null);
   const [tables, setTables] = useState(null); // { uid, rows } once signed in
+  const [rules, setRules] = useState(false);
   const seats = profile.seats || DEFAULT_SEATS;
   const wide = width >= WIDE;
   const narrow = width < 440;
@@ -286,7 +288,8 @@ export default function HomeScreen({
       <T style={{ fontFamily: FONTS.engraved, fontSize: 13, letterSpacing: 4.4 }} color={GOLD.leaf}>HOW WILL YOU PLAY?</T>
       {profile.firstRun && !invite && (
         <T v="small" color={th.inkSoft} style={{ marginTop: -10 }}>
-          You're {profile.name}. Change your name and magnate on the wanted poster{wide ? '' : ' below'}.
+          You're {profile.name} (rename yourself on the wanted poster{wide ? '' : ' below'}). New to the game? Read How to play;
+          your first game also comes with tips.
         </T>
       )}
       <View style={{ gap: 6 }}>
@@ -313,6 +316,12 @@ export default function HomeScreen({
         onOpen={(r) => online(() => fetchRoom(r.code))}
         onDelete={closeTable}
       />
+      <Button
+        title="How to play"
+        kind={profile.firstRun ? 'iron' : 'ghost'}
+        icon={BookOpen}
+        onPress={() => { feel.select(); setRules(true); }}
+      />
       <FooterQuote />
     </View>
   );
@@ -337,6 +346,11 @@ export default function HomeScreen({
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
+      <RulesSheet
+        visible={rules}
+        onClose={() => setRules(false)}
+        onReplayTips={() => { saveTutor({ seen: {}, off: false }); setRules(false); }}
+      />
     </View>
   );
 }

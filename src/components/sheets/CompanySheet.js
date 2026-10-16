@@ -68,7 +68,7 @@ function Survivor({ state, me, onPick }) {
 }
 
 export default function CompanySheet({
-  mode = 'charter', visible, state, me, onPick, onClose,
+  mode = 'charter', visible, state, me, onPick, onClose, tip,
 }) {
   if (mode === 'charter') {
     if (!state.pending || state.phase !== 'found') return null;
@@ -79,6 +79,7 @@ export default function CompanySheet({
         title="Charter a company"
         subtitle={`${newSize} plots at ${state.pending.tile} · you receive 1 founder share`}
         onClose={onClose}
+        tip={tip}
       >
         <Charter state={state} onPick={onPick} />
       </Sheet>
@@ -92,6 +93,7 @@ export default function CompanySheet({
       title="Tied buyout"
       subtitle={`${tied.length} companies of ${sizes(state)[tied[0]]} plots meet. Name the survivor.`}
       onClose={onClose}
+      tip={tip}
     >
       <Survivor state={state} me={me} onPick={onPick} />
     </Sheet>

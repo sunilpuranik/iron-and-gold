@@ -23,6 +23,8 @@ import Dispatch from '../components/game/Dispatch';
 import EventOverlay from '../components/game/EventOverlay';
 import CertificateSheet from '../components/sheets/CertificateSheet';
 import { describeTurn, latestTurn, turnsSince } from '../game/recap';
+import RulesSheet from '../components/sheets/RulesSheet';
+import { TipCard, useTutor } from '../components/game/Tutor';
 
 const DECISIONS = ['found', 'survivor', 'dispose'];
 
@@ -73,6 +75,10 @@ export default function GameScreen({
     if (selected && (!mine || state.phase !== 'place' || !me.hand.includes(selected))) setSelected(null);
   }, [state, mine]);
 
+  // First-game tips need to know a buyout happened (it plays behind the full-screen overlay first).
+  const [sawBuyout, setSawBuyout] = useState(false);
+  const [sawCharter, setSawCharter] = useState(false);
+
   // Feel for shared moments: buyouts and the closing bell.
   const lastFx = useRef(state.fx ? state.fx.seq : -1);
   useEffect(() => {
@@ -81,8 +87,10 @@ export default function GameScreen({
     lastFx.current = fx.seq;
     if ((fx.kind === 'buyout' || fx.kind === 'found') && fx.detail) {
       setEvents((q) => [...q, { fx, key: fx.seq }]);
+      if (fx.kind === 'found') setSawCharter(true);
     }
     if (fx.kind === 'buyout') {
+      setSawBuyout(true);
       feel.buyout();
       playSting();
     } else if (fx.kind === 'bell') {
@@ -128,6 +136,13 @@ export default function GameScreen({
   });
 
   const decisionVisible = mine && !event && DECISIONS.includes(state.phase) && dismissed !== state.seq;
+
+  const tutor = useTutor({
+    mine, over, cover, event, sawBuyout, sawCharter, phase: state.phase, canBell: canClose(state),
+  });
+  const tipCard = (where) => (tutor.tip && tutor.tip.where === where && sheet !== 'rules' ? (
+    <TipCard tip={tutor.tip} onDismiss={tutor.dismiss} onTurnOff={tutor.turnOff} />
+  ) : null);
   const closeDecision = () => setDismissed(state.seq);
 
   let body;
@@ -150,6 +165,7 @@ export default function GameScreen({
         state={state}
         me={cover ? null : me}
         onHome={onExit}
+        onRules={() => setSheet('rules')}
         view={view}
         onView={setView}
         mine={mine}
@@ -181,6 +197,10 @@ export default function GameScreen({
             onTicker={() => setSheet('ticker')}
           />
         )}
+        {/* Tips wait for a telegram to clear: on a phone the two don't fit in the space above the deeds. */}
+        {!toast && !cover && !event && tipCard('dock') && (
+          <View style={{ position: 'absolute', left: 8, right: 8, bottom: 8 }}>{tipCard('dock')}</View>
+        )}
         {toast && !cover && !event && (
           <Dispatch as="toast" dispatch={toast.dispatch} extra={toast.extra} onDone={() => setToast(null)} />
         )}
@@ -207,6 +227,7 @@ export default function GameScreen({
         state={state}
         onPick={(company) => { if (dispatch({ type: 'found', company })) feel.build(); }}
         onClose={closeDecision}
+        tip={tipCard('sheet')}
       />
       <CompanySheet
         mode="survivor"
@@ -215,6 +236,7 @@ export default function GameScreen({
         me={me}
         onPick={(company) => dispatch({ type: 'survivor', company })}
         onClose={closeDecision}
+        tip={tipCard('sheet')}
       />
       <SettleSheet
         visible={decisionVisible && state.phase === 'dispose'}
@@ -222,6 +244,7 @@ export default function GameScreen({
         me={me}
         onSettle={(a) => dispatch({ type: 'dispose', ...a })}
         onClose={closeDecision}
+        tip={tipCard('sheet')}
       />
       <InvestSheet
         visible={sheet === 'invest' && mine && state.phase === 'buy'}
@@ -243,6 +266,12 @@ export default function GameScreen({
         dispatches={dispatches}
         onDispatches={onDispatches}
         onClose={() => setSheet(null)}
+      />
+      <RulesSheet
+        visible={sheet === 'rules'}
+        onClose={() => setSheet(null)}
+        tipsOff={tutor.off}
+        onReplayTips={() => { tutor.replay(); setSheet(null); }}
       />
       <CertificateSheet
         visible={!!certId && !event}

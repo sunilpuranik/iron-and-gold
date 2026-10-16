@@ -3,6 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const PROFILE = 'ig.profile.v1';
 const LOCAL_GAME = 'ig.localGame.v1';
+const TUTOR = 'ig.tutor.v1';
 
 function randomId() {
   return Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-4);
@@ -48,3 +49,10 @@ export const saveProfile = (p) => write(PROFILE, p);
 export const loadLocalGame = () => read(LOCAL_GAME);
 export const saveLocalGame = (s) => write(LOCAL_GAME, s);
 export const clearLocalGame = () => write(LOCAL_GAME, null);
+
+// First-game tips (src/components/game/Tutor.js): which ones this device has seen, and whether they're off.
+export async function loadTutor() {
+  const t = await read(TUTOR);
+  return { seen: (t && t.seen) || {}, off: !!(t && t.off) };
+}
+export const saveTutor = (t) => write(TUTOR, t);

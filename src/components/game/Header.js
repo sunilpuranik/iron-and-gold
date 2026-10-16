@@ -1,14 +1,16 @@
 import { Pressable, View } from 'react-native';
-import { ChartColumn, Map as MapIcon } from 'lucide-react-native';
+import { BookOpen, ChartColumn, Map as MapIcon } from 'lucide-react-native';
 import { useTheme } from '../../theme/theme';
-import { Money, Rule, T } from '../../theme/ui';
+import {
+  Button, Money, Rule, T,
+} from '../../theme/ui';
 import { FONTS } from '../../theme/tokens';
 import { Seal, Wordmark } from '../../theme/brand';
 import Tabs from './Tabs';
 
-// Coin seal (home) · wordmark with turn line · Map/Exchange switch · your cash.
+// Coin seal (home) · wordmark with turn line · How to play · Map/Exchange switch · your cash.
 export default function Header({
-  state, me, onHome, view, onView, mine, over,
+  state, me, onHome, view, onView, mine, over, onRules,
 }) {
   const th = useTheme();
   return (
@@ -35,6 +37,7 @@ export default function Header({
             </T>
           )}
         </View>
+        {onRules && <Button iconOnly icon={BookOpen} label="How to play" color={th.inkSoft} onPress={onRules} style={{ marginHorizontal: -6 }} />}
         <Tabs
           kind="switch"
           value={view}
