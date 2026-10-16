@@ -28,6 +28,7 @@ const URLS = {
   dev: `https://${PROJECT}--dev.expo.app`,
 };
 const UPDATES = 'https://expo.dev/accounts/puranik-co/projects/iron-and-gold/updates';
+const EAS_TIMEOUT = 8 * 60 * 1000; // an EAS upload normally takes under a minute; it has been seen to stall
 
 // ---------------------------------------------------------------------------------------------
 // helpers
@@ -45,11 +46,14 @@ const positional = argv.filter((a, i) => !a.startsWith('--') && !(i > 0 && ['--t
 const say = (msg) => console.log(`\n▸ ${msg}`);
 const die = (msg) => { console.error(`\n✗ ${msg}`); process.exit(1); };
 
-function run(cmd, args, { env = {}, capture = false, allowFail = false, cwd = root } = {}) {
+function run(cmd, args, {
+  env = {}, capture = false, allowFail = false, cwd = root, timeout,
+} = {}) {
   if (!capture) console.log(`  $ ${cmd} ${args.join(' ')}`);
   const r = spawnSync(cmd, args, {
-    cwd, env: { ...process.env, ...env }, encoding: 'utf8', stdio: capture ? ['inherit', 'pipe', 'pipe'] : 'inherit',
+    cwd, env: { ...process.env, ...env }, encoding: 'utf8', stdio: capture ? ['inherit', 'pipe', 'pipe'] : 'inherit', timeout,
   });
+  if (r.error?.code === 'ETIMEDOUT') die(`${cmd} ${args.slice(0, 2).join(' ')} hung for ${Math.round(timeout / 60000)} minutes and was stopped. EAS sometimes stalls: run the same command again.`);
   if (r.status !== 0 && !allowFail) {
     if (capture) process.stderr.write(r.stderr || '');
     die(`${cmd} ${args.join(' ')} failed (exit ${r.status})`);
@@ -111,7 +115,8 @@ function exportWeb(env) {
 
 // eas deploy; returns { id, url } of the new deployment (its own URL works immediately).
 function easDeploy(args) {
-  const out = run('npx', ['eas-cli', 'deploy', '--non-interactive', '--json', ...args], { capture: true });
+  console.log('  uploading to EAS Hosting…');
+  const out = run('npx', ['eas-cli', 'deploy', '--non-interactive', '--json', ...args], { capture: true, timeout: EAS_TIMEOUT });
   let json = {};
   try { json = JSON.parse(out.slice(out.indexOf('{'))); } catch { /* fall back to scraping */ }
   const id = json.identifier || out.match(/--([a-z0-9]{6,})\.expo\.app/)?.[1];
@@ -144,7 +149,7 @@ function smoke(url) {
 // eas update; returns the update group id.
 function easUpdate(branch, environment, message, env) {
   const out = run('npx', ['eas-cli', 'update', '--branch', branch, '--environment', environment,
-    '--message', message, '--non-interactive', '--json'], { capture: true, env: env.vars });
+    '--message', message, '--non-interactive', '--json'], { capture: true, env: env.vars, timeout: EAS_TIMEOUT });
   const group = out.match(/"group"\s*:\s*"([0-9a-f-]{36})"/)?.[1];
   if (!group) die(`couldn't read the update group from eas update:\n${out.slice(0, 800)}`);
   return group;
