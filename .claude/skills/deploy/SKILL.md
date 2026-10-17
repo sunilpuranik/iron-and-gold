@@ -27,7 +27,8 @@ Local and dev builds use `.env.dev` (a separate dev Supabase project). Without i
 
 ## local
 Run in the background (Bash `run_in_background`, timeout 7200000) so the session stays usable:
-`node scripts/ship.mjs local web` (or `local app`). Tell the user the URL / to scan the QR from the
+`node scripts/ship.mjs local web` (or `local app`). Don't prefix it with `CI=1`: Expo turns file
+watching off in CI mode, so edits silently stop showing up. Tell the user the URL / to scan the QR from the
 output, and that edits hot-reload. Stop it with TaskStop when they're done.
 
 ## dev

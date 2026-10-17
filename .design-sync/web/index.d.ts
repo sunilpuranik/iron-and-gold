@@ -519,6 +519,19 @@ export interface ContinueCardProps {
 /** Iron Plate "CONTINUE BOT GAME" card with an IN PLAY tag, "Turn N · you're 2nd · $12.4k" and a gold progress bar (plots dealt). */
 export declare function ContinueCard(props: ContinueCardProps): JSX.Element;
 
+export interface InviteCardProps {
+  /** The 4-letter room code from the link. */
+  code: string;
+  /** Your alias; Join is disabled while it's empty. */
+  name: string;
+  onName?: (name: string) => void;
+  onJoin?: () => void;
+  busy?: boolean;
+  compact?: boolean;
+}
+/** Gold "YOU'RE INVITED · TABLE ABCD" card shown at the top of Home when a friend's room link opened the app: name field + Join. */
+export declare function InviteCard(props: InviteCardProps): JSX.Element;
+
 /** An online room row as the Saloon lists it. */
 export interface SaloonRoom {
   code: string;

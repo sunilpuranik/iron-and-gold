@@ -4,7 +4,7 @@ import {
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
-  Bot, ChevronLeft, Plus, User, X,
+  BookOpen, Bot, ChevronLeft, Plus, User, X,
 } from 'lucide-react-native';
 import { useTheme } from '../theme/theme';
 import {
@@ -17,11 +17,12 @@ import Portrait from '../components/Portrait';
 import FrontierScene from '../components/home/FrontierScene';
 import WantedPoster from '../components/home/WantedPoster';
 import {
-  ContinueCard, FooterQuote, NewGameCard, SaloonPanel,
+  ContinueCard, FooterQuote, InviteCard, NewGameCard, SaloonPanel,
 } from '../components/home/PlayCards';
 import { BOT_NAMES } from '../game/data';
 import { newGame } from '../game/engine';
-import { loadLocalGame } from '../store/storage';
+import { loadLocalGame, saveTutor } from '../store/storage';
+import RulesSheet from '../components/sheets/RulesSheet';
 import {
   createRoom, deleteRoom, ensureSession, fetchRoom, joinRoom, listMyRooms, onlineEnabled,
 } from '../net/online';
@@ -79,12 +80,12 @@ export default function HomeScreen({
   const { width, height } = useWindowDimensions();
   const [path, setPath] = useState(null); // null | 'host' | 'local'
   const [saved, setSaved] = useState(null);
-  // A room link (…/?room=ABCD) lands with the code in the Saloon's search, ready to join.
-  const [query, setQuery] = useState(joinCode || '');
+  const [query, setQuery] = useState('');
   const [title, setTitle] = useState('');
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState(notice || null);
   const [tables, setTables] = useState(null); // { uid, rows } once signed in
+  const [rules, setRules] = useState(false);
   const seats = profile.seats || DEFAULT_SEATS;
   const wide = width >= WIDE;
   const narrow = width < 440;
@@ -120,6 +121,7 @@ export default function HomeScreen({
       })),
     ];
     feel.build();
+    if (profile.firstRun) onProfile({ ...profile, firstRun: false });
     onStartLocal(newGame(players));
   };
 
@@ -130,6 +132,7 @@ export default function HomeScreen({
       const uid = await ensureSession();
       const row = await fn();
       if (!row) throw new Error('That table is gone');
+      if (profile.firstRun) onProfile({ ...profile, firstRun: false });
       onLobby(row, uid);
     } catch (e) {
       setErr(e.message);
@@ -264,10 +267,41 @@ export default function HomeScreen({
       compact={narrow}
     />
   );
+  // A friend's room link (…/?room=ABCD): offer their table first, unless you already sit at it.
+  const invite = onlineEnabled && joinCode && !tables?.rows.some((r) => r.code === joinCode) ? joinCode : null;
+  const rivals = seats.length === seats.filter((s) => s.bot).length
+    ? `${seats.length} bot${seats.length > 1 ? 's' : ''}`
+    : `${seats.length} rival${seats.length > 1 ? 's' : ''}`;
   const play = (
-    <View style={{ gap: 18, paddingTop: wide ? 34 : 8 }}>
+    // On a phone this column sits first, under the scene's -26 overlap, so it needs the extra top room.
+    <View style={{ gap: 18, paddingTop: wide ? 34 : 40 }}>
+      {invite && (
+        <InviteCard
+          code={invite}
+          name={profile.name}
+          onName={(name) => onProfile({ ...profile, name })}
+          onJoin={() => online(() => joinRoom(invite, profile))}
+          busy={busy}
+          compact={narrow}
+        />
+      )}
       <T style={{ fontFamily: FONTS.engraved, fontSize: 13, letterSpacing: 4.4 }} color={GOLD.leaf}>HOW WILL YOU PLAY?</T>
-      <NewGameCard width={column} compact={narrow} onPress={() => { feel.select(); setPath('local'); }} />
+      {profile.firstRun && !invite && (
+        <T v="small" color={th.inkSoft} style={{ marginTop: -10 }}>
+          You're {profile.name} (rename yourself on the wanted poster{wide ? '' : ' below'}). New to the game? Read How to play;
+          your first game also comes with tips.
+        </T>
+      )}
+      <View style={{ gap: 6 }}>
+        <NewGameCard width={column} compact={narrow} onPress={startLocal} />
+        <Button
+          title={`Choose rivals · ${rivals}`}
+          kind="ghost"
+          compact
+          onPress={() => { feel.select(); setPath('local'); }}
+          style={{ alignSelf: 'flex-end' }}
+        />
+      </View>
       {saved && <ContinueCard saved={saved} myId={profile.id} compact={narrow} onPress={() => onResumeLocal(saved)} />}
       <SaloonPanel
         enabled={onlineEnabled}
@@ -281,6 +315,12 @@ export default function HomeScreen({
         onJoin={(code) => online(() => joinRoom(code, profile))}
         onOpen={(r) => online(() => fetchRoom(r.code))}
         onDelete={closeTable}
+      />
+      <Button
+        title="How to play"
+        kind={profile.firstRun ? 'iron' : 'ghost'}
+        icon={BookOpen}
+        onPress={() => { feel.select(); setRules(true); }}
       />
       <FooterQuote />
     </View>
@@ -299,11 +339,18 @@ export default function HomeScreen({
             flexDirection: wide ? 'row' : 'column', gap: 24, alignItems: wide ? 'flex-start' : 'stretch',
           }}
           >
-            <View style={wide ? { flex: 1 } : null}>{poster}</View>
+            {/* On a phone the ways to play come first, so a newcomer can start without scrolling past the poster. */}
+            {wide ? <View style={{ flex: 1 }}>{poster}</View> : null}
             <View style={wide ? { flex: 1 } : null}>{play}</View>
+            {wide ? null : poster}
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
+      <RulesSheet
+        visible={rules}
+        onClose={() => setRules(false)}
+        onReplayTips={() => { saveTutor({ seen: {}, off: false }); setRules(false); }}
+      />
     </View>
   );
 }

@@ -1,4 +1,5 @@
 // Bottom sheet built on Modal: a raised lacquer panel under a gold-leaf edge. Pass onClose to make it dismissable.
+// `tip` (a node, e.g. a first-game TipCard) renders above the content: a Modal covers anything docked behind it.
 import { Modal, Pressable, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { X } from 'lucide-react-native';
@@ -6,7 +7,7 @@ import { useTheme } from '../../theme/theme';
 import { Button, Rule, T } from '../../theme/ui';
 
 export default function Sheet({
-  visible, title, subtitle, onClose, children, footer,
+  visible, title, subtitle, onClose, children, footer, tip,
 }) {
   const th = useTheme();
   const insets = useSafeAreaInsets();
@@ -31,7 +32,7 @@ export default function Sheet({
             {onClose && <Button iconOnly icon={X} label="Close" onPress={onClose} />}
           </View>
           <Rule kind="gilt" style={{ marginHorizontal: 18, marginTop: 8 }} />
-          <ScrollView contentContainerStyle={{ paddingHorizontal: 18, paddingVertical: 16, gap: 12 }}>{children}</ScrollView>
+          <ScrollView contentContainerStyle={{ paddingHorizontal: 18, paddingVertical: 16, gap: 12 }}>{tip}{children}</ScrollView>
           {footer ? <View style={{ paddingHorizontal: 18, gap: 8 }}>{footer}</View> : null}
         </View>
       </View>

@@ -20,15 +20,19 @@ const runs = [
 ];
 // The splash always shows the title block; if it isn't there the app didn't boot.
 const SIGN_OF_LIFE = /IRON/;
+// Failed requests to the backend surface as page errors in Safari. They mean Supabase is down or
+// paused, not that this build is broken, so they warn (when the app rendered) instead of failing.
+const BACKEND = /supabase\.co/;
 
 let failed = 0;
 for (const [name, type, device] of runs) {
   const errors = [];
+  const warnings = [];
   let browser;
   try {
     browser = await type.launch();
     const page = await (await browser.newContext(device)).newPage();
-    page.on('pageerror', (e) => errors.push(e.message));
+    page.on('pageerror', (e) => (BACKEND.test(e.message) ? warnings : errors).push(e.message));
     await page.goto(url, { waitUntil: 'load', timeout: 45000 });
     // Not networkidle: the splash animates forever. Poll for the title instead.
     const ok = await page.waitForFunction((re) => new RegExp(re).test(document.body.innerText), SIGN_OF_LIFE.source, { timeout: 20000 })
@@ -42,6 +46,7 @@ for (const [name, type, device] of runs) {
     await browser?.close();
   }
   console.log(`  ${errors.length ? '✗' : '✓'} ${name}${errors.length ? `: ${errors.join(' | ')}` : ''}`);
+  if (warnings.length) console.log(`    ! backend unreachable (is the Supabase project paused?): ${[...new Set(warnings)].join(' | ')}`);
   if (errors.length) failed++;
 }
 console.log(`  screenshots: ${out}`);

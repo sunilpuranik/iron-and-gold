@@ -43,6 +43,8 @@ function Label({ children, style }) {
 }
 
 // One magnate to pick: portrait, title and epithet on a dark lacquer tile; the chosen one glows gold.
+// Every tile in a row is the same height: the plate fills the row, and the title and epithet each
+// reserve two lines so a one-line name sits level with a two-line one.
 function MagnateTile({ index, on, onPress }) {
   return (
     <Pressable
@@ -50,10 +52,10 @@ function MagnateTile({ index, on, onPress }) {
       accessibilityLabel={`${TYCOON_TITLES[index]}, ${TYCOON_EPITHETS[index]}`}
       accessibilityState={{ selected: on }}
       onPress={() => { feel.select(); onPress(); }}
-      style={({ pressed }) => ({ flexBasis: '30%', flexGrow: 1, transform: [{ translateY: pressed ? -3 : 0 }] })}
+      style={({ pressed }) => ({ flexBasis: '30%', flexGrow: 1, alignSelf: 'stretch', transform: [{ translateY: pressed ? -3 : 0 }] })}
     >
       <View style={{
-        alignItems: 'center', gap: 6, paddingTop: 12, paddingBottom: 10, paddingHorizontal: 6, overflow: 'hidden',
+        flex: 1, alignItems: 'center', gap: 6, paddingTop: 12, paddingBottom: 10, paddingHorizontal: 6, overflow: 'hidden',
         backgroundColor: '#1E1813', borderWidth: on ? 3 : 1, borderColor: on ? GOLD.bright : GOLD.deep,
         margin: on ? -2 : 0, shadowColor: on ? GOLD.bright : '#000', shadowOpacity: on ? 0.7 : 0.4, shadowRadius: on ? 12 : 6,
         shadowOffset: { width: 0, height: on ? 0 : 6 }, elevation: on ? 8 : 3,
@@ -70,10 +72,10 @@ function MagnateTile({ index, on, onPress }) {
         </Svg>
         <View pointerEvents="none" style={{ position: 'absolute', left: 3, top: 3, right: 3, bottom: 3, borderWidth: 1, borderColor: 'rgba(207,166,74,0.5)' }} />
         <Portrait index={index} size={56} ring={on} />
-        <T style={{ fontFamily: FONTS.display, fontSize: 12, letterSpacing: 0.7, textAlign: 'center', lineHeight: 14 }} color={GOLD.bright} numberOfLines={2}>
+        <T style={{ fontFamily: FONTS.display, fontSize: 12, letterSpacing: 0.7, textAlign: 'center', lineHeight: 14, minHeight: 28, textAlignVertical: 'center' }} color={GOLD.bright} numberOfLines={2}>
           {TYCOON_TITLES[index].replace('The ', '')}
         </T>
-        <T style={{ fontFamily: FONTS.accent, fontSize: 13, textAlign: 'center', lineHeight: 15 }} color="#B7A98C" numberOfLines={2}>
+        <T style={{ fontFamily: FONTS.accent, fontSize: 13, textAlign: 'center', lineHeight: 15, minHeight: 30 }} color="#B7A98C" numberOfLines={2}>
           {TYCOON_EPITHETS[index]}
         </T>
       </View>

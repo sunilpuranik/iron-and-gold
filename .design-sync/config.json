@@ -122,6 +122,9 @@
     },
     "SaloonPanel": {
       "cardMode": "column"
+    },
+    "InviteCard": {
+      "cardMode": "column"
     }
   },
   "readmeHeader": ".design-sync/conventions.md"

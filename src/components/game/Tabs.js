@@ -2,6 +2,7 @@
 //   underline — the Deeds / Market / Tycoons strip: engraved labels over a gold underline
 //   switch    — the compact icon switch in the header (Map ⇄ Exchange); the lit segment is iron
 // items: names, or { key, label, icon, flag } — flag puts a gold dot on a segment that wants attention.
+// trailing (underline only): a node at the end of the strip, e.g. the panel's fold handle.
 import { Pressable, View } from 'react-native';
 import { useTheme } from '../../theme/theme';
 import { T } from '../../theme/ui';
@@ -21,7 +22,9 @@ function pick(on, onChange, key) {
   };
 }
 
-function Switch({ items, value, onChange }) {
+function Switch({
+  items, value, onChange, compact,
+}) {
   const th = useTheme();
   return (
     <View style={{ flexDirection: 'row', borderWidth: 1, borderColor: th.field }}>
@@ -39,7 +42,7 @@ function Switch({ items, value, onChange }) {
               hitSlop={{ top: 6, bottom: 6 }}
               onPress={pick(on, onChange, key)}
               style={{
-                width: 42, height: 38, alignItems: 'center', justifyContent: 'center',
+                width: compact ? 36 : 42, height: compact ? 36 : 38, alignItems: 'center', justifyContent: 'center',
                 backgroundColor: th.raised, overflow: 'hidden',
               }}
             >
@@ -64,11 +67,11 @@ function Switch({ items, value, onChange }) {
 }
 
 export default function Tabs({
-  kind = 'underline', items = TAB_NAMES, value, onChange,
+  kind = 'underline', items = TAB_NAMES, value, onChange, trailing, compact,
 }) {
   const th = useTheme();
   const list = items.map(norm);
-  if (kind === 'switch') return <Switch items={list} value={value} onChange={onChange} />;
+  if (kind === 'switch') return <Switch items={list} value={value} onChange={onChange} compact={compact} />;
   return (
     <View style={{ flexDirection: 'row', borderTopWidth: 1, borderBottomWidth: 1, borderColor: th.rule, backgroundColor: th.ground }}>
       {list.map(({ key, label }, i) => {
@@ -90,6 +93,7 @@ export default function Tabs({
           </Pressable>
         );
       })}
+      {trailing}
     </View>
   );
 }

@@ -75,7 +75,9 @@ function Settle({ state, me, onSettle }) {
   );
 }
 
-export default function SettleSheet({ visible, state, me, onSettle, onClose }) {
+export default function SettleSheet({
+  visible, state, me, onSettle, onClose, tip,
+}) {
   if (state.phase !== 'dispose' || !me) return null;
   const q = state.pending.queue;
   return (
@@ -84,6 +86,7 @@ export default function SettleSheet({ visible, state, me, onSettle, onClose }) {
       title="Settle shares"
       subtitle={`Buyout by ${company(state.pending.survivor).name}`}
       onClose={onClose}
+      tip={tip}
     >
       <Settle key={`${state.seq}-${q.length}`} state={state} me={me} onSettle={onSettle} />
     </Sheet>
