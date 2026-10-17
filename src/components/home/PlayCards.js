@@ -10,7 +10,6 @@ import {
 } from 'lucide-react-native';
 import { Button, Plate, T } from '../../theme/ui';
 import { FONTS, GOLD } from '../../theme/tokens';
-import { netWorth } from '../../game/rules';
 import { TILES } from '../../game/data';
 import { myTurnAt } from '../../net/online';
 
@@ -20,8 +19,6 @@ const MUTED = '#8C7F66';
 const SOFT = '#B7A98C';
 const CREAM = '#EDE4D0';
 
-const ordinal = (n) => n + (['th', 'st', 'nd', 'rd'][(n % 100 > 10 && n % 100 < 14) ? 0 : (n % 10 < 4 ? n % 10 : 0)] || 'th');
-const compactMoney = (n) => (Math.abs(n) >= 1000 ? `$${(n / 1000).toFixed(n >= 100000 ? 0 : 1)}k` : `$${n}`);
 
 // Wrapped in a View: on web a bare icon <svg> is position:static, so the Plate's absolutely
 // positioned GoldFill/IronFill would paint over it.
@@ -150,21 +147,17 @@ export function InviteCard({
   );
 }
 
-// Where the saved local game stands: your rank by net worth, your worth, and how much of the
-// town has been dealt (the game ends as the plots run out, so that is its progress).
-function standing(saved, myId) {
-  const seat = Math.max(0, saved.players.findIndex((p) => p.id === myId));
-  const worths = saved.players.map((_, i) => netWorth(saved, i));
-  const rank = 1 + worths.filter((w) => w > worths[seat]).length;
-  const progress = Math.min(1, 1 - (saved.pool?.length ?? TILES.length) / TILES.length);
-  return { rank, worth: worths[seat], progress };
+// How far the saved local game has got: the game ends as the plots run out, so that is its progress.
+// No rank or net worth: like the board game, who's winning is for the players to work out.
+function progressOf(saved) {
+  return Math.min(1, 1 - (saved.pool?.length ?? TILES.length) / TILES.length);
 }
 
 export function ContinueCard({
-  saved, myId, onPress, compact,
+  saved, onPress, compact,
 }) {
-  const { rank, worth, progress } = standing(saved, myId);
-  const detail = `Turn ${saved.turnNo} · you're ${ordinal(rank)} · ${compactMoney(worth)}`;
+  const progress = progressOf(saved);
+  const detail = `Turn ${saved.turnNo} · ${saved.pool?.length ?? TILES.length} deeds left`;
   return (
     <CardPress label="Continue bot game" hint={detail} onPress={onPress}>
       <Plate material="iron" pad={0} style={{ paddingVertical: 18, paddingHorizontal: compact ? 16 : 24, flexDirection: 'row', alignItems: 'center', gap: compact ? 12 : 18 }}>

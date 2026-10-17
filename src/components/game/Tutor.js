@@ -58,7 +58,7 @@ export const TIPS = [
   {
     id: 'waiting', where: 'dock', when: (c) => !c.mine && !c.over && !c.cover && !c.event,
     title: 'Rivals are playing',
-    body: 'The Exchange shows the race between companies; flip to the map with the switch up top. A telegram drops in after each rival\'s turn.',
+    body: 'The Exchange shows the companies, their prices and the shares left in the bank; flip to the map with the switch up top. A telegram drops in after each rival\'s turn.',
   },
 ];
 

@@ -425,7 +425,7 @@ export interface ExchangeViewProps {
   onCertificate?: (id: CompanyId) => void;
   onTicker?: () => void;
 }
-/** The exchange: standings, your position, company race, closing bell and latest moves. */
+/** The exchange: who is acting, the companies on the table (size, price, bank and your shares) and latest moves. No standings or net worth. */
 export declare function ExchangeView(props: ExchangeViewProps): JSX.Element;
 
 export interface DispatchProps {
@@ -510,8 +510,6 @@ export declare function NewGameCard(props: NewGameCardProps): JSX.Element;
 export interface ContinueCardProps {
   /** The saved local game. */
   saved: GameState;
-  /** Your player id in that game (ranks you by net worth). */
-  myId: string;
   onPress?: () => void;
   /** Shortens the title to "CONTINUE". */
   compact?: boolean;

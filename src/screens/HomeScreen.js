@@ -302,7 +302,7 @@ export default function HomeScreen({
           style={{ alignSelf: 'flex-end' }}
         />
       </View>
-      {saved && <ContinueCard saved={saved} myId={profile.id} compact={narrow} onPress={() => onResumeLocal(saved)} />}
+      {saved && <ContinueCard saved={saved} compact={narrow} onPress={() => onResumeLocal(saved)} />}
       <SaloonPanel
         enabled={onlineEnabled}
         compact={narrow}

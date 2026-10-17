@@ -1,10 +1,9 @@
-// Share certificate for a company, plus its share register (who holds what).
+// Share certificate for a company, plus its share register: who holds how many (the sums are yours to do).
 import { Pressable, ScrollView, View } from 'react-native';
 import { useTheme } from '../../theme/theme';
-import { Money, Rule, T } from '../../theme/ui';
+import { Rule, T } from '../../theme/ui';
 import { FONTS } from '../../theme/tokens';
 import { COMPANY_IDS, company } from '../../game/data';
-import { bonusesFor, price, sizes } from '../../game/engine';
 import Certificate from '../Certificate';
 import CompanyMark from '../CompanyMark';
 import Portrait from '../Portrait';
@@ -15,13 +14,10 @@ const MARK = 40;
 
 function Register({ state, id }) {
   const th = useTheme();
-  const sz = sizes(state)[id];
   const holders = state.players
     .map((p, seat) => ({ p, seat, n: p.shares[id] }))
     .filter((h) => h.n > 0)
     .sort((a, b) => b.n - a.n);
-  const bonus = {};
-  if (sz >= 2) for (const b of bonusesFor(state, id, price(id, sz))) bonus[b.seat] = b;
   return (
     <View style={{ gap: 6 }}>
       <T v="plate" color={th.accent}>Holders</T>
@@ -31,11 +27,6 @@ function Register({ state, id }) {
           <Portrait index={h.p.avatar} bot={h.p.bot} size={30} />
           <View style={{ flex: 1 }}>
             <T v="strong">{h.p.name}</T>
-            {bonus[h.seat] && (
-              <T v="small" color={th.inkSoft}>
-                {bonus[h.seat].kind} · would take <Money amount={bonus[h.seat].amount} v="small" /> in a buyout
-              </T>
-            )}
           </View>
           <T style={{ fontFamily: FONTS.money, fontSize: 16 }}>{h.n}</T>
         </View>

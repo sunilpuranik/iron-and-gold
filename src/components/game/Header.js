@@ -96,6 +96,10 @@ export default function Header({
   if (over) headline = 'Closing bell';
   else if (mine) headline = 'Your turn';
   else headline = who ? `${who}’s turn` : `Turn ${state.turnNo}`;
+  const rival = !over && !mine && !!who;
+  const lead = {
+    fontFamily: FONTS.money, fontSize: narrow ? 12 : 13, letterSpacing: narrow ? 0.6 : 1.2, textTransform: 'uppercase',
+  };
   const detail = `Turn ${state.turnNo} · ${state.pool.length} ${narrow ? 'left' : 'deeds left'}`;
 
   return (
@@ -117,13 +121,13 @@ export default function Header({
             </>
           ) : (
             <>
-              <T
-                numberOfLines={1}
-                style={{ fontFamily: FONTS.money, fontSize: narrow ? 12 : 13, letterSpacing: narrow ? 0.6 : 1.2, textTransform: 'uppercase' }}
-                color={mine && !over ? th.accent : th.ink}
-              >
-                {headline}
-              </T>
+              {/* A long rival name shortens itself; "'s turn" always stays readable. */}
+              <View style={{ flexDirection: 'row', minWidth: 0 }}>
+                <T numberOfLines={1} style={[lead, { flexShrink: 1 }]} color={mine && !over ? th.accent : th.ink}>
+                  {rival ? who : headline}
+                </T>
+                {rival && <T numberOfLines={1} style={[lead, { flexShrink: 0 }]} color={th.ink}>’s turn</T>}
+              </View>
               <T v="small" color={th.inkSoft} numberOfLines={1}>{detail}</T>
             </>
           )}
