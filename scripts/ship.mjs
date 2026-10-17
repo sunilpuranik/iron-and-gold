@@ -126,7 +126,8 @@ function easDeploy(args) {
 
 // An alias (dev, or production) takes a minute or so to switch to a new deployment. Wait until it
 // serves the same bundle as the deployment itself.
-async function waitForAlias(aliasUrl, deploymentUrl) {
+// warnOnly: the alias is already promoted, so a slow CDN mustn't abort the rest of a release.
+async function waitForAlias(aliasUrl, deploymentUrl, { warnOnly = false } = {}) {
   const bundle = async (u) => (await fetch(u, { cache: 'no-store' }).then((r) => r.text()).catch(() => ''))
     .match(/_expo\/static\/js\/web\/[^"]+\.js/)?.[0];
   const want = await bundle(deploymentUrl);
@@ -137,7 +138,9 @@ async function waitForAlias(aliasUrl, deploymentUrl) {
     process.stdout.write('.');
     await new Promise((r) => setTimeout(r, 5000));
   }
-  die(`${aliasUrl} still isn't serving the new build after 5 minutes (deployment ${deploymentUrl} is fine)`);
+  const msg = `${aliasUrl} still isn't serving the new build after 5 minutes (deployment ${deploymentUrl} is fine)`;
+  if (!warnOnly) die(msg);
+  console.log(`\n  ! ${msg}; it was promoted, so the CDN should catch up shortly. Carrying on.`);
 }
 
 function smoke(url) {
@@ -263,13 +266,16 @@ async function prod(what = 'all') {
 
   let web = prev?.web || null;
   let group = prev?.group || null;
-  if (what !== 'app') {
+  if (opt('web-id')) {
+    // Resuming a release whose web part already went out: record that deployment, don't redeploy.
+    web = opt('web-id');
+  } else if (what !== 'app') {
     say('Web');
     exportWeb(env);
     const d = easDeploy(['--environment', 'preview']);
     smoke(d.url);
     run('npx', ['eas-cli', 'deploy:alias', '--prod', '--id', d.id, '--non-interactive']);
-    await waitForAlias(URLS.prod, d.url);
+    await waitForAlias(URLS.prod, d.url, { warnOnly: true });
     web = d.id;
     say(`Web promoted: ${URLS.prod} (deployment ${d.id})`);
   }
