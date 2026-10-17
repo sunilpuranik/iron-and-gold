@@ -9,6 +9,8 @@ import Header from '../components/game/Header';
 import ExchangeView from '../components/game/ExchangeView';
 import Board from '../components/game/Board';
 import Tabs, { TAB_BODY_HEIGHT } from '../components/game/Tabs';
+import HandStrip, { PanelHandle } from '../components/game/HandStrip';
+import { loadLayout, saveLayout } from '../store/storage';
 import DeedsTab from '../components/game/DeedsTab';
 import MarketTab from '../components/game/MarketTab';
 import TycoonsTab from '../components/game/TycoonsTab';
@@ -41,6 +43,13 @@ export default function GameScreen({
   const mine = !cover && actor === mySeat && mySeat >= 0;
 
   const [tab, setTab] = useState('Deeds');
+  // The Deeds / Market / Tycoons panel folds down to a strip of your deeds, giving the board the room.
+  const [panelOpen, setPanelOpen] = useState(false);
+  useEffect(() => { loadLayout().then((l) => setPanelOpen(l.panelOpen)); }, []);
+  const togglePanel = () => {
+    setPanelOpen(!panelOpen);
+    saveLayout({ panelOpen: !panelOpen });
+  };
   const [selected, setSelected] = useState(null);
   const [sheet, setSheet] = useState(over ? 'results' : null);
   const [dismissed, setDismissed] = useState(-1);
@@ -205,8 +214,21 @@ export default function GameScreen({
           <Dispatch as="toast" dispatch={toast.dispatch} extra={toast.extra} onDone={() => setToast(null)} />
         )}
       </View>
-      <Tabs value={tab} onChange={setTab} />
-      <View style={{ height: TAB_BODY_HEIGHT, backgroundColor: th.ground }}>{body}</View>
+      {panelOpen ? (
+        <>
+          <Tabs value={tab} onChange={setTab} trailing={<PanelHandle open onToggle={togglePanel} />} />
+          <View style={{ height: TAB_BODY_HEIGHT, backgroundColor: th.ground }}>{body}</View>
+        </>
+      ) : (
+        <HandStrip
+          state={state}
+          hand={cover ? null : me && me.hand}
+          selected={selected}
+          canBuild={mine && state.phase === 'place'}
+          onDeed={onDeed}
+          onOpen={togglePanel}
+        />
+      )}
       <ActionBar
         phase={state.phase}
         mine={mine}

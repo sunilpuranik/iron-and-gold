@@ -4,6 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 const PROFILE = 'ig.profile.v1';
 const LOCAL_GAME = 'ig.localGame.v1';
 const TUTOR = 'ig.tutor.v1';
+const LAYOUT = 'ig.layout.v1';
 
 function randomId() {
   return Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-4);
@@ -56,3 +57,10 @@ export async function loadTutor() {
   return { seen: (t && t.seen) || {}, off: !!(t && t.off) };
 }
 export const saveTutor = (t) => write(TUTOR, t);
+
+// Layout choices that follow you between games: whether the bottom panel is open (default: folded).
+export async function loadLayout() {
+  const l = await read(LAYOUT);
+  return { panelOpen: !!(l && l.panelOpen) };
+}
+export const saveLayout = (l) => write(LAYOUT, l);
